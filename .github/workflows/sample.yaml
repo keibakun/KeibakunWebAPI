@@ -26,6 +26,7 @@ jobs:
       - name: Setup Git user
         shell: bash
         run: |
+          pwd
           git config --global user.email "keibakun.manage@gmail.com"
           git config --global user.name "keibakun"
       - name: Version Update
