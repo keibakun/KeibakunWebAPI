@@ -22,12 +22,17 @@ jobs:
         run: |
           npm install
           npx tsx ./NKScraper/scrapingAll_Jra.tsx
-      - name: Push to GitHub
+      - name: Push RaceList to GitHub
         uses: EndBug/add-and-commit@v9.1.1
         with:
-          add: |
-            '-f ./RaceList'
-            '-f ./Shutuba'
+          add: '-f ./RaceList'
+          author_name: 'GitHub Actions'
+          author_email: 'action@github.com'
+          message: 'hello'
+      - name: Push Shutuba to GitHub
+        uses: EndBug/add-and-commit@v9.1.1
+        with:
+          add: '-f ./Shutuba'
           author_name: 'GitHub Actions'
           author_email: 'action@github.com'
           message: 'hello'
