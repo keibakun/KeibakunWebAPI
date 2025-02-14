@@ -26,7 +26,7 @@ const scrapingAll_Jra = async () => {
                 const dirPath = path.join(__dirname as string, "Shutuba/raceListResult[i].RaceID")
                 console.log(dirPath);
                 // await fs.mkdir(dirPath, { recursive: true })
-                const filePath = path.join(dirPath, 'index.html');
+                const filePath = path.join(dirPath, 'index0.html');
                 await fs.writeFile(filePath, JSON.stringify(syutubaResult, null, 2), 'utf-8');
             }
         }
