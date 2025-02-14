@@ -8,9 +8,9 @@ const scrapingAll_Jra = async () => {
     const scraper: NKscraper = new NKscraper(true);
     const raceListResult: (NextRace)[] = await scraper.getRaceList(scraper.getRaceListURL());
     // レース一覧のJSONファイルを生成
-    const dp = path.join(__dirname as string, "RaceList")
+    const dp = path.join(__dirname as string, "../RaceList")
     // await fs.mkdir(dp);
-    const fp = path.join(dp, "index0.html")
+    const fp = path.join(dp, "index.html")
     await fs.writeFile(fp, JSON.stringify(raceListResult, null, 2), "utf-8")
     console.log(fp);
 
@@ -24,7 +24,7 @@ const scrapingAll_Jra = async () => {
                 syutubaResult = await scraper.getRaceSyutuba(raceListResult[i].RaceID as string);
 
                 // syutubaresultをファイルに保存
-                const dirPath = path.join(__dirname as string, "Shutuba/raceListResult[i].RaceID")
+                const dirPath = path.join(__dirname as string, "../Shutuba", raceListResult[i].RaceID)
                 console.log(dirPath);
                 // await fs.mkdir(dirPath, { recursive: true })
                 const filePath = path.join(dirPath, 'index.html');
