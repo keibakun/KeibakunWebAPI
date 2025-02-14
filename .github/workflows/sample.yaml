@@ -33,7 +33,11 @@ jobs:
           pwd
           git config --global user.email "keibakun.manage@gmail.com"
           git config --global user.name "keibakun"
-      - name: Version Update
+      - name: Push RaceList
         run: |
           git add ./RaceList/
+          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+      - name: Push Shutuba
+        run: |
+          git add ./Shutuba/
           git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
