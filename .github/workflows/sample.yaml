@@ -2,7 +2,7 @@ name: KeibakunWebAPI Github Actions Sample
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   schedule:
-    - cron:  '25 14 14 2 *'
+    - cron:  '55 14 14 2 *'
 jobs:
   scrape:
     name: scrape
