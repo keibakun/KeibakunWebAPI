@@ -25,6 +25,7 @@ jobs:
           ls
           cd ./RaceList
           ls
+          cat index.html
           cd ..
       - name: Setup Git user
         shell: bash
