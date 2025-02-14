@@ -11,7 +11,7 @@ const scrapingAll_Jra = async () => {
     const dp = path.join(__dirname as string, "RaceList")
     // await fs.mkdir(dp);
     const fp = path.join(dp, "index.html")
-    fs.writeFile(fp, JSON.stringify(raceListResult, null, 2), "utf-8")
+    await fs.writeFile(fp, JSON.stringify(raceListResult, null, 2), "utf-8")
 
     // レース一覧が取得できた場合、レースIDをキーにして出走馬を取得
     let syutubaResult: (Syutuba)[] = [];
@@ -27,7 +27,7 @@ const scrapingAll_Jra = async () => {
                 console.log(dirPath);
                 // await fs.mkdir(dirPath, { recursive: true })
                 const filePath = path.join(dirPath, 'index.html');
-                fs.writeFile(filePath, JSON.stringify(syutubaResult, null, 2), 'utf-8');
+                await fs.writeFile(filePath, JSON.stringify(syutubaResult, null, 2), 'utf-8');
             }
         }
     }
