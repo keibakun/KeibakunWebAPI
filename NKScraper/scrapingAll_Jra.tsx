@@ -17,8 +17,7 @@ const scrapingAll_Jra = async () => {
     // レース一覧が取得できた場合、レースIDをキーにして出走馬を取得
     let syutubaResult: (Syutuba)[] = [];
     if (raceListResult !== null) {
-        // const raceListResultLength = raceListResult.length;
-        const raceListResultLength = 0;
+        const raceListResultLength = raceListResult.length;
         for (let i = 0; i < raceListResultLength; i++) {
             if (raceListResult[i].RaceID) {
                 syutubaResult = await scraper.getRaceSyutuba(raceListResult[i].RaceID as string);
@@ -26,7 +25,7 @@ const scrapingAll_Jra = async () => {
                 // syutubaresultをファイルに保存
                 const dirPath = path.join(__dirname as string, "../Shutuba", raceListResult[i].RaceID)
                 console.log(dirPath);
-                // await fs.mkdir(dirPath, { recursive: true })
+                await fs.mkdir(dirPath, { recursive: true })
                 const filePath = path.join(dirPath, 'index.html');
                 await fs.writeFile(filePath, JSON.stringify(syutubaResult, null, 2), 'utf-8');
             }
