@@ -3,14 +3,14 @@ import { NKscraper } from "./NKScraper";
 // スクレイピングテスト用
 const test = async() =>{
 
-    const horseID = "horseid=2019105056";
-    const raceID = "202505010411";
-    const umaban = 1;
+    const horseID = "2022105365";
+    const raceID = "202505010804";
+    const umaban = 10;
     const scraper = new NKscraper(true);
-    const url = scraper.getHorseURL(horseID, raceID, 10);
+    const url = scraper.getHorseURL(horseID, raceID, umaban);
     console.log(url);
 
-    const result = await scraper.getHorseRecord(url, horseID, umaban);
+    const result = await scraper.getHorseRecord(horseID, raceID, umaban);
     console.log(result);
 }
 

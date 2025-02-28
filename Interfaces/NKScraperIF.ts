@@ -12,7 +12,7 @@ export interface Race {
         /** グレード */
         RaceGrade: string;
         /** 発走日時 */
-        StartTime: Date;
+        StartTime: Date | undefined;
         /** 出走条件 */
         EntryCondition: string;
     }
@@ -27,12 +27,12 @@ export interface Race {
         /** 芝スタートかどうか */
         isTurfStart: boolean;
         /** コース状態 */
-        CourseState: string;
+        CourseState?: string;
         /** 芝のクッション値 */
         TurfCushionValue?: number;
     }
     /** 天候 */
-    Weather: string;
+    Weather?: string;
     /** 出走馬 */
     EntryHorse: {
         /** 枠番 */
@@ -80,9 +80,11 @@ export interface NextRace {
 }
 
 export interface Syutuba {
+    RaceName: string | null;
+    RaceData: string | null;
     Umaban: number | null,
     HorseName: string | null;
-    HorseURL: string | null;
+    HorseID: string | null;
     HorseAge: string | null;
     Jockey: string | null;
     Kinryou: string | null;

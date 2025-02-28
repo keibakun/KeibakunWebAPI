@@ -23,7 +23,7 @@ const scrapingAll_Jra = async () => {
                 syutubaResult = await scraper.getRaceSyutuba(raceListResult[i].RaceID as string);
 
                 // syutubaresultをファイルに保存
-                const dirPath = path.join(__dirname as string, "../Shutuba", raceListResult[i].RaceID)
+                const dirPath = path.join(__dirname as string, "../Shutuba", raceListResult[i].RaceID as string)
                 console.log(dirPath);
                 await fs.mkdir(dirPath, { recursive: true })
                 const filePath = path.join(dirPath, 'index.html');

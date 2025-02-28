@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import puppeteer, { LaunchOptions } from "puppeteer";
 
 import { ScrapingError, ScrapingErrorHandler } from "../Error/ScrapingError";
 import { NextRace, Syutuba } from "../Interfaces/NKScraperIF";
@@ -22,7 +22,7 @@ export class NKscraper {
      * レース一覧を取得します
      * @returns レース一覧を取得する
      */
-    public async getRaceList(raceListURL: string): Promise<(NextRace)[]> {
+    public async getRaceList(raceListURL: string): Promise<NextRace[]> {
 
         console.info("今週のレース一覧を取得します");
 
@@ -132,14 +132,16 @@ export class NKscraper {
      * @param raceID レースの個別URL
      * @returns 
      */
-    async getRaceSyutuba(raceID : string): Promise<(Syutuba)[]> {
+    async getRaceSyutuba(raceID: string): Promise<(Syutuba)[]> {
 
-        console.info("レースURL：" + raceID + " の出走リストを取得します")
+        console.info("レースID:" + raceID + " の出走リストを取得します")
 
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.goto(this.getSyutubaURL(raceID));
 
+        let raceName: (string | null)[] = [];
+        let raceData: (string | null)[] = [];
         let horseName: (string | null)[] = [];
         let horseURL: (string | null)[] = [];
         let horseAge: (string | null)[] = [];
@@ -148,6 +150,16 @@ export class NKscraper {
         let weight: (string | null)[] = [];
 
         try {
+            // レース名を取得する
+            raceName = await page.$$eval("h1.Race_Name", list => list.map(e => e.textContent));
+            if (horseName.includes(null)) {
+                ScrapingErrorHandler.handleNullOrEmpty("レース名取得の結果にnullがあります");
+            }
+            // レース情報を取得する
+            raceData = await page.$$eval("div.Race_Data", list => list.map(e => e.textContent));
+            if (horseName.includes(null)) {
+                ScrapingErrorHandler.handleNullOrEmpty("レース名取得の結果にnullがあります");
+            }
             // 出馬票の馬名を取得する
             horseName = await page.$$eval("td.Horse_Info dl.fc dt.Horse.HorseLink a", list => list.map(e => e.textContent));
             if (horseName.includes(null)) {
@@ -156,27 +168,27 @@ export class NKscraper {
             // 馬の個別URLを取得する
             horseURL = await page.$$eval("dt.Horse.HorseLink a", list => list.map(e => e.href));
             if (horseName.includes(null)) {
-                ScrapingErrorHandler.handleNullOrEmpty("出馬表取得の結果にnullがあります");
+                ScrapingErrorHandler.handleNullOrEmpty("馬の個別URL取得の結果にnullがあります");
             }
             // 馬齢を取得する
             horseAge = await page.$$eval("dd.Age", list => list.map(e => e.textContent));
             if (horseName.includes(null)) {
-                ScrapingErrorHandler.handleNullOrEmpty("出馬表取得の結果にnullがあります");
+                ScrapingErrorHandler.handleNullOrEmpty("馬齢取得の結果にnullがあります");
             }
             // 騎手を取得する
             jockey = await page.$$eval("dd.Jockey a em", list => list.map(e => e.textContent));
             if (horseName.includes(null)) {
-                ScrapingErrorHandler.handleNullOrEmpty("出馬表取得の結果にnullがあります");
+                ScrapingErrorHandler.handleNullOrEmpty("騎手取得の結果にnullがあります");
             }
             // 斤量を取得する
             kinryou = await page.$$eval("dd.Jockey a", list => list.map(e => e.textContent));
             if (horseName.includes(null)) {
-                ScrapingErrorHandler.handleNullOrEmpty("出馬表取得の結果にnullがあります");
+                ScrapingErrorHandler.handleNullOrEmpty("斤量取得の結果にnullがあります");
             }
             // 馬体重を取得する
             weight = await page.$$eval("td.Weight", list => list.map(e => e.textContent));
             if (horseName.includes(null)) {
-                ScrapingErrorHandler.handleNullOrEmpty("出馬表取得の結果にnullがあります");
+                ScrapingErrorHandler.handleNullOrEmpty("馬体重取得の結果にnullがあります");
             }
         } catch (e) {
             throw e;
@@ -184,7 +196,30 @@ export class NKscraper {
             await browser.close();
         }
 
+        console.log(raceName);
+        console.log(raceData);
+
         const horseNameMount: number = horseName.length;
+
+        // raceNameのnullチェックをする
+        raceName = raceName.map(name => {
+            if (name === null) {
+                ScrapingErrorHandler.handleNullOrEmpty("レース名がnullです。そのためnullを返します");
+                return null;
+            } else {
+                return name
+            }
+        })
+
+        // raceDataのnullチェックをする
+        raceData = raceData.map(data => {
+            if (data === null) {
+                ScrapingErrorHandler.handleNullOrEmpty("レース情報がnullです。そのためnullを返します");
+                return null;
+            } else {
+                return data.replace(/\n/g, "");
+            }
+        })
 
         // horseNameのnullチェックと空白削除をする
         horseName = horseName.map(name => {
@@ -204,28 +239,28 @@ export class NKscraper {
                 return null;
             } else {
                 const match = url.match(tenDigitRegex);
-                return match ? match[0] : "--";
+                return match ? match[1] : "--";
             }
         }).filter(id => id != null);
 
         // horseAgeから馬齢と性別を取得する
         const horseAgeSex: (string | null)[] = horseAge.map(text => {
-            if(text === null) {
+            if (text === null) {
                 ScrapingErrorHandler.handleNullOrEmpty("馬齢データがnullです。そのためnullを返します")
                 return null;
-            }else{
+            } else {
                 const ageSexMatch = text.match(/[牡牝セ]\d{1,2}/g);
-                return ageSexMatch ? ageSexMatch[0] :"--"
+                return ageSexMatch ? ageSexMatch[0] : "--"
             }
         }).filter(id => id != null);
 
         // jockeyから騎手名、斤量を抽出する
-        
+
         const kinryouData = kinryou.map(text => {
-            if(text === null){
+            if (text === null) {
                 ScrapingErrorHandler.handleNullOrEmpty("騎手データがありません。そのため騎手名と斤量はnullを返します");
-                    return "null";
-            }else{
+                return "null";
+            } else {
                 const kinryouMatch = text.match(/\d{1,2}.\d{1}/);
                 return kinryouMatch ? kinryouMatch[0] : "--";
             }
@@ -233,24 +268,24 @@ export class NKscraper {
 
         // weightから馬体重を抽出する
         const weightData = weight.map(text => {
-            if(text === null){
+            if (text === null) {
                 ScrapingErrorHandler.handleNullOrEmpty("馬体重データがありません。そのため、nullを返します")
                 return null;
-            }else{
+            } else {
                 const weightMatch = text.match(/\d{3}/);
-                return weightMatch ? weightMatch[0]: "--";
+                return weightMatch ? weightMatch[0] : "--";
             }
         }).filter(id => id != null);
 
-        console.log();
-
         // 取得した出馬データを結合する
         const syutubaData: Syutuba[] = [];
-        for (let i = 0; i<horseNameMount; i++){
+        for (let i = 0; i < horseNameMount; i++) {
             syutubaData.push({
-                Umaban: i+1,
+                RaceName: raceName[0],
+                RaceData: raceData[0],
+                Umaban: i + 1,
                 HorseName: horseName[i],
-                HorseURL: horseID[i],
+                HorseID: horseID[i],
                 HorseAge: horseAgeSex[i],
                 Jockey: jockey[i],
                 Kinryou: kinryouData[i],
@@ -258,8 +293,6 @@ export class NKscraper {
             })
         }
 
-        console.log(syutubaData)
-        
         return syutubaData;
     }
 
@@ -272,19 +305,48 @@ export class NKscraper {
 
         console.info("馬の出走成績を取得します");
 
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        const horseURL : string = this.getHorseURL(horseID, raceID, umaban);
-        await page.goto(horseURL);
+        const browser = await puppeteer.launch({
+            args: [`--window-size=1920,3080`],
+            defaultViewport: {
+                width: 1920,
+                height: 3080
+            }
+        });
+        const smartphonePage = await browser.newPage();
+        const horseURL: string = this.getHorseURL(horseID, raceID, umaban);
+        await smartphonePage.goto(horseURL);
 
-        let horseName: (string | null)[] = [];
-        const selecter_horseID: string = "ul.RacingResultList.result_" + horseID;
+        let raceName: (string | null)[] = [];
+        let raceDate: (string | null)[] = [];
 
         try {
+            // セレクタが「もっと見る」のボタンがある場合、クリックする
+            const moreButtonSelector = `#RacingResultMore_${horseID}`;
+            await smartphonePage.waitForSelector(moreButtonSelector, { visible: true, timeout: 60000 });
+            const moreButton = await smartphonePage.$(moreButtonSelector);
+            if (moreButton) {
+                await moreButton.click();
+                await smartphonePage.waitForSelector("span.RaceName", { visible: true, timeout: 60000 }); // 代表してRaceNameが表示されるまでページ遷移を待つ
+            }
             // レース名を取得してnullチェックを行う
-            horseName = await page.$$eval(selecter_horseID + " li", list => list.map(e => e.textContent));
-            if (horseName.includes(null)) {
+            raceName = await smartphonePage.$$eval("span.RaceName", list => list.map(e => e.textContent));
+            if (raceName.includes(null)) {
                 ScrapingErrorHandler.handleNullOrEmpty("馬名取得の結果にnullがあります");
+            }
+            if (raceName.length > 10) {
+                raceName = raceName.slice(5, raceName.length - 5);
+            } else {
+                raceName = [];
+            }
+            // レース日時を取得してnullチェックを行う
+            raceDate = await smartphonePage.$$eval("span.RaceDate", list => list.map(e => e.textContent));
+            if (raceDate.includes(null)) {
+                ScrapingErrorHandler.handleNullOrEmpty("馬名取得の結果にnullがあります");
+            }
+            if (raceDate.length > 10) {
+                raceDate = raceDate.slice(5, raceDate.length - 5);
+            } else {
+                raceDate = [];
             }
         } catch (e: any) {
             throw new ScrapingError(`スクレイピング失敗:${horseURL}のスクレイピングでエラーが発生しました。エラー： ${e.message}`);
@@ -292,7 +354,7 @@ export class NKscraper {
             await browser.close();
         }
 
-        return horseName
+        return raceDate;
     }
 
     /**
@@ -320,7 +382,7 @@ export class NKscraper {
     public getHorseURL(houseID: string, raceID: string, umaban: number): string {
         // 主催者がJRAの場合
         if (this.isJRA) {
-            return "https://race.sp.netkeiba.com/modal/horse.html?race_id=" + raceID + "&" + houseID + "&i=" + umaban +"&rf=shutuba_modal";
+            return "https://race.sp.netkeiba.com/modal/horse.html?race_id=" + raceID + "&horse_id=" + houseID + "&i=" + umaban + "&rf=shutuba_modal";
             // 主催者がNARの場合 
         } else {
             return "https://db.netkeiba.com/horse/" + houseID;
