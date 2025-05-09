@@ -18,12 +18,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-      - name: scrape netkeiba_schedule
+      - name: scrape netkeiba_raceSchedule
         run: |
           npm install
-          npx tsx ./NKScraper/main_schedule.ts
+          npx tsx ./NKScraper/main_raceSchedule.ts
           ls
-          cd ./RaceList
+          cd ./RaceSchedule
           ls
           cat index.html
           cd ..
@@ -33,11 +33,7 @@ jobs:
           pwd
           git config --global user.email "keibakun.manage@gmail.com"
           git config --global user.name "keibakun"
-      - name: Push RaceList
+      - name: Push RaceSchedule
         run: |
-          git add ./RaceList/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
-      - name: Push Shutuba
-        run: |
-          git add ./Shutuba/
+          git add ./RaceSchedule/
           git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
