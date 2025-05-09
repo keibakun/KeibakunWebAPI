@@ -11,7 +11,7 @@ async function main_raceSchedule() {
     const schedule = await getRaceSchedule(year, month);
 
     // 開催日程のJSONファイルを生成
-    const dp = path.join(__dirname as string, `../../../RaceSchedule`, year.toString() + month.toString());
+    const dp = path.join(__dirname as string, `../../RaceSchedule`, year.toString() + month.toString());
     const outputDir = path.resolve(dp);
     if(!fs.existsSync(outputDir)) {
         console.log("Directory does not exist. Creating...");
