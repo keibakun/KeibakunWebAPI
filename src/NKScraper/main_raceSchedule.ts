@@ -1,5 +1,5 @@
 import path from "path";
-import fs from "fs/promises";
+import fs from "fs";
 
 import getRaceSchedule from "./raceSchedule/raceSchedule";
 
@@ -10,11 +10,17 @@ async function main_raceSchedule() {
 
     const schedule = await getRaceSchedule(year, month);
 
-    // レース一覧のJSONファイルを生成
+    // 開催日程のJSONファイルを生成
     const dp = path.join(__dirname as string, `../../../RaceSchedule`, year.toString() + month.toString());
-    await fs.mkdir(dp);
+    const outputDir = path.resolve(dp);
+    if(!fs.existsSync(outputDir)) {
+        console.log("Directory does not exist. Creating...");
+        await fs.mkdirSync(outputDir, { recursive: true });
+    } else {
+        console.log("Directory already exists.");
+    }
     const fp = path.join(dp, "index.html");
-    await fs.writeFile(fp, JSON.stringify(schedule, null, 2), "utf-8");
+    await fs.writeFileSync(fp, JSON.stringify(schedule, null, 2), "utf-8");
     
     console.log(JSON.stringify(schedule, null, 2));
 }

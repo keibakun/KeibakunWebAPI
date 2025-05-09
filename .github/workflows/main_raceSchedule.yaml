@@ -18,21 +18,25 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
+
+      - name: Ensure RaceSchedule directory exists
+        run: |
+          mkdir -p ./RaceSchedule
+
       - name: scrape netkeiba_raceSchedule
         run: |
           npm install
           npx tsx ./src/NKScraper/main_raceSchedule.ts
-          ls
-          cd ./RaceSchedule
-          ls
-          cat index.html
-          cd ..
+          ls ./RaceSchedule || echo "RaceSchedule directory is empty"
+          cat ./RaceSchedule/index.html || echo "index.html not found"
+
       - name: Setup Git user
         shell: bash
         run: |
           pwd
           git config --global user.email "keibakun.manage@gmail.com"
           git config --global user.name "keibakun"
+
       - name: Push RaceSchedule
         run: |
           git add ./RaceSchedule/
