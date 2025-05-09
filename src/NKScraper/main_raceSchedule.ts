@@ -6,7 +6,7 @@ import getRaceSchedule from "./raceSchedule/raceSchedule";
 // レースの開催日程を取得します
 async function main_raceSchedule() {
     const year = 2025;
-    const month = 4;
+    const month = 3;
 
     // 月を2桁にフォーマット
     const formattedMonth = month.toString().padStart(2, "0");
