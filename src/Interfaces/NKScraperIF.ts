@@ -79,6 +79,15 @@ export interface NextRace {
     RaceID: string | null;
 }
 
+export interface Horse {
+    // 未出走の場合も考慮して全てのプロパティは任意
+    RaceData: {
+        RaceName?: string | null;
+        RaceID?: string;
+        Comment?: string | null;
+    }
+}
+
 export interface Syutuba {
     RaceName: string | null;
     RaceData: string | null;

@@ -21,7 +21,7 @@ jobs:
       - name: scrape netkeiba_raceSchedule
         run: |
           npm install
-          npx tsx ./NKScraper/main_raceSchedule.ts
+          npx tsx ./src/NKScraper/main_raceSchedule.ts
           ls
           cd ./RaceSchedule
           ls
