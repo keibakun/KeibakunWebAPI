@@ -11,7 +11,8 @@ async function main_raceSchedule() {
     const schedule = await getRaceSchedule(year, month);
 
     // レース一覧のJSONファイルを生成
-    const dp = path.join(__dirname as string, `../../../RaceSchedule`, year.toString(), month.toString());
+    const dp = path.join(__dirname as string, `../../../RaceSchedule`, year.toString() + month.toString());
+    await fs.mkdir(dp);
     const fp = path.join(dp, "index.html");
     await fs.writeFile(fp, JSON.stringify(schedule, null, 2), "utf-8");
     
