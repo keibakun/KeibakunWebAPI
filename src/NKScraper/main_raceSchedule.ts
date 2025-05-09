@@ -8,10 +8,12 @@ async function main_raceSchedule() {
     const year = 2025;
     const month = 4;
 
+    // 月を2桁にフォーマット
+    const formattedMonth = month.toString().padStart(2, "0");
     const schedule = await getRaceSchedule(year, month);
 
     // 開催日程のJSONファイルを生成
-    const dp = path.join(__dirname as string, `../../RaceSchedule`, year.toString() + month.toString());
+    const dp = path.join(__dirname as string, `../../RaceSchedule`, year.toString() + formattedMonth.toString());
     const outputDir = path.resolve(dp);
     if(!fs.existsSync(outputDir)) {
         console.log("Directory does not exist. Creating...");
