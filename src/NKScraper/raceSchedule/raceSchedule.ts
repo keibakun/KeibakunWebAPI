@@ -1,18 +1,6 @@
 import puppeteer from "puppeteer";
 
-// レース情報の型
-interface Race {
-    venue: string;
-    raceName: string;
-}
-
-// スケジュール情報の型
-interface Schedule {
-    date: string;
-    day: string;
-    href: string;
-    races: Race[];
-}
+import { Schedule, Race } from "./raceShceduleIF";
 
 export default async function getRaceSchedule(year: number, month: number): Promise<Schedule[]> {
     // レースカレンダーのURL
@@ -55,7 +43,7 @@ export default async function getRaceSchedule(year: number, month: number): Prom
                         // 開催場とレースを取得
                         const races: Race[] = Array.from(cell.querySelectorAll("div")).flatMap((div) => {
                             return Array.from(div.querySelectorAll("p"))
-                                .slice(1) // 1回目の p 要素をスキップ
+                                .slice(1) // 1回目の p 要素は空になるためスキップ
                                 .map((p) => {
                                     const venue: string = p.querySelector("span.JyoName")?.textContent?.trim() || ""; // 開催場
                                     const raceName: string = p.querySelector("span.JName")?.textContent?.trim() || ""; // レース名（ない場合は空文字）
