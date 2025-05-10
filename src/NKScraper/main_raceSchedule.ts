@@ -9,7 +9,7 @@ async function main_raceSchedule() {
     // 取得対象の年を指定
     const year = 2025;
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 4; i < 5; i++) {
         const month = i + 1;
         // 月を2桁にフォーマット
         const formattedMonth: string = month.toString().padStart(2, "0");
