@@ -17,7 +17,7 @@ export interface Schedule {
     /** 曜日 */
     day: string;
     /** リンク */
-    href: string;
+    kaisaiDate: string;
     /** レース情報の配列 */
     races: Race[];
 }

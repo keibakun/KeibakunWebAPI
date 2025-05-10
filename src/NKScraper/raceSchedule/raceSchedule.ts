@@ -2,6 +2,12 @@ import puppeteer from "puppeteer";
 
 import { Schedule, Race } from "./raceShceduleIF";
 
+/**
+ * レースの開催日程を取得します
+ * @param year 年
+ * @param month 月
+ * @returns 開催日程の配列
+ */
 export default async function getRaceSchedule(year: number, month: number): Promise<Schedule[]> {
     // レースカレンダーのURL
     const url: string = `https://race.netkeiba.com/top/calendar.html?year=${year}&month=${month}`;
@@ -38,12 +44,13 @@ export default async function getRaceSchedule(year: number, month: number): Prom
                         if (!cell) continue;
 
                         const date: string = cell.querySelector("span.Day")?.textContent?.trim() || ""; // 日付
-                        const href: string = new URL(cell.querySelector("a")?.getAttribute("href") || "", "https://race.netkeiba.com").toString(); // セル全体のリンク
+                        const rawHref: string = cell.querySelector("a")?.getAttribute("href") || ""; // 元のリンク
+                        const kaisaiDate: string = rawHref.match(/kaisai_date=(\d{8})/)?.[1] || ""; // 「kaisai_date=」以降の8桁を抽出
 
                         // 開催場とレースを取得
                         const races: Race[] = Array.from(cell.querySelectorAll("div")).flatMap((div) => {
                             return Array.from(div.querySelectorAll("p"))
-                                .slice(1) // 1回目の p 要素は空になるためスキップ
+                                .slice(1) // 1回目の p 要素をスキップ
                                 .map((p) => {
                                     const venue: string = p.querySelector("span.JyoName")?.textContent?.trim() || ""; // 開催場
                                     const raceName: string = p.querySelector("span.JName")?.textContent?.trim() || ""; // レース名（ない場合は空文字）
@@ -51,7 +58,7 @@ export default async function getRaceSchedule(year: number, month: number): Prom
                                 });
                         });
 
-                        schedule.push({ date, day, href, races });
+                        schedule.push({ date, day, kaisaiDate, races });
                     }
                 }
 
