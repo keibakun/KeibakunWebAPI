@@ -7,9 +7,9 @@ import { Schedule } from "./raceSchedule/raceShceduleIF";
 // レースの開催日程を取得します
 async function main_raceSchedule() {
     // 取得対象の年を指定
-    const year = 2024;
+    const year = 2025;
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 4; i++) {
         const month = i + 1;
         // 月を2桁にフォーマット
         const formattedMonth: string = month.toString().padStart(2, "0");
