@@ -7,7 +7,7 @@ import { RaceData } from "./raceList/raceListIF";
 // レースリストを取得します
 async function main_raceList() {
     const year = 2025; // 年を指定
-    const month = 5; // 月を指定
+    const month = 4; // 月を指定
 
     // 月を2桁にフォーマット
     const formattedMonth: string = month.toString().padStart(2, "0");
@@ -52,10 +52,6 @@ async function main_raceList() {
         const fp = path.join(dp, "index.html");
         await fs.writeFileSync(fp, JSON.stringify(raceList, null, 2), "utf-8");
         console.info(`レースリストを ${fp} に保存しました`);
-
-        // 結果を出力
-        console.log(`kaisaiDate: ${kaisaiDate} のレースリスト:`);
-        console.log(JSON.stringify(raceList, null, 2));
     }
 }
 
