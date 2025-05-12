@@ -6,8 +6,10 @@ import { RaceData } from "./raceList/raceListIF";
 
 // レースリストを取得します
 async function main_raceList() {
-    const year = 2025; // 年を指定
-    const month = 4; // 月を指定
+    // コマンドライン引数から year と month を取得
+    const args = process.argv.slice(2);
+    const year = parseInt(args[0], 10) || 2025; // デフォルト値: 2025
+    const month = parseInt(args[1], 10) || 5;   // デフォルト値: 5
 
     // 月を2桁にフォーマット
     const formattedMonth: string = month.toString().padStart(2, "0");

@@ -1,7 +1,17 @@
-name: KeibakunWebAPI Github Actions Sample
+name: KeibakunWebAPI main_raceList Workflow
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
-  [ workflow_dispatch ]
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Year to process"
+        required: true
+        default: "2025"
+      month:
+        description: "Month to process"
+        required: true
+        default: "5"
+
 jobs:
   scrape:
     name: scrape
