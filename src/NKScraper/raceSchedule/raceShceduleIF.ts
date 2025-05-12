@@ -1,23 +1,25 @@
 /**
  * レース情報の型
+ * @interface
+ * @property {string} venue - 開催場
+ * @property {string} raceName - レース名
  */
 export interface Race {
-    /** 開催場 */
     venue: string;
-    /** レース名 */
     raceName: string;
 }
 
 /**
  * 開催日程の型
+ * @interface
+ * @property {string} date - 日付
+ * @property {string} day - 曜日
+ * @property {string} kaisaiDate - リンク
+ * @property {string} races - レース情報の配列
  */
 export interface Schedule {
-    /** 日付 */
     date: string;
-    /** 曜日 */
     day: string;
-    /** リンク */
     kaisaiDate: string;
-    /** レース情報の配列 */
     races: Race[];
 }

@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import puppeteer, { Browser, Page } from "puppeteer";
 
 import { Schedule, Race } from "./raceShceduleIF";
 
@@ -14,8 +14,8 @@ export default async function getRaceSchedule(year: number, month: number): Prom
 
     console.info("レースカレンダーをnetkeibaから取得します");
 
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
+    const browser: Browser = await puppeteer.launch({ headless: true });
+    const page: Page = await browser.newPage();
     await page.goto(url, { waitUntil: "domcontentloaded" });
 
     // 取得結果の入れ物

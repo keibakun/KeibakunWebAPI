@@ -26,6 +26,7 @@ async function main_raceSchedule() {
         }
         const fp = path.join(dp, "index.html");
         await fs.writeFileSync(fp, JSON.stringify(schedule, null, 2), "utf-8");
+        console.info(`開催日程を ${fp} に保存しました`);
 
         console.log(JSON.stringify(schedule, null, 2));
     }
