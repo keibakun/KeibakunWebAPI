@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       year:
-        description: "Year to process"
+        description: "取得対象の年を入力"
         required: true
         default: "2025"
       month:
-        description: "Month to process"
+        description: "取得対象の月を入力"
         required: true
         default: "5"
 
@@ -36,7 +36,7 @@ jobs:
       - name: scrape netkeiba_raceList
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceList.ts
+          npx tsx ./src/NKScraper/main_raceList.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
           ls ./RaceList || echo "RaceList directory is empty"
           cat ./RaceList/index.html || echo "index.html not found"
 

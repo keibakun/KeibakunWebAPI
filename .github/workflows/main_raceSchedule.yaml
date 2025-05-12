@@ -1,4 +1,4 @@
-name: KeibakunWebAPI Github Actions Sample
+name: KeibakunWebAPI main_raceSchedule Workflow
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   [ workflow_dispatch ]
