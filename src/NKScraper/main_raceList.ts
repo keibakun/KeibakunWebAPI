@@ -41,7 +41,7 @@ async function main_raceList() {
         const raceList: RaceData[] = await getRaceList(kaisaiDate);
 
         // レースリストのJSONファイルを生成
-        const dp = path.join(__dirname, `../../RaceList/${year}${formattedMonth}`, kaisaiDate);
+        const dp = path.join(__dirname, `../../RaceList/`, kaisaiDate);
         const outputDir = path.resolve(dp);
         if (!fs.existsSync(outputDir)) {
             console.log("指定のディレクトリが存在しないため作成します");
