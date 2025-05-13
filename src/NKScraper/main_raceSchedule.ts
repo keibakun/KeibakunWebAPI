@@ -6,10 +6,13 @@ import { Schedule } from "./raceSchedule/raceShceduleIF";
 
 // レースの開催日程を取得します
 async function main_raceSchedule() {
-    // 取得対象の年を指定
-    const year = 2025;
+    // コマンドライン引数から year を取得
+    const args = process.argv.slice(2);
+    const year = parseInt(args[0], 10) || 2025; // デフォルト値: 2025
 
-    for (let i = 4; i < 5; i++) {
+    console.info(`指定された年: ${year}`);
+
+    for (let i = 0; i < 12; i++) {
         const month = i + 1;
         // 月を2桁にフォーマット
         const formattedMonth: string = month.toString().padStart(2, "0");
@@ -27,8 +30,6 @@ async function main_raceSchedule() {
         const fp = path.join(dp, "index.html");
         await fs.writeFileSync(fp, JSON.stringify(schedule, null, 2), "utf-8");
         console.info(`開催日程を ${fp} に保存しました`);
-
-        console.log(JSON.stringify(schedule, null, 2));
     }
 }
 
