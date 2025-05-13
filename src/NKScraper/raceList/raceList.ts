@@ -52,12 +52,20 @@ export default async function getRaceList(kaisaiDate: string): Promise<RaceData[
                             const raceIdMatch = href.match(/race_id=(\d{12})/); // 12桁の数列を抽出
                             const raceId = raceIdMatch?.[1] || ""; // レースID
 
+                            // レースグレードを取得
+                            const gradeSpan = item.querySelector("span.Icon_GradeType");
+                            const gradeClassList = Array.from(gradeSpan?.classList || []); // クラス名を配列として取得
+                            const grade = gradeClassList
+                                .find((className) => className.startsWith("Icon_GradeType") && className !== "Icon_GradeType") // Icon_GradeType〇〇 を取得
+                                ?.replace("Icon_", ""); // "Icon_" を削除して "GradeType〇〇" に変換
+
                             return {
                                 raceName: match?.[1] || "", // レース名
                                 raceTime: match?.[2] || "", // レース時間
                                 raceCourse: match?.[3] || "", // コース情報
                                 tousuu: match?.[4] || "", // 頭数
                                 raceId, // レースID
+                                grade: grade || "", // レースグレード ("GradeType〇〇" の形式)
                             };
                         }
                     );
