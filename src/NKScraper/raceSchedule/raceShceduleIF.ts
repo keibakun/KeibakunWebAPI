@@ -1,6 +1,6 @@
 /**
- * レース情報の型
- * @interface
+ * @interface Race
+ * @description レース情報のインターフェース
  * @property {string} venue - 開催場
  * @property {string} raceName - レース名
  */
@@ -10,8 +10,8 @@ export interface Race {
 }
 
 /**
- * 開催日程の型
- * @interface
+ * @interface Schedule
+ * @description 開催日程のインターフェース
  * @property {string} date - 日付
  * @property {string} day - 曜日
  * @property {string} kaisaiDate - リンク
