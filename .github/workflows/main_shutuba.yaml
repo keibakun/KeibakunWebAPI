@@ -1,0 +1,49 @@
+name: KeibakunWebAPI main_shutuba Workflow
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "取得対象の年を入力"
+        required: true
+        default: "2025"
+
+jobs:
+  scrape:
+    name: scrape
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure Shutuba directory exists
+        run: |
+          mkdir -p ./Shutuba
+
+      - name: scrape netkeiba_shutuba
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
+          ls ./Shutuba || echo "Shutuba directory is empty"
+          cat ./Shutuba/index.html || echo "index.html not found"
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          pwd
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push RaceList
+        run: |
+          git add ./RaceList/
+          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
