@@ -95,7 +95,8 @@ async function main_shutuba(): Promise<void> {
                     console.log("指定のディレクトリが存在するため上書きします");
                 }
 
-                const fp: string = path.join(dp, "index.html");
+                // ファイルパスを構築
+                const fp: string = path.join(outputDir, "index.html");
                 fs.writeFileSync(fp, JSON.stringify(raceData, null, 2), "utf-8");
                 console.info(`出馬表を${fp} に保存しました`);
             } catch (error) {
