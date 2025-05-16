@@ -8,6 +8,11 @@ on:
         required: true
         default: "2025"
 
+      month:
+        description: "取得対象の月を入力"
+        required: true
+        default: "5"
+
 jobs:
   scrape:
     name: scrape
