@@ -75,22 +75,21 @@ async function main_shutuba() {
         // 各 raceId に対して getShutuba を実行
         for (const raceId of raceIds) {
             console.info(`レースID: ${raceId} の出馬表を取得します`);
+            const raceData = await getShutuba(raceId);
 
-            try {
-                const raceData = await getShutuba(raceId);
-
-                // 出馬表を保存
-                const outputDir = path.join(__dirname, `../../Shutuba/${kaisaiDate}`);
-                if (!fs.existsSync(outputDir)) {
-                    fs.mkdirSync(outputDir, { recursive: true });
-                }
-
-                const outputPath = path.join(outputDir, `${raceId}.json`);
-                fs.writeFileSync(outputPath, JSON.stringify(raceData, null, 2), "utf-8");
-                console.info(`出馬表を保存しました: ${outputPath}`);
-            } catch (error) {
-                console.error(`レースID: ${raceId} の出馬表取得中にエラーが発生しました:`, error);
+            // 出馬表を保存
+            const dp = path.join(__dirname, `../../Shutuba/`, raceId);
+            const outputDir = path.resolve(dp);
+            if (!fs.existsSync(outputDir)) {
+                console.log("指定のディレクトリが存在しないため作成します");
+                fs.mkdirSync(outputDir, { recursive: true });
+            } else {
+                console.log("指定のディレクトリが存在するため上書きします");
             }
+
+            const fp = path.join(dp, "index.html");
+            fs.writeFileSync(fp, JSON.stringify(raceData, null, 2), "utf-8");
+            console.info(`出馬表を${fp} に保存しました`);
         }
     }
 }
