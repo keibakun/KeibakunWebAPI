@@ -38,8 +38,7 @@ jobs:
         run: |
           npm install
           npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
-          ls ./Shutuba || echo "Shutuba directory is empty"
-          cat ./Shutuba/index.html || echo "index.html not found"
+          ls -R ./Shutuba || echo "Shutuba directory is empty"
 
       - name: Setup Git user
         shell: bash
