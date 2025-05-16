@@ -47,7 +47,7 @@ jobs:
           git config --global user.email "keibakun.manage@gmail.com"
           git config --global user.name "keibakun"
 
-      - name: Push RaceList
+      - name: Push Shutuba
         run: |
-          git add ./RaceList/
+          git add ./Shutuba/
           git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
