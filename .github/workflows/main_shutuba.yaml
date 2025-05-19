@@ -50,4 +50,6 @@ jobs:
       - name: Push Shutuba
         run: |
           git add ./Shutuba/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+          git diff --staged --exit-code || (
+            git commit -m "下記期間の出馬表データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" && git push
+          )
