@@ -1,0 +1,55 @@
+name: KeibakunWebAPI main_appendUpgradeInfo Workflow
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "アップグレード情報のタイトルを入力"
+        required: true
+        default: ""
+
+      month:
+        description: "情報の説明を入力"
+        required: true
+        default: ""
+
+jobs:
+  append:
+    name: appned
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure Info directory exists
+        run: |
+          mkdir -p ./Info
+
+      - name: appned upgradeInfo
+        run: |
+          npm install
+          npx tsx ./src/Info/main_appendUpgradeInfo.ts ${{ github.event.inputs.title }} ${{ github.event.inputs.description }}
+          ls -R ./Info || echo "Info directory is empty"
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          pwd
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push upgradeInfo
+        run: |
+          git add ./Info/upgrade
+          git diff --staged --exit-code || (
+            git commit -m "アップグレード情報を追加しました\n${{ github.event.inputs.title }}${{ github.event.inputs.description }}" && git push
+          )
