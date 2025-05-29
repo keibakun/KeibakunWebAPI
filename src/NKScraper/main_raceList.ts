@@ -6,16 +6,17 @@ import { RaceData } from "./raceList/raceListIF";
 
 // レースリストを取得します
 async function main_raceList() {
-    // コマンドライン引数から year を取得
+    // コマンドライン引数から year, month を取得
     const args = process.argv.slice(2);
     const year = parseInt(args[0], 10) || 2025; // デフォルト値: 2025
+    const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
 
-    console.info(`指定された年: ${year}`);
+    console.info(`指定された年: ${year}${monthArg ? `, 月: ${monthArg}` : ""}`);
 
-    // 1月から12月までループ
-    for (let i = 0; i < 12; i++) {
-        const month = i + 1;
-        // 月を2桁にフォーマット
+    // 月指定があればその月だけ、なければ1～12月ループ
+    const months = monthArg && monthArg >= 1 && monthArg <= 12 ? [monthArg] : Array.from({ length: 12 }, (_, i) => i + 1);
+
+    for (const month of months) {
         const formattedMonth: string = month.toString().padStart(2, "0");
 
         // index.html のパスを指定
@@ -26,27 +27,25 @@ async function main_raceList() {
         // index.html を読み込む
         if (!fs.existsSync(indexPath)) {
             console.warn(`index.html が存在しません: ${indexPath}`);
-            continue; // ファイルが存在しない場合はスキップ
+            continue;
         }
 
         const htmlContent = fs.readFileSync(indexPath, "utf-8");
 
-        // kaisaiDate をすべて抽出（例: "kaisaiDate": "20250525" の形式を想定）
+        // kaisaiDate をすべて抽出
         const kaisaiDateMatches = htmlContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
         if (!kaisaiDateMatches) {
             console.error(`kaisaiDate が見つかりませんでした: ${indexPath}`);
-            continue; // データが見つからない場合はスキップ
+            continue;
         }
 
-        // 抽出した kaisaiDate を配列に変換
         const kaisaiDates = kaisaiDateMatches.map((match) => {
             const dateMatch = match.match(/"kaisaiDate":\s*"(\d{8})"/);
             return dateMatch?.[1] || "";
-        }).filter((date) => date !== ""); // 空文字列を除外
+        }).filter((date) => date !== "");
 
         console.info(`抽出された kaisaiDate: ${kaisaiDates.join(", ")}`);
 
-        // 各 kaisaiDate に対してレースリストを取得
         for (const kaisaiDate of kaisaiDates) {
             console.info(`kaisaiDate: ${kaisaiDate} を使用してレースリストを取得します`);
             const raceList: RaceData[] = await getRaceList(kaisaiDate);
@@ -56,12 +55,12 @@ async function main_raceList() {
             const outputDir = path.resolve(dp);
             if (!fs.existsSync(outputDir)) {
                 console.log("指定のディレクトリが存在しないため作成します");
-                await fs.mkdirSync(outputDir, { recursive: true });
+                fs.mkdirSync(outputDir, { recursive: true });
             } else {
                 console.log("指定のディレクトリが存在するため上書きします");
             }
             const fp = path.join(dp, "index.html");
-            await fs.writeFileSync(fp, JSON.stringify(raceList, null, 2), "utf-8");
+            fs.writeFileSync(fp, JSON.stringify(raceList, null, 2), "utf-8");
             console.info(`レースリストを ${fp} に保存しました`);
         }
     }

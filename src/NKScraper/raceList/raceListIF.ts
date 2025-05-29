@@ -6,6 +6,7 @@
  * @property {string} raceCourse - コース情報
  * @property {string} tousuu - 頭数
  * @property {string} raceId - レースID
+ * @property {string} grade - レースグレード
  */
 export interface RaceItem {
     raceName: string;
@@ -13,6 +14,7 @@ export interface RaceItem {
     raceCourse: string;
     tousuu: string;
     raceId: string;
+    grade: string;
 }
 
 /**
