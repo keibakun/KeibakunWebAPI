@@ -35,12 +35,6 @@ jobs:
           ls ./RaceList || echo "RaceList directory is empty"
           cat ./RaceList/index.html || echo "index.html not found"
 
-      - name: Save intermediate results
-        uses: actions/upload-artifact@v3.1.3
-        with:
-          name: raceResult
-          path: ./RaceResult/
-
       - name: Setup Git user
         shell: bash
         run: |
