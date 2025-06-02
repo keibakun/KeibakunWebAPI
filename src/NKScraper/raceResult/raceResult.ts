@@ -10,7 +10,7 @@ import {
 
 export default async function getRaceResult(raceId: string): Promise<RaceResultWithRefund> {
     const url = `https://race.netkeiba.com/race/result.html?race_id=${raceId}&rf=race_list`;
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     await page.setViewport({ width: 2000, height: 5000 });
