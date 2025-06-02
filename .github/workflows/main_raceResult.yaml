@@ -31,7 +31,7 @@ jobs:
       - name: scrape netkeiba_raceResult
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceList.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} --limit 1000 --offset 0
+          npx tsx ./src/NKScraper/main_raceList.ts ${{ github.event.inputs.kaisaiDate }} --limit 1000 --offset 0
           ls ./RaceList || echo "RaceList directory is empty"
           cat ./RaceList/index.html || echo "index.html not found"
 
