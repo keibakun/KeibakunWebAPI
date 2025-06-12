@@ -69,8 +69,13 @@ async function main_raceResult() {
                     console.info(`raceId: ${raceId} のレース結果を取得します`);
                     const result = await getRaceResult(raceId);
 
+                    // raceIdを分割してディレクトリを構築
+                    const year = raceId.substring(0, 4);
+                    const month = raceId.substring(4, 6);
+                    const rest = raceId.substring(6);
+
                     // 保存先ディレクトリ
-                    const outDir = path.join(__dirname, `../../RaceResult/${raceId}`);
+                    const outDir = path.join(__dirname, `../../RaceResult/`, year, month, rest);
                     if (!fs.existsSync(outDir)) {
                         fs.mkdirSync(outDir, { recursive: true });
                     }
