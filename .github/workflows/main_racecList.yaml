@@ -32,45 +32,10 @@ jobs:
         run: |
           mkdir -p ./RaceList
 
-      - name: scrape netkeiba_raceList (part 1)
+      - name: scrape netkeiba_raceList
         run: |
           npm install
           npx tsx ./src/NKScraper/main_raceList.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} --limit 1000 --offset 0
-          ls ./RaceList || echo "RaceList directory is empty"
-          cat ./RaceList/index.html || echo "index.html not found"
-
-      - name: Save intermediate results
-        uses: actions/upload-artifact@v3
-        with:
-          name: racelist-part1
-          path: ./RaceList/
-
-  scrape-continue:
-    name: scrape-continue
-    needs: scrape
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
-
-      - name: Download intermediate results
-        uses: actions/download-artifact@v3
-        with:
-          name: racelist-part1
-
-      - name: scrape netkeiba_raceList (part 2)
-        run: |
-          npm install
-          npx tsx ./src/NKScraper/main_raceList.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} --limit 1000 --offset 1000
           ls ./RaceList || echo "RaceList directory is empty"
           cat ./RaceList/index.html || echo "index.html not found"
 
