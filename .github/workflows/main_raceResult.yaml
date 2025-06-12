@@ -2,10 +2,15 @@ name: KeibakunWebAPI main_raceResult Workflow
 on:
   workflow_dispatch:
     inputs:
-      kaisaiDate:
-        description: "取得対象の開催日程を入力"
+      year:
+        description: "取得対象の年を入力"
         required: true
-        default: "20250525"
+        default: "2025"
+
+      month:
+        description: "取得対象の月を入力"
+        required: true
+        default: "5"
 
 jobs:
   scrape:
@@ -31,7 +36,7 @@ jobs:
       - name: scrape netkeiba_raceResult
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.kaisaiDate }} --limit 1000 --offset 0
+          npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
           ls ./RaceResult || echo "RaceList directory is empty"
           cat ./RaceResult/index.html || echo "index.html not found"
 
@@ -45,4 +50,4 @@ jobs:
       - name: Push RaceResult
         run: |
           git add ./RaceResult/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+          git diff --staged --exit-code || (git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" && git push
