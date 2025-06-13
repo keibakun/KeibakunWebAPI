@@ -50,4 +50,7 @@ jobs:
       - name: Push RaceResult
         run: |
           git add ./RaceResult/
-          git diff --staged --exit-code || (git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" && git push
+          if ! git diff --staged --exit-code; then
+            git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月"
+            git push
+          fi
