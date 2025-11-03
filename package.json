@@ -58,5 +58,10 @@
     "@types/node-fetch": "^2.6.12",
     "@types/puppeteer": "^7.0.4",
     "tsx": "^4.19.4"
-  }
+  },
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
