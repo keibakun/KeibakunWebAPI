@@ -24,8 +24,20 @@ export class RaceList {
         const url: string = `https://race.netkeiba.com/top/race_list.html?kaisai_date=${kaisaiDate}`;
         this.logger.info("netkeibaからのレースリストのスクレイピングを開始します");
 
+        // ページ遷移し、主要コンテントのロードを待つ
         await this.page.goto(url, { waitUntil: "domcontentloaded" });
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        try {
+            // RaceList ボックスが描画されるのを最大10秒待つ
+            await this.page.waitForSelector("div.RaceList_Box.clearfix", { timeout: 10000 });
+            // 要素数が期待値に達するまで待つ（必要なら調整）
+            await this.page.waitForFunction(() => {
+                return document.querySelectorAll("div.RaceList_Box.clearfix").length > 0;
+            }, { timeout: 10000 });
+        } catch (e) {
+            this.logger.warn("RaceList 要素の待機がタイムアウトしました。ページが完全に描画されていない可能性があります。");
+            // 軽く待ってから続行（フォールバック）
+            await new Promise((resolve) => setTimeout(resolve, 500));
+        }
 
         try {
             const raceList = await this.page.$$eval(
