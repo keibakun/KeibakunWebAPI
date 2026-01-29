@@ -1,0 +1,11 @@
+{
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "plugin": ["typedoc-plugin-markdown"],
+  "hideGenerator": true,
+  "excludePrivate": true,
+  "excludeExternals": true,
+  "gitRevision": "main",
+  "includeVersion": false
+}
