@@ -10,7 +10,7 @@ import { Logger } from "../../utils/Logger";
 
 /**
  * RaceResultクラス
- * @description PuppeteerのPageインスタンスを使用してレース結果を取得するクラス
+ * PuppeteerのPageインスタンスを使用してレース結果を取得するクラス
  */
 export class RaceResult {
     private page: Page;

@@ -4,7 +4,7 @@ import { Logger } from "../../utils/Logger";
 
 /**
  * RaceListクラス
- * @description PuppeteerのPageインスタンスを使用してレースリストを取得するクラス
+ * PuppeteerのPageインスタンスを使用してレースリストを取得するクラス
  */
 export class RaceList {
     private page: Page;

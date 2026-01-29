@@ -1,6 +1,6 @@
 /**
  * @interface RaceItem
- * @description レースアイテムの情報を表すインターフェース
+ * レースアイテムの情報を表すインターフェース
  * @property {string} raceName - レース名
  * @property {string} raceTime - レース時間
  * @property {string} raceCourse - コース情報
@@ -19,7 +19,7 @@ export interface RaceItem {
 
 /**
  * @interface RaceTitle
- * @description レースタイトルの情報を表すインターフェース
+ * レースタイトルの情報を表すインターフェース
  * @property {string} kaiji - 回次
  * @property {string} venue - 開催場
  * @property {string} times - 日目
@@ -32,7 +32,7 @@ export interface RaceTitle {
 
 /**
  * @interface RaceData
- * @description レースデータの情報を表すインターフェース
+ * レースデータの情報を表すインターフェース
  * @property {RaceTitle} title - レースタイトル
  * @property {string} shiba - 芝情報
  * @property {string} da - ダート情報
