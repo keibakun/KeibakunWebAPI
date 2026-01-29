@@ -4,7 +4,7 @@ import { Logger } from "../../utils/Logger";
 
 /**
  * RaceScheduleクラス
- * @description PuppeteerのPageインスタンスを使用してレース開催日程を取得するクラス
+ * PuppeteerのPageインスタンスを使用してレース開催日程を取得するクラス
  */
 export class RaceSchedule {
     private page: Page;

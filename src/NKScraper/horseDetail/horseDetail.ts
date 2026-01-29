@@ -5,7 +5,7 @@ import { HorseProfile, HorseRaceResultRow, HorseDetail } from "./horseDetailIF";
 
 /**
  * HorseDetailクラス
- * @description PuppeteerのPageインスタンスを使用して馬の詳細情報を取得するクラス
+ * PuppeteerのPageインスタンスを使用して馬の詳細情報を取得するクラス
  */
 export class HorseDetailScraper {
     private page: Page;
@@ -41,7 +41,7 @@ export class HorseDetailScraper {
             await this.page.waitForFunction(() => document.readyState === 'complete', { timeout: 5000 }).catch(() => {});
         } catch (e) {
             this.logger.warn('主要要素の待機がタイムアウトしました。フォールバックで短時間待機します。');
-            await this.page.waitForTimeout(1500);
+            await new Promise((r) => setTimeout(r, 1500));
         }
 
         try {

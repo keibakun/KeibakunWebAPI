@@ -1,6 +1,6 @@
 /**
  * @interface SyutubaIF
- * @description 出走馬情報のインターフェース
+ * 出走馬情報のインターフェース
  * @property {string} umaban - 馬番
  * @property {string} horseName - 馬名
  * @property {string} horseId - 馬ID
@@ -27,7 +27,7 @@ export interface SyutubaIF {
 
 /**
  * @interface RaceIF
- * @description レース情報のインターフェース
+ * レース情報のインターフェース
  * @property {string} raceNum - レースナンバー
  * @property {string} raceName - レース名
  * @property {string} grade - レースグレード
