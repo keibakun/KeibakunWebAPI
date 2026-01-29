@@ -1,109 +1,148 @@
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
 import getShutuba from "./shutuba/shutuba";
 import { RaceIF } from "./shutuba/syutubaIF";
+import { Logger } from "../utils/Logger";
+import { FileUtil } from "../utils/FileUtil";
+import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 
-async function main_shutuba(): Promise<void> {
-    // コマンドライン引数から年と月を取得
-    const args: string[] = process.argv.slice(2);
-    const year: number = parseInt(args[0], 10) || 2025; // デフォルト値: 2025
-    const month: number = parseInt(args[1], 10); // 月を引数から取得（必須）
+const logger = new Logger();
+const jsonWriter = new JsonFileWriterUtil(logger);
 
-    if (isNaN(month) || month < 1 || month > 12) {
-        console.error("月の指定が無効です。1～12の範囲で指定してください。");
-        return;
+/**
+ * Main_Shutuba
+ *
+ * `RaceSchedule/<YYYYMM>/index.html` から開催日を抽出し、
+ * `RaceList/<kaisaiDate>/index.html` を参照して `raceId` を取り出し、
+ * 各 `raceId` に対して `getShutuba` を呼び出して出馬表を保存するクラスです。
+ */
+export class Main_Shutuba {
+    private year: number;
+    private monthArg?: number;
+
+    /**
+     * コンストラクタ
+     * @param year 対象年（例: 2025）
+     * @param monthArg 対象月（1-12）
+     */
+    constructor(year: number, monthArg?: number) {
+        this.year = year;
+        this.monthArg = monthArg;
     }
 
-    console.info(`指定された年: ${year}, 月: ${month}`);
-
-    const kaisaiDates: string[] = [];
-
-    // 月を2桁にフォーマット
-    const formattedMonth: string = month.toString().padStart(2, "0");
-
-    // RaceSchedule の index.html を参照
-    const schedulePath: string = path.join(__dirname, `../../RaceSchedule/${year}${formattedMonth}/index.html`);
-
-    if (!fs.existsSync(schedulePath)) {
-        console.warn(`index.html が存在しません: ${schedulePath}`);
-        return; // ファイルが存在しない場合は終了
-    }
-
-    const scheduleContent: string = fs.readFileSync(schedulePath, "utf-8");
-
-    // kaisaiDate を抽出
-    const kaisaiDateMatches: RegExpMatchArray | null = scheduleContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
-    if (!kaisaiDateMatches) {
-        console.warn(`kaisaiDate が見つかりません: ${schedulePath}`);
-        return;
-    }
-
-    // 抽出した kaisaiDate を配列に追加
-    const extractedDates: string[] = kaisaiDateMatches.map((match: string): string => {
-        const dateMatch: RegExpMatchArray | null = match.match(/"kaisaiDate":\s*"(\d{8})"/);
-        return dateMatch?.[1] || "";
-    }).filter((date: string): boolean => date !== "");
-
-    kaisaiDates.push(...extractedDates);
-
-    if (kaisaiDates.length === 0) {
-        console.warn(`指定された年 (${year}) の月 (${month}) の開催日が見つかりませんでした。`);
-        return;
-    }
-
-    // RaceList 配下のフォルダを参照
-    for (const kaisaiDate of kaisaiDates) {
-        const raceListPath: string = path.join(__dirname, `../../RaceList/${kaisaiDate}/index.html`);
-        if (!fs.existsSync(raceListPath)) {
-            console.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
-            continue;
+    /**
+     * エントリポイント: スケジュールから開催日を抽出して処理を開始します。
+     */
+    async run(): Promise<void> {
+        // monthArg が整数か検証（以前は必須だったため同様の振る舞いにしている）
+        if (!this.monthArg || isNaN(this.monthArg) || this.monthArg < 1 || this.monthArg > 12) {
+            logger.error("月の指定が無効です。1～12の範囲で指定してください。");
+            return;
         }
 
-        const raceListContent: string = fs.readFileSync(raceListPath, "utf-8");
+        logger.info(`指定された年: ${this.year}, 月: ${this.monthArg}`);
+
+        const formattedMonth = this.monthArg.toString().padStart(2, "0");
+        const schedulePath = path.join(__dirname, `../../RaceSchedule/${this.year}${formattedMonth}/index.html`);
+
+        // schedule ファイルの存在チェック
+        if (! await FileUtil.exists(schedulePath)) {
+            logger.warn(`index.html が存在しません: ${schedulePath}`);
+            return;
+        }
+
+        // index.html を読み込み、kaisaiDate を抽出
+        let scheduleContent = "";
+        try {
+            scheduleContent = await fs.readFile(schedulePath, "utf-8");
+        } catch (e) {
+            logger.error(`スケジュールの読み込みに失敗しました: ${schedulePath}`);
+            return;
+        }
+
+        const kaisaiDates = this.extractKaisaiDates(scheduleContent, schedulePath);
+        if (kaisaiDates.length === 0) {
+            logger.warn(`指定された年 (${this.year}) の月 (${this.monthArg}) の開催日が見つかりませんでした。`);
+            return;
+        }
+
+        // 各開催日について処理
+        for (const kaisaiDate of kaisaiDates) {
+            await this.processKaisaiDate(kaisaiDate);
+        }
+    }
+
+    /**
+     * index.html の内容から kaisaiDate を抽出します。
+     * @param htmlContent index.html の文字列
+     * @param indexPath ログ用のパス
+     */
+    private extractKaisaiDates(htmlContent: string, indexPath: string): string[] {
+        const kaisaiDateMatches = htmlContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
+        if (!kaisaiDateMatches) {
+            logger.warn(`kaisaiDate が見つかりません: ${indexPath}`);
+            return [];
+        }
+        return kaisaiDateMatches
+            .map((match) => match.match(/"kaisaiDate":\s*"(\d{8})"/)?.[1] || "")
+            .filter((d) => d !== "");
+    }
+
+    /**
+     * 開催日の RaceList/index.html を読み、raceId を抽出して出馬表を取得・保存します。
+     * @param kaisaiDate 開催日文字列（YYYYMMDD）
+     */
+    private async processKaisaiDate(kaisaiDate: string): Promise<void> {
+        const raceListPath = path.join(__dirname, `../../RaceList/${kaisaiDate}/index.html`);
+        if (! await FileUtil.exists(raceListPath)) {
+            logger.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
+            return;
+        }
+
+        let raceListContent = "";
+        try {
+            raceListContent = await fs.readFile(raceListPath, "utf-8");
+        } catch (e) {
+            logger.error(`RaceList の読み込みに失敗しました: ${raceListPath}`);
+            return;
+        }
 
         // raceId を抽出
-        const raceIdMatches: RegExpMatchArray | null = raceListContent.match(/"raceId":\s*"(\d{12})"/g);
+        const raceIdMatches = raceListContent.match(/"raceId":\s*"(\d{12})"/g);
         if (!raceIdMatches) {
-            console.warn(`raceId が見つかりません: ${raceListPath}`);
-            continue;
+            logger.warn(`raceId が見つかりません: ${raceListPath}`);
+            return;
         }
 
-        const raceIds: string[] = raceIdMatches.map((match: string): string => {
-            const idMatch: RegExpMatchArray | null = match.match(/"raceId":\s*"(\d{12})"/);
-            return idMatch?.[1] || "";
-        }).filter((id: string): boolean => id !== "");
+        const raceIds = raceIdMatches
+            .map((match) => match.match(/"raceId":\s*"(\d{12})"/)?.[1] || "")
+            .filter((id) => id !== "");
 
-        // 各 raceId に対して getShutuba を実行
+        // 各 raceId に対して出馬表を取得して保存
         for (const raceId of raceIds) {
-            console.info(`レースID: ${raceId} の出馬表を取得します`);
-
+            logger.info(`レースID: ${raceId} の出馬表を取得します`);
             try {
-                const raceData: RaceIF = await getShutuba(raceId);
+                const raceData: RaceIF = await getShutuba(raceId); // 実際のスクレイピング関数を呼び出し
 
-                // raceId を分割してディレクトリを構築
-                const year: string = raceId.substring(0, 4);
-                const month: string = raceId.substring(4, 6);
-                const rest: string = raceId.substring(6);
+                // raceId を分解して出力先ディレクトリを構築
+                const ry = raceId.substring(0, 4);
+                const rm = raceId.substring(4, 6);
+                const rest = raceId.substring(6);
 
-                // ディレクトリパスを構築
-                const dp: string = path.join(__dirname, `../../Shutuba/`, year, month, rest);
-                const outputDir: string = path.resolve(dp);
-                if (!fs.existsSync(outputDir)) {
-                    console.log("指定のディレクトリが存在しないため作成します");
-                    fs.mkdirSync(outputDir, { recursive: true });
-                } else {
-                    console.log("指定のディレクトリが存在するため上書きします");
-                }
-
-                // ファイルパスを構築
-                const fp: string = path.join(outputDir, "index.html");
-                fs.writeFileSync(fp, JSON.stringify(raceData, null, 2), "utf-8");
-                console.info(`出馬表を${fp} に保存しました`);
-            } catch (error) {
-                console.error(`レースID: ${raceId} の出馬表取得中にエラーが発生しました:`, error);
+                const outDir = path.join(__dirname, `../../Shutuba/`, ry, rm, rest);
+                // JsonFileWriterUtil を利用して JSON として保存
+                await jsonWriter.writeJson(outDir, "index.html", raceData);
+            } catch (error: any) {
+                logger.error(`レースID: ${raceId} の出馬表取得中にエラーが発生しました: ${String(error)}`);
             }
         }
     }
 }
 
-main_shutuba();
+// CLI 実行
+const args = process.argv.slice(2);
+const year = parseInt(args[0], 10) || 2025;
+const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
+
+const main = new Main_Shutuba(year, monthArg);
+main.run();
