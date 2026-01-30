@@ -41,7 +41,11 @@ export class HorseDetailScraper {
             await this.page.waitForFunction(() => document.readyState === 'complete', { timeout: 5000 }).catch(() => {});
         } catch (e) {
             this.logger.warn('主要要素の待機がタイムアウトしました。フォールバックで短時間待機します。');
+<<<<<<< Updated upstream
             await new Promise((r) => setTimeout(r, 1500));
+=======
+            await new Promise((resolve) => setTimeout(resolve, 500));
+>>>>>>> Stashed changes
         }
 
         try {
