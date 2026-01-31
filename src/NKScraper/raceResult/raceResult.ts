@@ -10,7 +10,7 @@ import { Logger } from "../../utils/Logger";
 
 /**
  * RaceResultクラス
- * PuppeteerのPageインスタンスを使用してレース結果を取得するクラス
+ * @description PuppeteerのPageインスタンスを使用してレース結果を取得するクラス
  */
 export class RaceResult {
     private page: Page;
@@ -110,81 +110,104 @@ function parseRefundTables(tables: Element[]): RefundIF {
     const sanrentan: any[] = [];
 
     tables.forEach((table) => {
-        const rows = Array.from(table.querySelectorAll("tbody tr"));
-        rows.forEach((row) => {
-            const th = row.querySelector("th");
-            if (!th) return;
-            const label = th.textContent?.trim() ?? "";
-            const resultCell = row.querySelector("td.Result");
-            const payoutCell = row.querySelector("td.Payout");
-            const ninkiCell = row.querySelector("td.Ninki");
-
-            // extract result numbers (can be multiple groups of <ul> or multiple <div><span>)
-            const results: string[] = [];
-            if (resultCell) {
-                const spans = Array.from(resultCell.querySelectorAll("span"));
-                spans.forEach(s => {
-                    const t = s.textContent?.trim() ?? "";
-                    if (t) results.push(t);
-                });
-            }
-
-            // payouts: may contain <br> separated values
-            const payouts: string[] = [];
-            if (payoutCell) {
-                const txt = payoutCell.textContent ?? "";
-                txt.split(/\r?\n/).map(s => s.trim()).filter(Boolean).forEach(p => payouts.push(p));
-                if (payouts.length === 0 && txt.trim()) payouts.push(txt.trim());
-            }
-
-            const ninkis: string[] = [];
-            if (ninkiCell) {
-                Array.from(ninkiCell.querySelectorAll("span")).forEach(s => {
-                    const t = s.textContent?.trim() ?? "";
-                    if (t) ninkis.push(t);
-                });
-                if (ninkis.length === 0 && (ninkiCell.textContent ?? "").trim()) ninkis.push((ninkiCell.textContent ?? "").trim());
-            }
-
-            const getPayout = (i: number) => payouts[i] ?? payouts[0] ?? "";
-            const getNinki = (i: number) => ninkis[i] ?? ninkis[0] ?? "";
-
-            if (label.includes("単勝")) {
-                if (results.length >= 1) {
-                    tansho.push({ umaban: results[0], payout: getPayout(0), ninki: getNinki(0) });
-                }
-            } else if (label.includes("複勝")) {
-                for (let i = 0; i < results.length; i++) {
-                    fukusho.push({ umaban: results[i], payout: getPayout(i), ninki: getNinki(i) });
-                }
-            } else if (label.includes("枠連")) {
-                const comb = results.filter(Boolean);
-                if (comb.length) wakuren.push({ combination: comb, payout: getPayout(0), ninki: getNinki(0) });
-            } else if (label.includes("馬連")) {
-                const comb = results.filter(Boolean);
-                if (comb.length) umaren.push({ combination: comb, payout: getPayout(0), ninki: getNinki(0) });
-            } else if (label.includes("ワイド")) {
-                const lists = resultCell ? Array.from(resultCell.querySelectorAll("ul")) : [];
-                if (lists.length > 0) {
-                    lists.forEach((ul, idx) => {
-                        const comb = Array.from(ul.querySelectorAll("span")).map(s => s.textContent?.trim() ?? "").filter(Boolean);
-                        if (comb.length) wide.push({ combination: comb, payout: getPayout(idx), ninki: getNinki(idx) });
+        const caption = table.querySelector("caption")?.textContent?.trim() ?? "";
+        const rows = table.querySelectorAll("tr");
+        if (caption.includes("単勝")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 2) {
+                    tansho.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        payout: cells[1].textContent?.trim() ?? "",
                     });
-                } else {
-                    const comb = results.filter(Boolean);
-                    if (comb.length) wide.push({ combination: comb, payout: getPayout(0), ninki: getNinki(0) });
                 }
-            } else if (label.includes("馬単")) {
-                const comb = results.filter(Boolean);
-                if (comb.length) umatan.push({ combination: comb, payout: getPayout(0), ninki: getNinki(0) });
-            } else if (label.includes("三連複")) {
-                const comb = results.filter(Boolean);
-                if (comb.length) sanrenpuku.push({ combination: comb, payout: getPayout(0), ninki: getNinki(0) });
-            } else if (label.includes("三連単")) {
-                const comb = results.filter(Boolean);
-                if (comb.length) sanrentan.push({ combination: comb, payout: getPayout(0), ninki: getNinki(0) });
-            }
-        });
+            });
+        } else if (caption.includes("複勝")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 2) {
+                    fukusho.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        payout: cells[1].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        } else if (caption.includes("枠連")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 2) {
+                    wakuren.push({
+                        wakuban: cells[0].textContent?.trim() ?? "",
+                        payout: cells[1].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        } else if (caption.includes("馬連")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 3) {
+                    umaren.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        umaban2: cells[1].textContent?.trim() ?? "",
+                        payout: cells[2].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        } else if (caption.includes("ワイド")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 3) {
+                    wide.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        umaban2: cells[1].textContent?.trim() ?? "",
+                        payout: cells[2].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        } else if (caption.includes("馬単")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 3) {
+                    umatan.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        umaban2: cells[1].textContent?.trim() ?? "",
+                        payout: cells[2].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        } else if (caption.includes("三連複")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 4) {
+                    sanrenpuku.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        umaban2: cells[1].textContent?.trim() ?? "",
+                        umaban3: cells[2].textContent?.trim() ?? "",
+                        payout: cells[3].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        } else if (caption.includes("三連単")) {
+            rows.forEach((row, i) => {
+                if (i === 0) return;
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 5) {
+                    sanrentan.push({
+                        umaban: cells[0].textContent?.trim() ?? "",
+                        umaban2: cells[1].textContent?.trim() ?? "",
+                        umaban3: cells[2].textContent?.trim() ?? "",
+                        payout: cells[4].textContent?.trim() ?? "",
+                    });
+                }
+            });
+        }
     });
 
     return {
