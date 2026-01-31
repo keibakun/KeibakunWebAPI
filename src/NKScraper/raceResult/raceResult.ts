@@ -59,18 +59,22 @@ export class RaceResult {
      */
     private parseResultRows(rows: Element[]): RaceResultRow[] {
         return Array.from(rows).map((row) => {
+            // 馬名と馬IDの抽出: td:nth-child(4) の a 要素
             const horseA = row.querySelector("td:nth-child(4) a");
             const horseName = horseA?.textContent?.trim() ?? "";
             const horseId = horseA?.getAttribute("href")?.match(/horse\/(\d+)/)?.[1] ?? "";
 
+            // 騎手名と騎手ID: td:nth-child(7) の a
             const jockeyA = row.querySelector("td:nth-child(7) a");
             const jockey = jockeyA?.textContent?.trim() ?? "";
             const jockeyId = jockeyA?.getAttribute("href")?.match(/jockey\/result\/recent\/(\d+)/)?.[1] ?? "";
 
+            // 調教師名と調教師ID: td:nth-child(14) の a
             const trainerA = row.querySelector("td:nth-child(14) a");
             const trainer = trainerA?.textContent?.trim() ?? "";
             const trainerId = trainerA?.getAttribute("href")?.match(/trainer\/result\/recent\/(\d+)/)?.[1] ?? "";
 
+            // 体重は余分な空白を削除し、括弧内の注釈を取り除いて正規化
             const bataijuuTd = row.querySelector("td:nth-child(15)");
             const bataijuu = bataijuuTd?.textContent?.replace(/\s+/g, "").replace(/\(.*\)/, "") ?? "";
 
@@ -96,8 +100,22 @@ export class RaceResult {
         });
     }
 
+
     /**
-     * 払い戻しテーブルをパースする関数
+     * 払い戻しテーブルをパースして構造化されたオブジェクトに変換します。
+     *
+     * 概要:
+     * - 各 `table.Payout_Detail_Table` を走査し、`tr` ごとに式別を判定します。
+     * - `td.Result` から馬番の組み合わせ（`combination: string[]`）を作成します。
+     *   - `<ul>` が複数ある場合は各 `<ul>` を 1 組として扱います。
+     *   - そうでない場合は `span` 要素を取得し、`payouts` の数に応じて分割して組み合わせを推定します。
+     * - `td.Payout` は `<br>` 区切りで複数金額が入るため分割して配列化します。
+     * - 各組み合わせごとに `RefundIF` に合うオブジェクト（`combination` / `payout` / `ninki`）を作成して配列へ push します。
+     *
+     * 戻り値: `RefundIF` 型
+     *
+     * 注意:
+     * - HTML の不整合に対しては複数のフォールバックを設けていますが、特殊ケースは追加対応が必要です。
      */
     private parseRefundTables(tables: Element[]): RefundIF {
         const tansho: any[] = [];
@@ -118,12 +136,14 @@ export class RaceResult {
                 if (i === 0 && row.querySelectorAll("td").length === 0) return;
 
                 // ラベル取得: caption -> th -> tr の class -> 空文字
+                // （ページによって caption が存在しないケースがあるため複数手段で取得）
                 const label = (caption
                     || row.querySelector("th")?.textContent?.trim()
                     || row.getAttribute("class")?.trim()
                     || "").trim();
 
                 // td.Payout は <br> 区切りで複数あることがある
+                // HTML をそのまま分割して生の金額テキスト配列を作る
                 const payoutCell = row.querySelector("td.Payout");
                 const payouts: string[] = [];
                 if (payoutCell) {
@@ -135,8 +155,8 @@ export class RaceResult {
                 }
 
                 // td.Result から馬番の組み合わせリストを作成
-                // - <ul> が複数ある場合は各 <ul> を 1 組とする
-                // - そうでない場合は span 要素群を取得し、payouts の数で分割して複数組を推測する
+                // - `<ul>` が複数ある場合は各 `<ul>` を 1 組とする
+                // - そうでない場合は `span` 要素群を取得し、payouts の数で分割して複数組を推測する
                 const resultCell = row.querySelector("td.Result");
                 const combos: string[][] = [];
                 if (resultCell) {
@@ -155,6 +175,7 @@ export class RaceResult {
                         const spanTexts = spanElems.map(s => s.textContent?.trim() ?? "");
                         const nonEmpty = spanTexts.filter(Boolean);
 
+                        // 複数 payout がある場合、spanTexts を分割して複数の組み合わせに割り当てる
                         if (payouts.length > 1 && spanTexts.length >= payouts.length) {
                             const chunkSize = Math.ceil(spanTexts.length / payouts.length);
                             for (let k = 0; k < payouts.length; k++) {
@@ -162,6 +183,7 @@ export class RaceResult {
                                 if (chunk.length) combos.push(chunk);
                             }
                         } else if (nonEmpty.length > 0) {
+                            // 単純に span の並びを 1 組として扱う
                             combos.push(nonEmpty);
                         } else {
                             // fallback: 直接テキストを分割
@@ -171,13 +193,14 @@ export class RaceResult {
                     }
                 }
 
-                // td.Ninki の人気を配列で取得
+                // td.Ninki の人気を配列で取得（例: "1人気" 等）
                 const ninki: string[] = [];
                 row.querySelectorAll("td.Ninki span").forEach((el) => {
                     const t = el.textContent?.trim() ?? "";
                     if (t) ninki.push(t);
                 });
 
+                // 各式別の判定（ラベル文字列または tr の class 属性を利用）
                 const isTansho = label.includes("単勝") || row.classList.contains("Tansho");
                 const isFukusho = label.includes("複勝") || row.classList.contains("Fukusho");
                 const isWakuren = label.includes("枠連") || row.classList.contains("Wakuren");
@@ -190,11 +213,13 @@ export class RaceResult {
                 const isSanrentan = /(三|3)連単/.test(label)
                     || row.classList.contains("Tan3");
 
+                // --- 各式別ごとの normalized オブジェクト作成と push ---
                 if (isTansho) {
-                    // 単勝は複数組ある可能性があるため、全 combos を処理する
+                    // 単勝: combos を全て処理。各 combo の要素は単一馬番のはずだが、複数馬番が入る場合も考慮して個別に push
                     combos.forEach((combo, idx) => {
                         const payoutStr = payouts[idx] ?? payouts[0] ?? "";
                         const ninkiStr = ninki[idx] ?? ninki[0] ?? "";
+                        // 不要文字を削除: '>' カンマ 空白 等
                         const cleaned = (payoutStr ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                         combo.forEach((h) => {
                             const normalizedTansho = { umaban: h, payout: cleaned, ninki: ninkiStr };
@@ -276,7 +301,15 @@ export class RaceResult {
     /**
      * コーナー通過順テーブルをパースする関数
      */
+    /**
+     * コーナー通過順テーブルをパースする関数
+     *
+     * @remarks
+     * - `rows` は `table.Corner_Num tr` の NodeList を想定します。
+     * - 各行の 2 列目にコーナー通過順（馬番一覧）が入っている想定で抽出します。
+     */
     private parseCornerOrderRows(rows: Element[]): CornerOrderIF {
+        // それぞれ存在チェックを行い、存在しなければ空文字を返す
         return {
             corner1: rows[0] && rows[0].children[1] ? rows[0].children[1].textContent?.replace(/\s+/g, "") ?? "" : "",
             corner2: rows[1] && rows[1].children[1] ? rows[1].children[1].textContent?.replace(/\s+/g, "") ?? "" : "",
@@ -288,7 +321,16 @@ export class RaceResult {
     /**
      * ラップタイムテーブルをパースする関数
      */
+    /**
+     * ラップタイムテーブルをパースする関数
+     *
+     * @remarks
+     * - `document.querySelector("table.Race_HaronTime")` を参照して、ヘッダー行（`tr.Header`）と
+     *   各馬のタイム行（`tr.HaronTime`）を抽出します。
+     * - ヘッダーは `th` を列挙し、タイム行は各 `td` のテキストを配列化します。
+     */
     private parseLapTime(): LapTimeIF {
+        // 全体的なペース表示（例: 前半/後半のラベル）を取得
         const paceElem = document.querySelector(".RapPace_Title span");
         const pace = paceElem ? paceElem.textContent?.trim() ?? "" : "";
 
@@ -296,14 +338,14 @@ export class RaceResult {
         const times: string[][] = [];
         const table = document.querySelector("table.Race_HaronTime");
         if (table) {
-            // ヘッダー取得
+            // ヘッダー取得: 1 行目の th を順に取り出す
             const headerTr = table.querySelector("tr.Header");
             if (headerTr) {
                 headerTr.querySelectorAll("th").forEach(th => {
                     headers.push(th.textContent?.trim() ?? "");
                 });
             }
-            // タイム取得
+            // 各馬のタイム行取得: tr.HaronTime の各 td を配列化
             const trs = table.querySelectorAll("tr.HaronTime");
             trs.forEach(tr => {
                 const row: string[] = [];
