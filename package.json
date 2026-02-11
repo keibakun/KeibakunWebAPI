@@ -5,12 +5,12 @@
   "dependencies": {
     "@google-cloud/functions-framework": "^3.3.0",
     "@types/jest": "^27.5.2",
+    "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.4.7",
     "fs": "^0.0.1-security",
     "http-server": "^14.1.1",
     "node-fetch": "^2.7.0",
     "puppeteer": "^24.8.2",
-    "cheerio": "^1.0.0-rc.12",
     "request": "^2.88.2",
     "tls": "^0.0.1"
   },
