@@ -1,0 +1,52 @@
+name: 【production】出馬表取得
+run-name: production shutuba run
+on:
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    name: scrape
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure Shutuba directory exists
+        run: |
+          mkdir -p ./Shutuba
+
+      - name: Run production shutuba (use run-time date)
+        run: |
+          npm install
+          # Use the action runtime date for year/month/day
+          YEAR=$(date -u +%Y)
+          MONTH=$(date -u +%m | sed 's/^0//')
+          DAY=$(date -u +%d | sed 's/^0//')
+          echo "Run for: ${YEAR}-${MONTH}-${DAY}"
+          npx tsx ./src/NKScraper/main_shutuba.ts ${YEAR} ${MONTH} ${DAY} false
+          ls -R ./Shutuba || echo "Shutuba directory is empty"
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push Shutuba
+        run: |
+          YEAR=$(date -u +%Y)
+          MONTH=$(date -u +%m | sed 's/^0//')
+          DAY=$(date -u +%d | sed 's/^0//')
+          git add ./Shutuba/
+          git diff --staged --exit-code || (
+            git commit -m "本番実行: 出馬表データを取得しました ${YEAR}-${MONTH}-${DAY}" && git push
+          )

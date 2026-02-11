@@ -15,55 +15,85 @@ const jsonWriter = new JsonFileWriterUtil(logger);
  * `RaceSchedule/<YYYYMM>/index.html` から開催日を抽出し、
  * `RaceList/<kaisaiDate>/index.html` を参照して `raceId` を取り出し、
  * 各 `raceId` に対して `getShutuba` を呼び出して出馬表を保存するクラスです。
+ * デバッグモードフラグはデフォルトで false です。
  */
 export class Main_Shutuba {
     private year: number;
-    private monthArg?: number;
-
+    private month?: number;
+    private day?: number;
+    private debug: boolean;
     /**
      * コンストラクタ
-     * @param year 対象年（例: 2025）
-     * @param monthArg 対象月（1-12）
+     * @param year 対象年（例: 2026）
+     * @param month 対象月（1-12）
+     * @param day 対象日（1-31）
+     * @param debug デバッグモードフラグ
      */
-    constructor(year: number, monthArg?: number) {
+    constructor(year: number, month?: number, day?: number, debug?: boolean) {
         this.year = year;
-        this.monthArg = monthArg;
+        this.month = month;
+        this.day = day;
+        this.debug = debug || false;
     }
 
     /**
      * エントリポイント: スケジュールから開催日を抽出して処理を開始します。
      */
     async run(): Promise<void> {
-        // monthArg が整数か検証（以前は必須だったため同様の振る舞いにしている）
-        if (!this.monthArg || isNaN(this.monthArg) || this.monthArg < 1 || this.monthArg > 12) {
-            logger.error("月の指定が無効です。1～12の範囲で指定してください。");
-            return;
-        }
+        let kaisaiDates: string[] = [];
 
-        logger.info(`指定された年: ${this.year}, 月: ${this.monthArg}`);
+        if (!this.debug) {
+            // debug=false の場合は year/month/day 指定が期待される。翌日以降の RaceList を走査する。
+            if (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12 ||
+                !this.day || isNaN(this.day) || this.day < 1 || this.day > 31) {
+                logger.error("月/日の指定が無効です。月は1～12、日は1～31の範囲で指定してください。");
+                return;
+            }
 
-        const formattedMonth = this.monthArg.toString().padStart(2, "0");
-        const schedulePath = path.join(__dirname, `../../RaceSchedule/${this.year}${formattedMonth}/index.html`);
+            logger.info(`指定された年: ${this.year}, 月: ${this.month}, 日: ${this.day}（debug=false）`);
 
-        // schedule ファイルの存在チェック
-        if (! await FileUtil.exists(schedulePath)) {
-            logger.warn(`index.html が存在しません: ${schedulePath}`);
-            return;
-        }
+            const baseDate = new Date(this.year, this.month - 1, this.day);
+            const targetDate = new Date(baseDate);
+            targetDate.setDate(targetDate.getDate() + 1); // 明日以降
 
-        // index.html を読み込み、kaisaiDate を抽出
-        let scheduleContent = "";
-        try {
-            scheduleContent = await fs.readFile(schedulePath, "utf-8");
-        } catch (e) {
-            logger.error(`スケジュールの読み込みに失敗しました: ${schedulePath}`);
-            return;
-        }
+            kaisaiDates = await this.getKaisaiDatesFromRaceListAfter(targetDate);
+            if (kaisaiDates.length === 0) {
+                logger.warn(`指定日時の翌日以降の RaceList に開催日が見つかりませんでした。`);
+                return;
+            }
+        } else {
+            // 既存の動作（debug=true）: RaceSchedule から開催日を抽出
+            // month が整数か検証
+            if (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12) {
+                logger.error("月の指定が無効です。1～12の範囲で指定してください。");
+                return;
+            }
 
-        const kaisaiDates = this.extractKaisaiDates(scheduleContent, schedulePath);
-        if (kaisaiDates.length === 0) {
-            logger.warn(`指定された年 (${this.year}) の月 (${this.monthArg}) の開催日が見つかりませんでした。`);
-            return;
+            logger.info(`指定された年: ${this.year}, 月: ${this.month}, デバッグモード: ${this.debug}`);
+
+            const formattedMonth = this.month.toString().padStart(2, "0");
+            const schedulePath = path.join(__dirname, `../../RaceSchedule/${this.year}${formattedMonth}/index.html`);
+
+            // schedule ファイルの存在チェック
+            if (! await FileUtil.exists(schedulePath)) {
+                logger.warn(`index.html が存在しません: ${schedulePath}`);
+                return;
+            }
+
+            // index.html を読み込み、kaisaiDate を抽出
+            let scheduleContent = "";
+            try {
+                scheduleContent = await fs.readFile(schedulePath, "utf-8");
+            } catch (e) {
+                logger.error(`スケジュールの読み込みに失敗しました: ${schedulePath}`);
+                return;
+            }
+
+            kaisaiDates = this.extractKaisaiDates(scheduleContent, schedulePath);
+            if (kaisaiDates.length === 0) {
+                logger.warn(`指定された年 (${this.year}) の月 (${this.month}) の開催日が見つかりませんでした。`);
+                return;
+            }
         }
 
         // 各開催日について処理
@@ -86,6 +116,35 @@ export class Main_Shutuba {
         return kaisaiDateMatches
             .map((match) => match.match(/"kaisaiDate":\s*"(\d{8})"/)?.[1] || "")
             .filter((d) => d !== "");
+    }
+
+    /**
+     * RaceList ディレクトリを走査し、targetDate（YYYYMMDD）以上のディレクトリ名を返す
+     * @param targetDate 判定開始日（この日を含む）
+     */
+    private async getKaisaiDatesFromRaceListAfter(targetDate: Date): Promise<string[]> {
+        const raceListDir = path.join(__dirname, `../../RaceList`);
+        if (! await FileUtil.exists(raceListDir)) {
+            logger.warn(`RaceList ディレクトリが存在しません: ${raceListDir}`);
+            return [];
+        }
+
+        let entries: string[] = [];
+        try {
+            entries = await fs.readdir(raceListDir);
+        } catch (e) {
+            logger.error(`RaceList ディレクトリの読み込みに失敗しました: ${raceListDir}`);
+            return [];
+        }
+
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const targetStr = `${targetDate.getFullYear()}${pad(targetDate.getMonth() + 1)}${pad(targetDate.getDate())}`;
+
+        const kaisaiDates = entries
+            .filter((name) => /^\d{8}$/.test(name) && name >= targetStr)
+            .sort();
+
+        return kaisaiDates;
     }
 
     /**
@@ -141,8 +200,15 @@ export class Main_Shutuba {
 
 // CLI 実行
 const args = process.argv.slice(2);
-const year = parseInt(args[0], 10) || 2025;
+const year = args[0] ? parseInt(args[0], 10) : undefined;
 const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
+const dayArg = args[2] ? parseInt(args[2], 10) : undefined;
+const debugArg = typeof args[3] !== "undefined" ? (String(args[3]).toLowerCase() === "true") : undefined;
 
-const main = new Main_Shutuba(year, monthArg);
+if (!year) {
+    logger.error("年の指定が必要です（例: 2025）。");
+    process.exit(1);
+}
+
+const main = new Main_Shutuba(year, monthArg, dayArg, debugArg);
 main.run();

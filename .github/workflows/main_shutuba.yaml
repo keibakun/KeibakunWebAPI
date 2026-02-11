@@ -12,6 +12,11 @@ on:
         description: "取得対象の月を入力"
         required: true
         default: "5"
+      
+      debug:
+        description: "デバッグ用フラグ（true/false）。手動実行の際は原則デフォルト値を変更しないでください。"
+        required: false
+        default: "true"
 
 jobs:
   scrape:
@@ -37,7 +42,7 @@ jobs:
       - name: scrape netkeiba_shutuba
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
+          npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} ${{ github.event.inputs.debug }}
           ls -R ./Shutuba || echo "Shutuba directory is empty"
 
       - name: Setup Git user
@@ -51,5 +56,5 @@ jobs:
         run: |
           git add ./Shutuba/
           git diff --staged --exit-code || (
-            git commit -m "下記期間の出馬表データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" && git push
+            git commit -m "デバッグモードで下記期間の出馬表データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" && git push
           )
