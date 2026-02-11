@@ -1,4 +1,4 @@
-name: 【production】出馬表取得
+name: 【本番】出馬表取得
 run-name: production shutuba run
 on:
   workflow_dispatch: {}
