@@ -58,7 +58,7 @@ export class Main_RaceSchedule {
 
 // コマンドライン引数から呼び出し
 const args = process.argv.slice(2);
-const year = parseInt(args[0], 10) || 2025;
+const year = parseInt(args[0], 10) || 2026;
 
 const main = new Main_RaceSchedule(year);
 main.run();

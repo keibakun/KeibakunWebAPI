@@ -1,7 +1,12 @@
 name: KeibakunWebAPI main_raceSchedule Workflow
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
-  [ workflow_dispatch ]
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Target year (YYYY)'
+        required: true
+        default: '2026'
 jobs:
   scrape:
     name: scrape
@@ -26,7 +31,7 @@ jobs:
       - name: scrape netkeiba_raceSchedule
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceSchedule.ts
+          npx tsx ./src/NKScraper/main_raceSchedule.ts ${{ github.event.inputs.year }}
           ls ./RaceSchedule || echo "RaceSchedule directory is empty"
           cat ./RaceSchedule/index.html || echo "index.html not found"
 
