@@ -1,4 +1,4 @@
-name: KeibakunWebAPI main_shutuba Workflow
+name: 【手動】出馬表取得
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   workflow_dispatch:

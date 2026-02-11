@@ -1,4 +1,4 @@
-name: KeibakunWebAPI main_raceList Workflow
+name: 【手動】レースリスト取得
 on:
   workflow_dispatch:
     inputs:
