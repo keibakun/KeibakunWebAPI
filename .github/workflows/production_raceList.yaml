@@ -1,0 +1,86 @@
+name: 【本番】レースリスト取得
+run-name: ${{ github.actor }} runs production race list
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: '取得対象の年を入力（例: 2026）。未指定時は実行時の西暦が使用されます。'
+        required: false
+      month:
+        description: '取得対象の月を入力（例: 5）。未指定時は実行時の月が使用されます。'
+        required: false
+  schedule:
+    # 毎週金/土/日 18:00 (JST) に起動。GitHub Actions の cron は UTC 基準のため UTC 9:00 に設定しています。
+    # ジョブ内で0〜1800秒ランダムに待機して18:00〜18:30のランダム開始を実現します。
+    - cron: '0 9 * * FRI,SAT,SUN'
+jobs:
+  scrape:
+    name: scrape
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Randomized delay (0-1800s)
+        shell: bash
+        run: |
+          # ランダムに0〜1800秒（0〜30分）待機して開始時刻をランダム化
+          sleep_seconds=$(( RANDOM % 1801 ))
+          echo "Delaying start by ${sleep_seconds}s to randomize run time"
+          sleep "$sleep_seconds"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Determine target year/month
+        id: set_year_month
+        shell: bash
+        run: |
+          input_year='${{ github.event.inputs.year }}'
+          input_month='${{ github.event.inputs.month }}'
+          if [ -z "$input_year" ]; then
+            year=$(date +%Y)
+            echo "No input year provided, using current year: $year"
+          else
+            year="$input_year"
+            echo "Using input year: $year"
+          fi
+          if [ -z "$input_month" ]; then
+            # date +%m returns zero-padded month; strip leading zero
+            month=$(date +%m | sed 's/^0//')
+            echo "No input month provided, using current month: $month"
+          else
+            month="$input_month"
+            echo "Using input month: $month"
+          fi
+          echo "YEAR=$year" >> $GITHUB_ENV
+          echo "MONTH=$month" >> $GITHUB_ENV
+
+      - name: Ensure RaceList directory exists
+        run: |
+          mkdir -p ./RaceList
+
+      - name: scrape netkeiba_raceList
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_raceList.ts "$YEAR" "$MONTH" --limit 1000 --offset 0
+          ls ./RaceList || echo "RaceList directory is empty"
+          cat ./RaceList/index.html || echo "index.html not found"
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          pwd
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push RaceList
+        run: |
+          git add ./RaceList/
+          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
