@@ -7,8 +7,9 @@ on:
         description: '取得対象の年を入力（例: 2026）。未指定時は実行時の西暦が使用されます。'
         required: false
   schedule:
-    # 毎週金曜、土曜、日曜の18:00に起動し、ジョブ内で0〜1800秒ランダムに待機して18:00〜18:30のランダム開始を実現
-    - cron: '0 18 * * FRI,SAT,SUN'
+    # 毎週金/土/日 18:00 (JST) に起動。GitHub Actions の cron は UTC 基準のため UTC 9:00 に設定しています。
+    # ジョブ内で0〜1800秒ランダムに待機して18:00〜18:30のランダム開始を実現します。
+    - cron: '0 9 * * FRI,SAT,SUN'
 jobs:
   scrape:
     name: scrape
