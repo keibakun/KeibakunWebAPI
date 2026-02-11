@@ -1,0 +1,72 @@
+name: 【本番】レース開催日程取得
+run-name: ${{ github.actor }} runs production schedule
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: '取得対象の年を入力（例: 2026）。未指定時は実行時の西暦が使用されます。'
+        required: false
+  schedule:
+    # 毎週金曜、土曜、日曜の18:00に起動し、ジョブ内で0〜1800秒ランダムに待機して18:00〜18:30のランダム開始を実現
+    - cron: '0 18 * * FRI,SAT,SUN'
+jobs:
+  scrape:
+    name: scrape
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Randomized delay (0-1800s)
+        shell: bash
+        run: |
+          # ランダムに0〜1800秒（0〜30分）待機して開始時刻をランダム化
+          sleep_seconds=$(( RANDOM % 1801 ))
+          echo "Delaying start by ${sleep_seconds}s to randomize run time"
+          sleep "$sleep_seconds"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Determine target year
+        id: set_year
+        shell: bash
+        run: |
+          input_year='${{ github.event.inputs.year }}'
+          if [ -z "$input_year" ]; then
+            year=$(date +%Y)
+            echo "No input year provided, using current year: $year"
+          else
+            year="$input_year"
+            echo "Using input year: $year"
+          fi
+          echo "YEAR=$year" >> $GITHUB_ENV
+
+      - name: Ensure RaceSchedule directory exists
+        run: |
+          mkdir -p ./RaceSchedule
+
+      - name: scrape netkeiba_raceSchedule
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_raceSchedule.ts "$YEAR"
+          ls ./RaceSchedule || echo "RaceSchedule directory is empty"
+          cat ./RaceSchedule/index.html || echo "index.html not found"
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          pwd
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push RaceSchedule
+        run: |
+          git add ./RaceSchedule/
+          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
