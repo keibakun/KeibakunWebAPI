@@ -193,11 +193,14 @@ export class RaceResult {
                     }
                 }
 
-                // td.Ninki の人気を配列で取得（例: "1人気" 等）
+                // td.Ninki の人気を配列で取得、人気の文字列は削除して数値部分だけを抽出
                 const ninki: string[] = [];
                 row.querySelectorAll("td.Ninki span").forEach((el) => {
                     const t = el.textContent?.trim() ?? "";
-                    if (t) ninki.push(t);
+                    if (t) {
+                        const cleaned = t.replace(/人気/g, "").trim();
+                        if (cleaned) ninki.push(cleaned);
+                    }
                 });
 
                 // 各式別の判定（ラベル文字列または tr の class 属性を利用）
@@ -207,11 +210,8 @@ export class RaceResult {
                 const isUmaren = label.includes("馬連") || row.classList.contains("Umaren");
                 const isWide = label.includes("ワイド") || row.classList.contains("Wide");
                 const isUmatan = label.includes("馬単") || row.classList.contains("Umatan");
-                const isSanrenpuku = /(三|3)連複/.test(label)
-                    || row.classList.contains("Fuku3");
-
-                const isSanrentan = /(三|3)連単/.test(label)
-                    || row.classList.contains("Tan3");
+                const isSanrenpuku = /(三|3)連複/.test(label) || row.classList.contains("Fuku3");
+                const isSanrentan = /(三|3)連単/.test(label) || row.classList.contains("Tan3");
 
                 // --- 各式別ごとの normalized オブジェクト作成と push ---
                 if (isTansho) {
