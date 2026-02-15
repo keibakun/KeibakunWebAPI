@@ -154,14 +154,6 @@ export class RaceResult {
                     });
                 }
 
-                // payout の正規化関数: '>' カンマ 空白 円 を除去
-                const cleanPayout = (s: string) => (s ?? "")
-                    .replace(/^>+/, "")
-                    .replace(/,/g, "")
-                    .replace(/円/g, "")
-                    .replace(/\s/g, "")
-                    .trim();
-
                 // td.Result から馬番の組み合わせリストを作成
                 // - `<ul>` が複数ある場合は各 `<ul>` を 1 組とする
                 // - そうでない場合は `span` 要素群を取得し、payouts の数で分割して複数組を推測する
@@ -201,14 +193,11 @@ export class RaceResult {
                     }
                 }
 
-                // td.Ninki の人気を配列で取得、人気の文字列は削除して数値部分だけを抽出
+                // td.Ninki の人気を配列で取得（例: "1人気" 等）
                 const ninki: string[] = [];
                 row.querySelectorAll("td.Ninki span").forEach((el) => {
                     const t = el.textContent?.trim() ?? "";
-                    if (t) {
-                        const cleaned = t.replace(/人気/g, "").trim();
-                        if (cleaned) ninki.push(cleaned);
-                    }
+                    if (t) ninki.push(t);
                 });
 
                 // 各式別の判定（ラベル文字列または tr の class 属性を利用）
@@ -218,8 +207,11 @@ export class RaceResult {
                 const isUmaren = label.includes("馬連") || row.classList.contains("Umaren");
                 const isWide = label.includes("ワイド") || row.classList.contains("Wide");
                 const isUmatan = label.includes("馬単") || row.classList.contains("Umatan");
-                const isSanrenpuku = /(三|3)連複/.test(label) || row.classList.contains("Fuku3");
-                const isSanrentan = /(三|3)連単/.test(label) || row.classList.contains("Tan3");
+                const isSanrenpuku = /(三|3)連複/.test(label)
+                    || row.classList.contains("Fuku3");
+
+                const isSanrentan = /(三|3)連単/.test(label)
+                    || row.classList.contains("Tan3");
 
                 // --- 各式別ごとの normalized オブジェクト作成と push ---
                 if (isTansho) {
@@ -227,7 +219,8 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         const payoutStr = payouts[idx] ?? payouts[0] ?? "";
                         const ninkiStr = ninki[idx] ?? ninki[0] ?? "";
-                        const cleaned = cleanPayout(payoutStr);
+                        // 不要文字を削除: '>' カンマ 空白 等
+                        const cleaned = (payoutStr ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                         combo.forEach((h) => {
                             const normalizedTansho = { umaban: h, payout: cleaned, ninki: ninkiStr };
                             tansho.push(normalizedTansho);
@@ -237,7 +230,7 @@ export class RaceResult {
                     // 複勝は複数組 -> combos と payouts を対応させる
                     combos.forEach((combo, idx) => {
                         combo.forEach((num) => {
-                                const cleanedPayoutF = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutF = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedFukusho = { umaban: num, payout: cleanedPayoutF, ninki: ninki[idx] ?? "" };
                                 fukusho.push(normalizedFukusho);
                         });
@@ -245,7 +238,7 @@ export class RaceResult {
                 } else if (isWakuren) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 1) {
-                                const cleanedPayoutW = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutW = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedWakuren = { combination: combo, payout: cleanedPayoutW, ninki: ninki[idx] ?? "" };
                                 wakuren.push(normalizedWakuren);
                         }
@@ -253,7 +246,7 @@ export class RaceResult {
                 } else if (isUmaren) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
-                                const cleanedPayoutU = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutU = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedUmaren = { combination: combo, payout: cleanedPayoutU, ninki: ninki[idx] ?? "" };
                                 umaren.push(normalizedUmaren);
                         }
@@ -261,7 +254,7 @@ export class RaceResult {
                 } else if (isWide) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
-                                const cleanedPayoutWd = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutWd = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedWide = { combination: combo, payout: cleanedPayoutWd, ninki: ninki[idx] ?? "" };
                                 wide.push(normalizedWide);
                         }
@@ -269,7 +262,7 @@ export class RaceResult {
                 } else if (isUmatan) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
-                                const cleanedPayoutUt = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutUt = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedUmatan = { combination: combo, payout: cleanedPayoutUt, ninki: ninki[idx] ?? "" };
                                 umatan.push(normalizedUmatan);
                         }
@@ -277,7 +270,7 @@ export class RaceResult {
                 } else if (isSanrenpuku) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 3) {
-                                const cleanedPayoutSrp = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutSrp = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedSanrenpuku = { combination: combo, payout: cleanedPayoutSrp, ninki: ninki[idx] ?? "" };
                                 sanrenpuku.push(normalizedSanrenpuku);
                         }
@@ -285,7 +278,7 @@ export class RaceResult {
                 } else if (isSanrentan) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 3) {
-                                const cleanedPayoutSrt = cleanPayout(payouts[idx] ?? "");
+                                const cleanedPayoutSrt = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                                 const normalizedSanrentan = { combination: combo, payout: cleanedPayoutSrt, ninki: ninki[idx] ?? "" };
                                 sanrentan.push(normalizedSanrentan);
                         }
@@ -305,7 +298,9 @@ export class RaceResult {
             sanrentan,
         };
     }
-
+    /**
+     * コーナー通過順テーブルをパースする関数
+     */
     /**
      * コーナー通過順テーブルをパースする関数
      *
@@ -323,6 +318,9 @@ export class RaceResult {
         };
     }
 
+    /**
+     * ラップタイムテーブルをパースする関数
+     */
     /**
      * ラップタイムテーブルをパースする関数
      *
