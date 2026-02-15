@@ -33,7 +33,16 @@ jobs:
         run: |
           mkdir -p ./RaceResult
 
+      - name: Install Chromium and libs (for Puppeteer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
+          which chromium-browser || true
+
       - name: scrape netkeiba_raceResult
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          PUPPETEER_HEADLESS: new
         run: |
           npm install
           npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
