@@ -154,6 +154,14 @@ export class RaceResult {
                     });
                 }
 
+                // payout の正規化関数: '>' カンマ 空白 円 を除去
+                const cleanPayout = (s: string) => (s ?? "")
+                    .replace(/^>+/, "")
+                    .replace(/,/g, "")
+                    .replace(/円/g, "")
+                    .replace(/\s/g, "")
+                    .trim();
+
                 // td.Result から馬番の組み合わせリストを作成
                 // - `<ul>` が複数ある場合は各 `<ul>` を 1 組とする
                 // - そうでない場合は `span` 要素群を取得し、payouts の数で分割して複数組を推測する
@@ -219,8 +227,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         const payoutStr = payouts[idx] ?? payouts[0] ?? "";
                         const ninkiStr = ninki[idx] ?? ninki[0] ?? "";
-                        // 不要文字を削除: '>' カンマ 空白 等
-                        const cleaned = (payoutStr ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                        const cleaned = cleanPayout(payoutStr);
                         combo.forEach((h) => {
                             const normalizedTansho = { umaban: h, payout: cleaned, ninki: ninkiStr };
                             tansho.push(normalizedTansho);
@@ -230,7 +237,7 @@ export class RaceResult {
                     // 複勝は複数組 -> combos と payouts を対応させる
                     combos.forEach((combo, idx) => {
                         combo.forEach((num) => {
-                                const cleanedPayoutF = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutF = cleanPayout(payouts[idx] ?? "");
                                 const normalizedFukusho = { umaban: num, payout: cleanedPayoutF, ninki: ninki[idx] ?? "" };
                                 fukusho.push(normalizedFukusho);
                         });
@@ -238,7 +245,7 @@ export class RaceResult {
                 } else if (isWakuren) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 1) {
-                                const cleanedPayoutW = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutW = cleanPayout(payouts[idx] ?? "");
                                 const normalizedWakuren = { combination: combo, payout: cleanedPayoutW, ninki: ninki[idx] ?? "" };
                                 wakuren.push(normalizedWakuren);
                         }
@@ -246,7 +253,7 @@ export class RaceResult {
                 } else if (isUmaren) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
-                                const cleanedPayoutU = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutU = cleanPayout(payouts[idx] ?? "");
                                 const normalizedUmaren = { combination: combo, payout: cleanedPayoutU, ninki: ninki[idx] ?? "" };
                                 umaren.push(normalizedUmaren);
                         }
@@ -254,7 +261,7 @@ export class RaceResult {
                 } else if (isWide) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
-                                const cleanedPayoutWd = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutWd = cleanPayout(payouts[idx] ?? "");
                                 const normalizedWide = { combination: combo, payout: cleanedPayoutWd, ninki: ninki[idx] ?? "" };
                                 wide.push(normalizedWide);
                         }
@@ -262,7 +269,7 @@ export class RaceResult {
                 } else if (isUmatan) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
-                                const cleanedPayoutUt = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutUt = cleanPayout(payouts[idx] ?? "");
                                 const normalizedUmatan = { combination: combo, payout: cleanedPayoutUt, ninki: ninki[idx] ?? "" };
                                 umatan.push(normalizedUmatan);
                         }
@@ -270,7 +277,7 @@ export class RaceResult {
                 } else if (isSanrenpuku) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 3) {
-                                const cleanedPayoutSrp = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutSrp = cleanPayout(payouts[idx] ?? "");
                                 const normalizedSanrenpuku = { combination: combo, payout: cleanedPayoutSrp, ninki: ninki[idx] ?? "" };
                                 sanrenpuku.push(normalizedSanrenpuku);
                         }
@@ -278,7 +285,7 @@ export class RaceResult {
                 } else if (isSanrentan) {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 3) {
-                                const cleanedPayoutSrt = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
+                                const cleanedPayoutSrt = cleanPayout(payouts[idx] ?? "");
                                 const normalizedSanrentan = { combination: combo, payout: cleanedPayoutSrt, ninki: ninki[idx] ?? "" };
                                 sanrentan.push(normalizedSanrentan);
                         }
@@ -298,9 +305,7 @@ export class RaceResult {
             sanrentan,
         };
     }
-    /**
-     * コーナー通過順テーブルをパースする関数
-     */
+
     /**
      * コーナー通過順テーブルをパースする関数
      *
@@ -318,9 +323,6 @@ export class RaceResult {
         };
     }
 
-    /**
-     * ラップタイムテーブルをパースする関数
-     */
     /**
      * ラップタイムテーブルをパースする関数
      *
