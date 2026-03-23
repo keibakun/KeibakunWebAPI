@@ -32,9 +32,21 @@ export class JraNews {
      *
      * @returns {Promise<JraNewsIF>} ニュースアイテム配列
      */
-    async getNews(): Promise<JraNewsIF> {
-        const url = `${this.baseUrl}/news/`;
-        this.logger.info(`JraNews: 開始 ${url}`);
+    /**
+     * 年月パラメータを受け取りスクレイピング先を切替える
+     * @param yyyymm optional 年月（yyyymm）。未指定の場合は現行のニュース一覧（/news/）を使用
+     */
+    async getNews(yyyymm?: string): Promise<JraNewsIF> {
+        let url = `${this.baseUrl}/news/`;
+        if (yyyymm && /^\d{6}$/.test(yyyymm)) {
+            url = `${this.baseUrl}/news/${yyyymm}/`;
+            this.logger.info(`JraNews: 開始 ${url} (yyyymm=${yyyymm})`);
+        } else {
+            this.logger.info(`JraNews: 開始 ${url}`);
+            if (yyyymm) {
+                this.logger.warn(`JraNews: yyyymm パラメータの形式が不正です: ${yyyymm}`);
+            }
+        }
 
         // ページ遷移して主要要素の読み込みを待つ
         await this.page.goto(url, { waitUntil: "domcontentloaded" });
