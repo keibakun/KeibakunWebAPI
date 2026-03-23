@@ -1,8 +1,6 @@
 name: '【本番】JRAニュース取得'
 
 on:
-  # 毎日 JST の 9:00 〜 18:00 の1時間おきに実行する
-  # GitHub Actions の cron は UTC なので、JST(UTC+9) の 09-18 に合わせるには UTC の 00-09 を指定
   schedule:
     - cron: '0 0-9 * * *'
   workflow_dispatch: {}
@@ -33,6 +31,5 @@ jobs:
 
       - name: Run JRA News scraper
         env:
-          # PuppeteerManager は環境変数で実行パスを参照するため指定
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
-        run: npx tsx src/JRAScraper/News/main_JraNews.ts
+        run: npx tsx src/JRAScraper/main_JraNews.ts
