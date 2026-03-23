@@ -1,6 +1,12 @@
 name: 【本番】出馬表取得
 run-name: production shutuba run
 on:
+  schedule:
+    # JST 20:00 は UTC 11:00 のため、金曜〜月曜を UTC11:00 に設定
+    - cron: '0 11 * * 5' # 金
+    - cron: '0 11 * * 6' # 土
+    - cron: '0 11 * * 0' # 日
+    - cron: '0 11 * * 1' # 月
   workflow_dispatch: {}
 
 jobs:
@@ -24,15 +30,17 @@ jobs:
         run: |
           mkdir -p ./Shutuba
 
-      - name: Run production shutuba (use run-time date)
+      - name: Run production shutuba (use run-time year-month)
         run: |
           npm install
-          # Use the action runtime date for year/month/day
-          YEAR=$(date -u +%Y)
-          MONTH=$(date -u +%m | sed 's/^0//')
-          DAY=$(date -u +%d | sed 's/^0//')
-          echo "Run for: ${YEAR}-${MONTH}-${DAY}"
-          npx tsx ./src/NKScraper/main_shutuba.ts ${YEAR} ${MONTH} ${DAY} false
+          # compute JST year-month (yyyymm)
+          YYYMM=$(TZ=Asia/Tokyo date +%Y%m)
+          echo "Run for yyyymm: ${YYYMM} (JST)"
+          # randomize start time within the hour: sleep 0..3599 seconds
+          SLEEP=$((RANDOM % 3600))
+          echo "Random sleep for ${SLEEP} seconds to randomize start time within the hour"
+          sleep ${SLEEP}
+          npx tsx ./src/NKScraper/main_shutuba.ts ${YYYMM}
           ls -R ./Shutuba || echo "Shutuba directory is empty"
 
       - name: Setup Git user
@@ -43,10 +51,9 @@ jobs:
 
       - name: Push Shutuba
         run: |
-          YEAR=$(date -u +%Y)
-          MONTH=$(date -u +%m | sed 's/^0//')
-          DAY=$(date -u +%d | sed 's/^0//')
+          # use JST date for commit metadata
+          YYYMM=$(TZ=Asia/Tokyo date +%Y%m)
           git add ./Shutuba/
           git diff --staged --exit-code || (
-            git commit -m "本番実行: 出馬表データを取得しました ${YEAR}-${MONTH}-${DAY}" && git push
+            git commit -m "本番実行: 出馬表データを取得しました ${YYYMM}" && git push
           )
