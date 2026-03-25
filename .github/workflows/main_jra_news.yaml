@@ -43,4 +43,9 @@ jobs:
 
       - name: Push JRANews
         run: |
+          # use JST date for commit metadata
+          YYYMM=$(TZ=Asia/Tokyo date +%Y%m)
           git add ./JRANews/
+          git diff --staged --exit-code || (
+            git commit -m "本番実行: JRAニュースを取得しました ${YYYMM}" && git push
+          )
