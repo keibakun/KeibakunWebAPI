@@ -33,3 +33,14 @@ jobs:
         env:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
         run: npx tsx src/JRAScraper/main_JraNews.ts
+      
+      - name: Setup Git user
+        shell: bash
+        run: |
+          pwd
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push JRANews
+        run: |
+          git add ./JRANews/
