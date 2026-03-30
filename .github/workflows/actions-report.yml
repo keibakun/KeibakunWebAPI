@@ -1,0 +1,49 @@
+name: Actions Report
+
+on:
+  workflow_run:
+    types: [completed]
+
+jobs:
+  report:
+    if: ${{ github.event.workflow_run.name != 'Actions Report' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Write report file
+        env:
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          HTML_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d%H%M")
+          OUTDIR="ActionsReport/${WORKFLOW_NAME}"
+          mkdir -p "$OUTDIR"
+          if [ "$CONCLUSION" = "success" ]; then
+            CODE=0
+            CONTENTS='Actions Complete'
+          else
+            CODE=1
+            CONTENTS="Conclusion: $CONCLUSION, url: $HTML_URL"
+          fi
+          # Escape double quotes and backslashes in CONTENTS for safe JSON
+          ESC_CONTENTS=${CONTENTS//\\/\\\\}
+          ESC_CONTENTS=${ESC_CONTENTS//\"/\\\"}
+          printf '{"TimeStamp":"%s","Code":%s,"Contents":"%s"}\n' "$TIMESTAMP" "$CODE" "$ESC_CONTENTS" > "$OUTDIR/index.html"
+
+      - name: Commit and push report
+        env:
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git add "ActionsReport/${WORKFLOW_NAME}/index.html"
+          git commit -m "Add Actions report for ${WORKFLOW_NAME} run ${GITHUB_RUN_ID}" || echo "No changes to commit"
+          git push
