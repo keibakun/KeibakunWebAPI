@@ -21,15 +21,16 @@ if (!workflowName) {
   process.exit(1);
 }
 
-// TimeStamp を yyyyMMddhhmm 形式で生成（UTC）
+// TimeStamp を yyyyMMddhhmm 形式で生成（JST = UTC+9）
 const now = new Date();
+const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
 const pad = (n: number) => n.toString().padStart(2, "0");
 const timestamp = [
-  now.getFullYear(),
-  pad(now.getMonth() + 1),
-  pad(now.getDate()),
-  pad(now.getHours()),
-  pad(now.getMinutes()),
+  jst.getUTCFullYear(),
+  pad(jst.getUTCMonth() + 1),
+  pad(jst.getUTCDate()),
+  pad(jst.getUTCHours()),
+  pad(jst.getUTCMinutes()),
 ].join("");
 
 const report = {
