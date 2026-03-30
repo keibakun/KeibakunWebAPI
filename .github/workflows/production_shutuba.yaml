@@ -62,6 +62,8 @@ jobs:
   report:
     needs: [scrape]
     if: always()
+    permissions:
+      contents: write
     uses: ./.github/workflows/actions-report.yml
     with:
       workflow-name: '【本番】出馬表取得'
