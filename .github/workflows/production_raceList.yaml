@@ -11,8 +11,8 @@ on:
         required: false
   schedule:
     # 毎週金/土/日 18:00 (JST) に起動。GitHub Actions の cron は UTC 基準のため UTC 9:00 に設定しています。
-    # ジョブ内で0〜1800秒ランダムに待機して18:00〜18:30のランダム開始を実現します。
-    - cron: '1 10 * * FRI,SAT,SUN'
+    # ジョブ内で0〜120秒ランダムに待機して18:00〜18:02のランダム開始を実現します。
+    - cron: '0 9 * * FRI,SAT,SUN'
 jobs:
   scrape:
     name: scrape
@@ -21,11 +21,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Randomized delay (0-1800s)
+      - name: Randomized delay (0-120s)
         shell: bash
         run: |
-          # ランダムに0〜1800秒（0〜30分）待機して開始時刻をランダム化
-          sleep_seconds=$(( RANDOM % 1801 ))
+          # ランダムに0〜120秒（0〜2分）待機して開始時刻をランダム化
+          sleep_seconds=$(( RANDOM % 120 ))
           echo "Delaying start by ${sleep_seconds}s to randomize run time"
           sleep "$sleep_seconds"
 
