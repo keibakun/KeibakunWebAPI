@@ -15,6 +15,7 @@ jobs:
   scrape:
     name: scrape
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
     permissions:
       contents: write
     steps:
@@ -50,3 +51,11 @@ jobs:
         run: |
           git add ./RaceList/
           git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+
+  report:
+    needs: [scrape]
+    if: always()
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【手動】レースリスト取得'
+      conclusion: ${{ needs.scrape.result }}

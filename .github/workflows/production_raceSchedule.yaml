@@ -14,6 +14,7 @@ jobs:
   scrape:
     name: scrape
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -71,3 +72,11 @@ jobs:
         run: |
           git add ./RaceSchedule/
           git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+
+  report:
+    needs: [scrape]
+    if: always()
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番】レース開催日程取得'
+      conclusion: ${{ needs.scrape.result }}

@@ -13,6 +13,7 @@ jobs:
   scrape:
     name: scrape
     runs-on: ubuntu-22.04
+    timeout-minutes: 120
     permissions:
       contents: write
     steps:
@@ -57,3 +58,11 @@ jobs:
           git diff --staged --exit-code || (
             git commit -m "本番実行: 出馬表データを取得しました ${YYYMM}" && git push
           )
+
+  report:
+    needs: [scrape]
+    if: always()
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番】出馬表取得'
+      conclusion: ${{ needs.scrape.result }}

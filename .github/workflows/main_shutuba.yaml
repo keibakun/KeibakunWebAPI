@@ -22,6 +22,7 @@ jobs:
   scrape:
     name: scrape
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
     permissions:
       contents: write
     steps:
@@ -58,3 +59,11 @@ jobs:
           git diff --staged --exit-code || (
             git commit -m "デバッグモードで下記期間の出馬表データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" && git push
           )
+
+  report:
+    needs: [scrape]
+    if: always()
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【手動】出馬表取得'
+      conclusion: ${{ needs.scrape.result }}

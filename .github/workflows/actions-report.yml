@@ -1,12 +1,19 @@
 name: Actions Report
 
 on:
-  workflow_run:
-    types: [completed]
+  workflow_call:
+    inputs:
+      workflow-name:
+        description: 'レポート対象のワークフロー名'
+        required: true
+        type: string
+      conclusion:
+        description: '先行ジョブの結果 (success / failure / cancelled)'
+        required: true
+        type: string
 
 jobs:
   report:
-    if: ${{ github.event.workflow_run.name != 'Actions Report' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,35 +22,32 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: true
-          fetch-depth: 0
 
-      - name: Write report file
-        env:
-          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
-          HTML_URL: ${{ github.event.workflow_run.html_url }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate report
         run: |
-          TIMESTAMP=$(date +"%Y%m%d%H%M")
-          OUTDIR="ActionsReport/${WORKFLOW_NAME}"
-          mkdir -p "$OUTDIR"
+          CONCLUSION="${{ inputs.conclusion }}"
           if [ "$CONCLUSION" = "success" ]; then
-            CODE=0
-            CONTENTS='Actions Complete'
+            npx tsx src/ActionsReport/generateReport.ts "${{ inputs.workflow-name }}" 0 "Actions Complete"
+          elif [ "$CONCLUSION" = "cancelled" ]; then
+            npx tsx src/ActionsReport/generateReport.ts "${{ inputs.workflow-name }}" 1 "Job was cancelled or timed out"
           else
-            CODE=1
-            CONTENTS="Conclusion: $CONCLUSION, url: $HTML_URL"
+            npx tsx src/ActionsReport/generateReport.ts "${{ inputs.workflow-name }}" 1 "Job conclusion: $CONCLUSION"
           fi
-          # Escape double quotes and backslashes in CONTENTS for safe JSON
-          ESC_CONTENTS=${CONTENTS//\\/\\\\}
-          ESC_CONTENTS=${ESC_CONTENTS//\"/\\\"}
-          printf '{"TimeStamp":"%s","Code":%s,"Contents":"%s"}\n' "$TIMESTAMP" "$CODE" "$ESC_CONTENTS" > "$OUTDIR/index.html"
 
       - name: Commit and push report
-        env:
-          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
         run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git add "ActionsReport/${WORKFLOW_NAME}/index.html"
-          git commit -m "Add Actions report for ${WORKFLOW_NAME} run ${GITHUB_RUN_ID}" || echo "No changes to commit"
-          git push
+          git config user.name "keibakun"
+          git config user.email "keibakun.manage@gmail.com"
+          git pull --rebase || true
+          git add ActionsReport/
+          git diff --staged --exit-code || (
+            git commit -m "ActionsReport: ${{ inputs.workflow-name }}" && git push
+          )

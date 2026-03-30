@@ -12,11 +12,12 @@ on:
   schedule:
     # 毎週金/土/日 18:00 (JST) に起動。GitHub Actions の cron は UTC 基準のため UTC 9:00 に設定しています。
     # ジョブ内で0〜1800秒ランダムに待機して18:00〜18:30のランダム開始を実現します。
-    - cron: '0 9 * * FRI,SAT,SUN'
+    - cron: '1 10 * * FRI,SAT,SUN'
 jobs:
   scrape:
     name: scrape
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
     permissions:
       contents: write
     steps:
@@ -84,3 +85,11 @@ jobs:
         run: |
           git add ./RaceList/
           git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+
+  report:
+    needs: [scrape]
+    if: always()
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番】レースリスト取得'
+      conclusion: ${{ needs.scrape.result }}

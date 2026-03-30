@@ -12,6 +12,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -51,3 +52,11 @@ jobs:
           git diff --staged --exit-code || (
             git commit -m "本番実行: JRAニュースを取得しました ${YYYMM}" && git push
           )
+
+  report:
+    needs: [scrape]
+    if: always()
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番】JRAニュース取得'
+      conclusion: ${{ needs.scrape.result }}
