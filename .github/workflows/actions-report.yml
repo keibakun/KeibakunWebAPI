@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name "keibakun"
           git config user.email "keibakun.manage@gmail.com"
-          git pull --rebase || true
+          git pull --rebase --autostash
           git add ActionsReport/
           git diff --staged --exit-code || (
             git commit -m "ActionsReport: ${{ inputs.workflow-name }}" && git push
