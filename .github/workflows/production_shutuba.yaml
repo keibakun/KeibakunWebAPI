@@ -37,8 +37,8 @@ jobs:
           # compute JST year-month (yyyymm)
           YYYMM=$(TZ=Asia/Tokyo date +%Y%m)
           echo "Run for yyyymm: ${YYYMM} (JST)"
-          # randomize start time within the hour: sleep 0..3599 seconds
-          SLEEP=$((RANDOM % 3600))
+          # randomize start time within the hour: sleep 0..119 seconds
+          SLEEP=$((RANDOM % 120))
           echo "Random sleep for ${SLEEP} seconds to randomize start time within the hour"
           sleep ${SLEEP}
           npx tsx ./src/NKScraper/main_shutuba.ts ${YYYMM}
