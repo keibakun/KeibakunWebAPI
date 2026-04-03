@@ -218,16 +218,19 @@ export class HorseDetailScraper {
                     const kinryou = cells[13]?.textContent?.trim() ?? '';
                     const distance = cells[14]?.textContent?.trim() ?? '';
                     const baba = cells[16]?.textContent?.trim() ?? '';
+                    // cells[17] = 馬場指数
                     const time = cells[18]?.textContent?.trim() ?? '';
                     const tyakusa = cells[19]?.textContent?.trim() ?? '';
-                    const tuuka = cells[21]?.textContent?.trim() ?? '';
-                    const pace = cells[22]?.textContent?.trim() ?? '';
-                    const last3f = cells[23]?.textContent?.trim() ?? '';
-                    const weight = cells[24]?.textContent?.trim() ?? '';
+                    // cells[20] = タイム指数, cells[21] = タイム指数マスター, cells[22] = スタート指数, cells[23] = 追走指数, cells[24] = 上がり指数
+                    const tuuka = cells[25]?.textContent?.trim() ?? '';
+                    const pace = cells[26]?.textContent?.trim() ?? '';
+                    const last3f = cells[27]?.textContent?.trim() ?? '';
+                    const weight = cells[28]?.textContent?.trim() ?? '';
                     // comment セルのリンク (あれば href を格納)
-                    const commentLink = cells[25]?.querySelector('a') ? (cells[25].querySelector('a')?.getAttribute('href') ?? '') : '';
-                    const winnerOrSecondary = cells[27]?.textContent?.trim() ?? '';
-                    const prize = cells[28]?.textContent?.trim() ?? '';
+                    const commentLink = cells[29]?.querySelector('a') ? (cells[29].querySelector('a')?.getAttribute('href') ?? '') : '';
+                    // cells[30] = 備考
+                    const winnerOrSecondary = cells[31]?.textContent?.trim() ?? '';
+                    const prize = cells[32]?.textContent?.trim() ?? '';
 
                     return {
                         date: cells[0]?.textContent?.trim() ?? '',
