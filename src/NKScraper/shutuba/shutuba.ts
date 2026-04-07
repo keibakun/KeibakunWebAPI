@@ -1,20 +1,19 @@
-import puppeteer, { Browser, Page } from "puppeteer";
+import { Page } from "puppeteer";
 
 import { RaceIF, SyutubaIF } from "./syutubaIF";
 
 /**
  * 出馬表を取得する関数
+ * @param {Page} page - PuppeteerのPageインスタンス
  * @param {string} raceId - レースID
  * @returns {Promise<RaceIF>} - 出馬表の情報
  */
-export default async function getShutuba(raceId: string): Promise<RaceIF> {
+export default async function getShutuba(page: Page, raceId: string): Promise<RaceIF> {
     // 出馬表のURL
     const url: string = `https://race.netkeiba.com/race/shutuba.html?race_id=${raceId}&rf=race_submenu`;
 
     console.info(`URL: ${url} から出馬表を取得します`);
 
-    const browser: Browser = await puppeteer.launch({ headless: true });
-    const page: Page = await browser.newPage();
     await page.goto(url, { waitUntil: "domcontentloaded" });
 
     let raceData: RaceIF;
@@ -93,8 +92,6 @@ export default async function getShutuba(raceId: string): Promise<RaceIF> {
     } catch (error) {
         console.error("出馬表の取得中にエラーが発生しました:", error);
         throw error;
-    } finally {
-        await browser.close();
     }
 
     return raceData;

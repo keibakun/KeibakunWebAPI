@@ -1,13 +1,18 @@
 import path from "path";
 import fs from "fs/promises";
+import { Page } from "puppeteer";
 import getShutuba from "./shutuba/shutuba";
 import { RaceIF } from "./shutuba/syutubaIF";
+import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { Logger } from "../utils/Logger";
 import { FileUtil } from "../utils/FileUtil";
 import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 
 const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
+
+/** 並列処理のデフォルト同時実行数 */
+const DEFAULT_CONCURRENCY = 3;
 
 /**
  * Main_Shutuba
@@ -22,18 +27,21 @@ export class Main_Shutuba {
     private month?: number;
     private day?: number;
     private debug: boolean;
+    private concurrency: number;
     /**
      * コンストラクタ
      * @param year 対象年（例: 2026）
      * @param month 対象月（1-12）
      * @param day 対象日（1-31）
      * @param debug デバッグモードフラグ
+     * @param concurrency 並列実行数（デフォルト: 3）
      */
-    constructor(year: number, month?: number, day?: number, debug?: boolean) {
+    constructor(year: number, month?: number, day?: number, debug?: boolean, concurrency?: number) {
         this.year = year;
         this.month = month;
         this.day = day;
         this.debug = debug || false;
+        this.concurrency = concurrency ?? DEFAULT_CONCURRENCY;
     }
 
     /**
@@ -43,23 +51,33 @@ export class Main_Shutuba {
         let kaisaiDates: string[] = [];
 
         if (!this.debug) {
-            // debug=false の場合は year/month/day 指定が期待される。翌日以降の RaceList を走査する。
-            if (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12 ||
-                !this.day || isNaN(this.day) || this.day < 1 || this.day > 31) {
-                logger.error("月/日の指定が無効です。月は1～12、日は1～31の範囲で指定してください。");
+            if (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12) {
+                logger.error("月の指定が無効です。月は1～12の範囲で指定してください。");
                 return;
             }
 
-            logger.info(`指定された年: ${this.year}, 月: ${this.month}, 日: ${this.day}（debug=false）`);
+            if (this.day && !isNaN(this.day) && this.day >= 1 && this.day <= 31) {
+                // 年月日指定: 翌日以降の RaceList を走査する
+                logger.info(`指定された年: ${this.year}, 月: ${this.month}, 日: ${this.day}（debug=false）`);
 
-            const baseDate = new Date(this.year, this.month - 1, this.day);
-            const targetDate = new Date(baseDate);
-            targetDate.setDate(targetDate.getDate() + 1); // 明日以降
+                const baseDate = new Date(this.year, this.month - 1, this.day);
+                const targetDate = new Date(baseDate);
+                targetDate.setDate(targetDate.getDate() + 1); // 明日以降
 
-            kaisaiDates = await this.getKaisaiDatesFromRaceListAfter(targetDate);
-            if (kaisaiDates.length === 0) {
-                logger.warn(`指定日時の翌日以降の RaceList に開催日が見つかりませんでした。`);
-                return;
+                kaisaiDates = await this.getKaisaiDatesFromRaceListAfter(targetDate);
+                if (kaisaiDates.length === 0) {
+                    logger.warn(`指定日時の翌日以降の RaceList に開催日が見つかりませんでした。`);
+                    return;
+                }
+            } else {
+                // 年月のみ指定: 該当月の RaceList を全走査する
+                logger.info(`指定された年: ${this.year}, 月: ${this.month}（debug=false, 月全体）`);
+
+                kaisaiDates = await this.getKaisaiDatesFromRaceListByMonth(this.year, this.month);
+                if (kaisaiDates.length === 0) {
+                    logger.warn(`${this.year}年${this.month}月の RaceList に開催日が見つかりませんでした。`);
+                    return;
+                }
             }
         } else {
             // 既存の動作（debug=true）: RaceSchedule から開催日を抽出
@@ -96,10 +114,103 @@ export class Main_Shutuba {
             }
         }
 
-        // 各開催日について処理
+        // 各開催日について raceId を収集
+        const allRaceIds: string[] = [];
         for (const kaisaiDate of kaisaiDates) {
-            await this.processKaisaiDate(kaisaiDate);
+            const ids = await this.collectRaceIds(kaisaiDate);
+            allRaceIds.push(...ids);
         }
+
+        if (allRaceIds.length === 0) {
+            logger.warn("処理対象の raceId がありません");
+            return;
+        }
+
+        logger.info(`合計 ${allRaceIds.length} 件の raceId を処理します（並列数: ${this.concurrency}）`);
+
+        // Puppeteer を起動してワーカープールで並列処理
+        const pm = new PuppeteerManager();
+        const pages: Page[] = [];
+        try {
+            await pm.init();
+
+            // 並列数ぶんのページ（タブ）を生成
+            for (let i = 0; i < this.concurrency; i++) {
+                const page = await pm.newPage();
+                pages.push(page);
+            }
+
+            await this.runWorkerPool(pages, allRaceIds);
+        } catch (e) {
+            logger.error(`致命的なエラー: ${String(e)}`);
+        } finally {
+            for (const page of pages) {
+                try { await page.close(); } catch {}
+            }
+            await pm.close();
+        }
+    }
+
+    /**
+     * ワーカープール: 各ページが共有キューから raceId を取り出して処理する
+     * @param pages Puppeteer Page の配列
+     * @param raceIds 処理対象の raceId 配列
+     */
+    private async runWorkerPool(pages: Page[], raceIds: string[]): Promise<void> {
+        let cursor = 0;
+        const total = raceIds.length;
+
+        const worker = async (page: Page, workerId: number) => {
+            while (true) {
+                const idx = cursor++;
+                if (idx >= total) break;
+                const raceId = raceIds[idx];
+                logger.info(`[Worker${workerId}] (${idx + 1}/${total}) レースID: ${raceId} の出馬表を取得します`);
+                try {
+                    const raceData: RaceIF = await getShutuba(page, raceId);
+
+                    const ry = raceId.substring(0, 4);
+                    const rm = raceId.substring(4, 6);
+                    const rest = raceId.substring(6);
+                    const outDir = path.join(__dirname, `../../Shutuba/`, ry, rm, rest);
+                    await jsonWriter.writeJson(outDir, "index.html", raceData);
+                } catch (error: any) {
+                    logger.error(`[Worker${workerId}] レースID: ${raceId} の出馬表取得中にエラーが発生しました: ${String(error)}`);
+                }
+            }
+        };
+
+        await Promise.all(pages.map((page, i) => worker(page, i)));
+    }
+
+    /**
+     * 開催日の RaceList/index.html から raceId を収集します（スクレイピングなし）。
+     * @param kaisaiDate 開催日文字列（YYYYMMDD）
+     */
+    private async collectRaceIds(kaisaiDate: string): Promise<string[]> {
+        const raceListPath = path.join(__dirname, `../../RaceList/${kaisaiDate}/index.html`);
+        if (! await FileUtil.exists(raceListPath)) {
+            logger.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
+            return [];
+        }
+
+        let raceListContent = "";
+        try {
+            raceListContent = await fs.readFile(raceListPath, "utf-8");
+        } catch (e) {
+            logger.error(`RaceList の読み込みに失敗しました: ${raceListPath}`);
+            return [];
+        }
+
+        const raceIdMatches = raceListContent.match(/"raceId":\s*"(\d{12})"/g);
+        if (!raceIdMatches) {
+            logger.warn(`raceId が見つかりません: ${raceListPath}`);
+            return [];
+        }
+
+        return raceIdMatches
+            .map((match) => match.match(/"raceId":\s*"(\d{12})"/)?.[1] || "")
+            .filter((id) => id !== "");
     }
 
     /**
@@ -148,53 +259,30 @@ export class Main_Shutuba {
     }
 
     /**
-     * 開催日の RaceList/index.html を読み、raceId を抽出して出馬表を取得・保存します。
-     * @param kaisaiDate 開催日文字列（YYYYMMDD）
+     * RaceList ディレクトリを走査し、指定年月に一致するディレクトリ名を返す
+     * @param year 対象年
+     * @param month 対象月（1-12）
      */
-    private async processKaisaiDate(kaisaiDate: string): Promise<void> {
-        const raceListPath = path.join(__dirname, `../../RaceList/${kaisaiDate}/index.html`);
-        if (! await FileUtil.exists(raceListPath)) {
-            logger.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
-            return;
+    private async getKaisaiDatesFromRaceListByMonth(year: number, month: number): Promise<string[]> {
+        const raceListDir = path.join(__dirname, `../../RaceList`);
+        if (! await FileUtil.exists(raceListDir)) {
+            logger.warn(`RaceList ディレクトリが存在しません: ${raceListDir}`);
+            return [];
         }
 
-        let raceListContent = "";
+        let entries: string[] = [];
         try {
-            raceListContent = await fs.readFile(raceListPath, "utf-8");
+            entries = await fs.readdir(raceListDir);
         } catch (e) {
-            logger.error(`RaceList の読み込みに失敗しました: ${raceListPath}`);
-            return;
+            logger.error(`RaceList ディレクトリの読み込みに失敗しました: ${raceListDir}`);
+            return [];
         }
 
-        // raceId を抽出
-        const raceIdMatches = raceListContent.match(/"raceId":\s*"(\d{12})"/g);
-        if (!raceIdMatches) {
-            logger.warn(`raceId が見つかりません: ${raceListPath}`);
-            return;
-        }
+        const prefix = `${year}${month.toString().padStart(2, "0")}`;
 
-        const raceIds = raceIdMatches
-            .map((match) => match.match(/"raceId":\s*"(\d{12})"/)?.[1] || "")
-            .filter((id) => id !== "");
-
-        // 各 raceId に対して出馬表を取得して保存
-        for (const raceId of raceIds) {
-            logger.info(`レースID: ${raceId} の出馬表を取得します`);
-            try {
-                const raceData: RaceIF = await getShutuba(raceId); // 実際のスクレイピング関数を呼び出し
-
-                // raceId を分解して出力先ディレクトリを構築
-                const ry = raceId.substring(0, 4);
-                const rm = raceId.substring(4, 6);
-                const rest = raceId.substring(6);
-
-                const outDir = path.join(__dirname, `../../Shutuba/`, ry, rm, rest);
-                // JsonFileWriterUtil を利用して JSON として保存
-                await jsonWriter.writeJson(outDir, "index.html", raceData);
-            } catch (error: any) {
-                logger.error(`レースID: ${raceId} の出馬表取得中にエラーが発生しました: ${String(error)}`);
-            }
-        }
+        return entries
+            .filter((name) => /^\d{8}$/.test(name) && name.startsWith(prefix))
+            .sort();
     }
 }
 
