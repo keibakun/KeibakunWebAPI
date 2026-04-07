@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
+import { Page } from "puppeteer";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { RaceResult } from "./raceResult/raceResult";
 import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
@@ -9,51 +10,111 @@ import { Logger } from "../utils/Logger";
 const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
 
+/** 並列処理のデフォルト同時実行数 */
+const DEFAULT_CONCURRENCY = 3;
+
 /**
  * Main_RaceResult
  *
  * 年月から `RaceList` を走査し、各 `raceId` に対して `RaceResult` を取得して
  * `RaceResult/<year><month><rest>/index.html` に JSON を保存するクラスです。
+ * 複数タブを使った並列スクレイピングに対応しています。
  */
 export class Main_RaceResult {
     private year: number;
     private monthArg?: number;
+    private concurrency: number;
 
     /**
      * コンストラクタ
      * @param year 対象の年（例: 2025）
      * @param monthArg 対象の月（省略時は全月）
+     * @param concurrency 並列実行数（デフォルト: 3）
      */
-    constructor(year: number, monthArg?: number) {
+    constructor(year: number, monthArg?: number, concurrency?: number) {
         this.year = year;
         this.monthArg = monthArg;
+        this.concurrency = concurrency ?? DEFAULT_CONCURRENCY;
     }
 
     /**
      * エントリポイント: Puppeteer を初期化して対象月すべての処理を実行します。
      */
     async run(): Promise<void> {
-        logger.info(`指定された年: ${this.year}${this.monthArg ? `, 月: ${this.monthArg}` : ""}`);
+        logger.info(`指定された年: ${this.year}${this.monthArg ? `, 月: ${this.monthArg}` : ""}, 並列数: ${this.concurrency}`);
 
         const months = this.getTargetMonths();
 
-        // Puppeteer を起動して Page インスタンスを取得
-        const pm = new PuppeteerManager();
-        try {
-            await pm.init(); // ブラウザ起動
-            const page = pm.getPage(); // Page を取得
-            const raceResultScraper = new RaceResult(page); // スクレイパーを初期化
+        // 全対象月の raceId を先に収集する
+        const allRaceIds: string[] = [];
+        for (const month of months) {
+            const ids = await this.collectRaceIds(month);
+            allRaceIds.push(...ids);
+        }
 
-            // 対象の月ごとに処理を行う
-            for (const month of months) {
-                await this.processMonth(raceResultScraper, month);
+        if (allRaceIds.length === 0) {
+            logger.warn("処理対象の raceId がありません");
+            return;
+        }
+        logger.info(`合計 ${allRaceIds.length} 件の raceId を処理します（並列数: ${this.concurrency}）`);
+
+        // Puppeteer を起動してワーカープールで並列処理
+        const pm = new PuppeteerManager();
+        const pages: Page[] = [];
+        try {
+            await pm.init();
+
+            // 並列数ぶんのページ（タブ）を生成
+            for (let i = 0; i < this.concurrency; i++) {
+                const page = await pm.newPage();
+                pages.push(page);
             }
+
+            // ワーカープール方式で並列実行
+            await this.runWorkerPool(pages, allRaceIds);
         } catch (e) {
             logger.error(`致命的なエラー: ${String(e)}`);
         } finally {
-            // ブラウザをクローズ
+            // 追加したページをクローズ
+            for (const page of pages) {
+                try { await page.close(); } catch {}
+            }
             await pm.close();
         }
+    }
+
+    /**
+     * ワーカープール: 各ページが共有キューから raceId を取り出して処理する
+     * @param pages Puppeteer Page の配列
+     * @param raceIds 処理対象の raceId 配列
+     */
+    private async runWorkerPool(pages: Page[], raceIds: string[]): Promise<void> {
+        let cursor = 0;
+        const total = raceIds.length;
+
+        const worker = async (page: Page, workerId: number) => {
+            const scraper = new RaceResult(page);
+            while (true) {
+                const idx = cursor++;
+                if (idx >= total) break;
+                const raceId = raceIds[idx];
+                try {
+                    logger.info(`[Worker${workerId}] (${idx + 1}/${total}) raceId: ${raceId} のレース結果を取得します`);
+                    const result = await scraper.getRaceResult(raceId);
+
+                    const ry = raceId.substring(0, 4);
+                    const rm = raceId.substring(4, 6);
+                    const rest = raceId.substring(6);
+                    const outDir = path.join(__dirname, `../../RaceResult/`, ry, rm, rest);
+                    await jsonWriter.writeJson(outDir, "index.html", result);
+                } catch (err: any) {
+                    logger.error(`[Worker${workerId}] raceId: ${raceId} の取得・保存でエラー: ${String(err)}`);
+                }
+            }
+        };
+
+        // 全ワーカーを同時に起動し、すべてが完了するまで待機
+        await Promise.all(pages.map((page, i) => worker(page, i)));
     }
 
     /**
@@ -67,25 +128,22 @@ export class Main_RaceResult {
     }
 
     /**
-     * 指定月の RaceList ディレクトリを走査し、開催日ごとの処理を呼び出します。
-     * @param raceResultScraper `RaceResult` スクレイパーインスタンス
+     * 指定月の RaceList ディレクトリを走査し、raceId の配列を返します。
      * @param month 対象月（1-12）
      */
-    private async processMonth(raceResultScraper: RaceResult, month: number): Promise<void> {
+    private async collectRaceIds(month: number): Promise<string[]> {
         const formattedMonth = month.toString().padStart(2, "0");
         const raceListRoot = path.join(__dirname, `../../RaceList/`);
 
         let entries: string[] = [];
         try {
-            // RaceList ルートのディレクトリ一覧を非同期取得
             entries = await fs.readdir(raceListRoot);
         } catch (err) {
             logger.warn(`RaceListディレクトリが見つかりません: ${raceListRoot}`);
-            return;
+            return [];
         }
 
         const kaisaiDates: string[] = [];
-        // entries を走査して対象年月の kaisaiDate ディレクトリを収集
         for (const name of entries) {
             const idxPath = path.join(raceListRoot, name, "index.html");
             if (name.startsWith(`${this.year}${formattedMonth}`) && await FileUtil.exists(idxPath)) {
@@ -95,50 +153,46 @@ export class Main_RaceResult {
 
         if (kaisaiDates.length === 0) {
             logger.warn(`RaceList/${this.year}${formattedMonth}**/index.html が見つかりません`);
-            return;
+            return [];
         }
 
-        // 各開催日ごとに詳細処理を行う
+        const raceIds: string[] = [];
         for (const kaisaiDate of kaisaiDates) {
-            await this.processKaisaiDate(raceResultScraper, raceListRoot, kaisaiDate);
+            const ids = await this.extractRaceIds(raceListRoot, kaisaiDate);
+            raceIds.push(...ids);
         }
+        return raceIds;
     }
 
     /**
-     * 開催日（kaisaiDate）単位の処理:
-     * - RaceList/index.html を読み込み JSON をパース
-     * - 各 raceId を抽出して RaceResult を保存
-     * @param raceResultScraper `RaceResult` スクレイパー
+     * 開催日（kaisaiDate）の RaceList/index.html から raceId を抽出します。
      * @param raceListRoot RaceList ルートパス
      * @param kaisaiDate 開催日文字列（YYYYMMDD）
      */
-    private async processKaisaiDate(raceResultScraper: RaceResult, raceListRoot: string, kaisaiDate: string): Promise<void> {
+    private async extractRaceIds(raceListRoot: string, kaisaiDate: string): Promise<string[]> {
         const raceListPath = path.join(raceListRoot, kaisaiDate, "index.html");
         if (! await FileUtil.exists(raceListPath)) {
             logger.warn(`RaceListファイルが存在しません: ${raceListPath}`);
-            return;
+            return [];
         }
 
         let raceListJson = "";
         try {
-            // index.html を読み込む（RaceList は JSON 配列が格納されている想定）
             raceListJson = await fs.readFile(raceListPath, "utf-8");
         } catch (e) {
             logger.error(`RaceListの読み込みに失敗しました: ${raceListPath}`);
-            return;
+            return [];
         }
 
         let raceList: any[] = [];
         try {
-            // JSON をパースして raceId を抽出
             raceList = JSON.parse(raceListJson);
         } catch (e) {
             logger.error("RaceListのJSONパースに失敗しました");
-            return;
+            return [];
         }
 
         const raceIds: string[] = [];
-        // raceId を走査して収集
         for (const venue of raceList) {
             if (venue.items && Array.isArray(venue.items)) {
                 for (const item of venue.items) {
@@ -151,27 +205,8 @@ export class Main_RaceResult {
 
         if (raceIds.length === 0) {
             logger.error(`raceIdが見つかりませんでした: ${kaisaiDate}`);
-            return;
         }
-
-        // 各 raceId について RaceResult を取得して保存
-        for (const raceId of raceIds) {
-            try {
-                logger.info(`raceId: ${raceId} のレース結果を取得します`);
-                const result = await raceResultScraper.getRaceResult(raceId); // スクレイピング実行
-
-                // raceId から出力ディレクトリを構築（年・月・残り）
-                const ry = raceId.substring(0, 4);
-                const rm = raceId.substring(4, 6);
-                const rest = raceId.substring(6);
-
-                const outDir = path.join(__dirname, `../../RaceResult/`, ry, rm, rest);
-                // JSON として保存
-                await jsonWriter.writeJson(outDir, "index.html", result);
-            } catch (err: any) {
-                logger.error(`raceId: ${raceId} の取得・保存でエラー: ${String(err)}`);
-            }
-        }
+        return raceIds;
     }
 }
 
@@ -179,6 +214,7 @@ export class Main_RaceResult {
 const args = process.argv.slice(2);
 const year = parseInt(args[0], 10) || 2025;
 const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
+const concurrency = args[2] ? parseInt(args[2], 10) : undefined;
 
-const main = new Main_RaceResult(year, monthArg);
+const main = new Main_RaceResult(year, monthArg, concurrency);
 main.run();

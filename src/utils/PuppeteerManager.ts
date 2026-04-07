@@ -87,6 +87,17 @@ export class PuppeteerManager {
     }
 
     /**
+     * 新しいPageインスタンスを生成して返す（並列処理用）
+     */
+    async newPage(): Promise<Page> {
+        if (!this.browser) {
+            this.logger.error("PuppeteerManager: init()を先に呼んでください");
+            throw new Error("PuppeteerManager: init()を先に呼んでください");
+        }
+        return await this.browser.newPage();
+    }
+
+    /**
      * Browserインスタンス取得
      */
     getBrowser(): Browser {
