@@ -23,7 +23,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -59,10 +60,12 @@ jobs:
 
       - name: Push RaceResult
         run: |
+          # Ensure local is up-to-date
+          git pull --rebase --autostash origin main
           git add ./RaceResult/
           if ! git diff --staged --exit-code; then
             git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月"
-            git push
+            git push origin main
           fi
 
   report:

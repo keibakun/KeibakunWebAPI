@@ -20,7 +20,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -56,9 +57,11 @@ jobs:
         run: |
           # use JST date for commit metadata
           YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          # Ensure local is up-to-date
+          git pull --rebase --autostash origin main
           git add ./Shutuba/
           git diff --staged --exit-code || (
-            git commit -m "本番実行: 出馬表データを取得しました ${YYYYMMDD}" && git push
+            git commit -m "本番実行: 出馬表データを取得しました ${YYYYMMDD}" && git push origin main
           )
 
   report:

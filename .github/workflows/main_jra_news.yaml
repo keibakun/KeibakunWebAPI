@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -48,9 +51,11 @@ jobs:
         run: |
           # use JST date for commit metadata
           YYYMM=$(TZ=Asia/Tokyo date +%Y%m)
+          # Ensure local branch is up-to-date; autostash uncommitted changes before rebase
+          git pull --rebase --autostash origin main
           git add ./JRANews/
           git diff --staged --exit-code || (
-            git commit -m "本番実行: JRAニュースを取得しました ${YYYMM}" && git push
+            git commit -m "本番実行: JRAニュースを取得しました ${YYYMM}" && git push origin main
           )
 
   report:

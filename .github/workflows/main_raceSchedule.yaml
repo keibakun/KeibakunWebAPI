@@ -18,7 +18,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -45,8 +46,9 @@ jobs:
 
       - name: Push RaceSchedule
         run: |
+          git pull --rebase --autostash origin main
           git add ./RaceSchedule/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push)
+          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push origin main)
 
   report:
     needs: [scrape]
