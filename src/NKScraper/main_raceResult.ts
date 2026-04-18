@@ -11,7 +11,7 @@ const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
 
 /** 並列処理のデフォルト同時実行数 */
-const DEFAULT_CONCURRENCY = 3;
+const DEFAULT_CONCURRENCY = 5;
 
 /**
  * Main_RaceResult
@@ -29,7 +29,7 @@ export class Main_RaceResult {
      * コンストラクタ
      * @param year 対象の年（例: 2025）
      * @param monthArg 対象の月（省略時は全月）
-     * @param concurrency 並列実行数（デフォルト: 3）
+     * @param concurrency 並列実行数（デフォルト: 5）
      */
     constructor(year: number, monthArg?: number, concurrency?: number) {
         this.year = year;
