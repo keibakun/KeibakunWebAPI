@@ -34,7 +34,7 @@ export class Main_Shutuba {
      * @param month 対象月（1-12）
      * @param day 対象日（1-31）
      * @param debug デバッグモードフラグ
-     * @param concurrency 並列実行数（デフォルト: 3）
+     * @param concurrency 並列実行数（デフォルト: 5）
      */
     constructor(year: number, month?: number, day?: number, debug?: boolean, concurrency?: number) {
         this.year = year;
