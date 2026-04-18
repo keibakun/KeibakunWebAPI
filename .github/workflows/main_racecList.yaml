@@ -11,10 +11,6 @@ on:
         required: true
         default: "5"
 
-concurrency:
-  group: race-list-scrape
-  cancel-in-progress: false
-
 jobs:
   scrape:
     name: scrape

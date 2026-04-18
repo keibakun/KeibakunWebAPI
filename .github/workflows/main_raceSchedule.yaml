@@ -8,10 +8,6 @@ on:
         required: true
         default: '2026'
 
-concurrency:
-  group: race-schedule-scrape
-  cancel-in-progress: false
-
 jobs:
   scrape:
     name: scrape

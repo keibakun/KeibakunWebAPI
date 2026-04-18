@@ -9,10 +9,6 @@ on:
     - cron: '0 11 * * 1' # 月
   workflow_dispatch: {}
 
-concurrency:
-  group: shutuba-scrape
-  cancel-in-progress: false
-
 jobs:
   scrape:
     name: scrape

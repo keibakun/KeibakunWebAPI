@@ -11,10 +11,6 @@ on:
     # ジョブ内で0〜120秒ランダムに待機して18:10〜18:12のランダム開始を実現します。
     - cron: '10 9 * * FRI,SAT,SUN'
 
-concurrency:
-  group: race-schedule-scrape
-  cancel-in-progress: false
-
 jobs:
   scrape:
     name: scrape

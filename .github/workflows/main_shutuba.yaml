@@ -18,10 +18,6 @@ on:
         required: false
         default: "true"
 
-concurrency:
-  group: shutuba-scrape
-  cancel-in-progress: false
-
 jobs:
   scrape:
     name: scrape
