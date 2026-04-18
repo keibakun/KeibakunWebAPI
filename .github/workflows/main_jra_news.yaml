@@ -2,7 +2,7 @@ name: '【本番】JRAニュース取得'
 
 on:
   schedule:
-    - cron: '0 0-9 * * *'
+    - cron: '3 0-9 * * *'
   workflow_dispatch: {}
 
 concurrency:
