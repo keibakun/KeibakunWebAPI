@@ -1,5 +1,6 @@
 name: 【手動】出馬表取得
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: 【手動】出馬表取得 ${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月
+
 on:
   workflow_dispatch:
     inputs:
