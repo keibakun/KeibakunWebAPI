@@ -12,6 +12,10 @@ on:
         required: true
         default: "5"
 
+concurrency:
+  group: race-result-scrape
+  cancel-in-progress: false
+
 jobs:
   scrape:
     name: scrape
@@ -60,13 +64,15 @@ jobs:
 
       - name: Push RaceResult
         run: |
-          # Ensure local is up-to-date
-          git pull --rebase --autostash origin main
-          git add ./RaceResult/
-          if ! git diff --staged --exit-code; then
-            git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月"
-            git push origin main
-          fi
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./RaceResult/
+            git diff --staged --exit-code && break
+            git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
 
   report:
     needs: [scrape]

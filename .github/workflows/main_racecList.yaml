@@ -11,6 +11,10 @@ on:
         required: true
         default: "5"
 
+concurrency:
+  group: race-list-scrape
+  cancel-in-progress: false
+
 jobs:
   scrape:
     name: scrape
@@ -50,9 +54,15 @@ jobs:
 
       - name: Push RaceList
         run: |
-          git pull --rebase --autostash origin main
-          git add ./RaceList/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push origin main)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./RaceList/
+            git diff --staged --exit-code && break
+            git commit -m "レースリストデータを取得しました ${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
 
   report:
     needs: [scrape]

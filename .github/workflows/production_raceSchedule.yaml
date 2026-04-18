@@ -10,6 +10,11 @@ on:
     # 毎週金/土/日 18:10 (JST) に起動。GitHub Actions の cron は UTC 基準のため UTC 9:10 に設定しています。
     # ジョブ内で0〜120秒ランダムに待機して18:10〜18:12のランダム開始を実現します。
     - cron: '10 9 * * FRI,SAT,SUN'
+
+concurrency:
+  group: race-schedule-scrape
+  cancel-in-progress: false
+
 jobs:
   scrape:
     name: scrape
@@ -71,9 +76,15 @@ jobs:
 
       - name: Push RaceSchedule
         run: |
-          git pull --rebase --autostash origin main
-          git add ./RaceSchedule/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push origin main)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./RaceSchedule/
+            git diff --staged --exit-code && break
+            git commit -m "本番実行: レース開催日程データを取得しました ${YEAR}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
 
   report:
     needs: [scrape]

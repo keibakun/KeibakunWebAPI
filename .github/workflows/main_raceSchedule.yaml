@@ -7,6 +7,11 @@ on:
         description: 'Target year (YYYY)'
         required: true
         default: '2026'
+
+concurrency:
+  group: race-schedule-scrape
+  cancel-in-progress: false
+
 jobs:
   scrape:
     name: scrape
@@ -46,9 +51,15 @@ jobs:
 
       - name: Push RaceSchedule
         run: |
-          git pull --rebase --autostash origin main
-          git add ./RaceSchedule/
-          git diff --staged --exit-code || (git commit -m 'ci(changelog): update version' && git push origin main)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./RaceSchedule/
+            git diff --staged --exit-code && break
+            git commit -m "レース開催日程データを取得しました ${{ github.event.inputs.year }}年" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
 
   report:
     needs: [scrape]
