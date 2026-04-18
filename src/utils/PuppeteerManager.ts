@@ -36,6 +36,7 @@ export class PuppeteerManager {
         const launchOptions: any = {
             headless: headlessSetting,
             args: [...defaultArgs],
+            protocolTimeout: 21600000, // GitHub Actions 1ジョブ最大実行時間（6時間）
             ...options
         };
 
@@ -50,6 +51,8 @@ export class PuppeteerManager {
         try {
             this.browser = await puppeteer.launch(launchOptions);
             this.page = await this.browser.newPage();
+            this.page.setDefaultNavigationTimeout(300000); // 1回のナビゲーション最大5分
+            this.page.setDefaultTimeout(300000); // 1回の操作最大5分
         } catch (err: any) {
             // 失敗時に原因のヒントをログ出力して再スロー
             this.logger.error('Puppeteer failed to launch browser.');
@@ -94,7 +97,10 @@ export class PuppeteerManager {
             this.logger.error("PuppeteerManager: init()を先に呼んでください");
             throw new Error("PuppeteerManager: init()を先に呼んでください");
         }
-        return await this.browser.newPage();
+        const page = await this.browser.newPage();
+        page.setDefaultNavigationTimeout(300000); // 1回のナビゲーション最大5分
+        page.setDefaultTimeout(300000); // 1回の操作最大5分
+        return page;
     }
 
     /**

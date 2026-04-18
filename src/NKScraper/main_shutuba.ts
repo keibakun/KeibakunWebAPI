@@ -51,12 +51,19 @@ export class Main_Shutuba {
         let kaisaiDates: string[] = [];
 
         if (!this.debug) {
-            if (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12) {
+            if (!this.month) {
+                // 年のみ指定: 該当年の RaceList を全走査する
+                logger.info(`指定された年: ${this.year}（debug=false, 年全体）`);
+
+                kaisaiDates = await this.getKaisaiDatesFromRaceListByYear(this.year);
+                if (kaisaiDates.length === 0) {
+                    logger.warn(`${this.year}年の RaceList に開催日が見つかりませんでした。`);
+                    return;
+                }
+            } else if (isNaN(this.month) || this.month < 1 || this.month > 12) {
                 logger.error("月の指定が無効です。月は1～12の範囲で指定してください。");
                 return;
-            }
-
-            if (this.day && !isNaN(this.day) && this.day >= 1 && this.day <= 31) {
+            } else if (this.day && !isNaN(this.day) && this.day >= 1 && this.day <= 31) {
                 // 年月日指定: 翌日以降の RaceList を走査する
                 logger.info(`指定された年: ${this.year}, 月: ${this.month}, 日: ${this.day}（debug=false）`);
 
@@ -256,6 +263,32 @@ export class Main_Shutuba {
             .sort();
 
         return kaisaiDates;
+    }
+
+    /**
+     * RaceList ディレクトリを走査し、指定年に一致するディレクトリ名を返す
+     * @param year 対象年
+     */
+    private async getKaisaiDatesFromRaceListByYear(year: number): Promise<string[]> {
+        const raceListDir = path.join(__dirname, `../../RaceList`);
+        if (! await FileUtil.exists(raceListDir)) {
+            logger.warn(`RaceList ディレクトリが存在しません: ${raceListDir}`);
+            return [];
+        }
+
+        let entries: string[] = [];
+        try {
+            entries = await fs.readdir(raceListDir);
+        } catch (e) {
+            logger.error(`RaceList ディレクトリの読み込みに失敗しました: ${raceListDir}`);
+            return [];
+        }
+
+        const prefix = `${year}`;
+
+        return entries
+            .filter((name) => /^\d{8}$/.test(name) && name.startsWith(prefix))
+            .sort();
     }
 
     /**
