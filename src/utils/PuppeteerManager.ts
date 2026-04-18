@@ -69,11 +69,19 @@ export class PuppeteerManager {
      */
     async close() {
         if (this.page) {
-            await this.page.close();
+            try {
+                await this.page.close();
+            } catch {
+                // セッションが既に切断済みの場合は無視する
+            }
             this.page = null;
         }
         if (this.browser) {
-            await this.browser.close();
+            try {
+                await this.browser.close();
+            } catch {
+                // ブラウザが既に終了済みの場合は無視する
+            }
             this.browser = null;
         }
     }

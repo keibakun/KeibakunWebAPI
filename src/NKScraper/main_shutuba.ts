@@ -12,7 +12,7 @@ const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
 
 /** 並列処理のデフォルト同時実行数 */
-const DEFAULT_CONCURRENCY = 3;
+const DEFAULT_CONCURRENCY = 5;
 
 /**
  * Main_Shutuba
