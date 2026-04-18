@@ -89,7 +89,7 @@ export class RaceResult {
                 jockeyId,
                 time: row.querySelector("td:nth-child(8) .RaceTime")?.textContent?.trim() ?? "",
                 chakusa: row.querySelector("td:nth-child(9) .RaceTime")?.textContent?.trim() ?? "",
-                ninki: row.querySelector("td:nth-child(10) .OddsPeople")?.textContent?.trim() ?? "",
+                ninki: (row.querySelector("td:nth-child(10) .OddsPeople")?.textContent?.trim() ?? "").replace(/人気/g, "").trim(),
                 odds: row.querySelector("td:nth-child(11) span")?.textContent?.trim() ?? "",
                 agari: row.querySelector("td:nth-child(12)")?.textContent?.trim() ?? "",
                 tsuuka: row.querySelector("td:nth-child(13)")?.textContent?.trim() ?? "",
@@ -193,10 +193,10 @@ export class RaceResult {
                     }
                 }
 
-                // td.Ninki の人気を配列で取得（例: "1人気" 等）
+                // td.Ninki の人気を配列で取得（「人気」文字列は除去して数字のみにする）
                 const ninki: string[] = [];
                 row.querySelectorAll("td.Ninki span").forEach((el) => {
-                    const t = el.textContent?.trim() ?? "";
+                    const t = (el.textContent?.trim() ?? "").replace(/人気/g, "").trim();
                     if (t) ninki.push(t);
                 });
 
