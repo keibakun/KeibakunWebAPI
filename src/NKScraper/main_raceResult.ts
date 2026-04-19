@@ -24,32 +24,43 @@ export class Main_RaceResult {
     private year: number;
     private monthArg?: number;
     private concurrency: number;
+    private singleRaceId?: string;
 
     /**
      * コンストラクタ
      * @param year 対象の年（例: 2025）
      * @param monthArg 対象の月（省略時は全月）
      * @param concurrency 並列実行数（デフォルト: 5）
+     * @param singleRaceId 1件だけ取得する raceId（指定時は year/monthArg を無視）
      */
-    constructor(year: number, monthArg?: number, concurrency?: number) {
+    constructor(year: number, monthArg?: number, concurrency?: number, singleRaceId?: string) {
         this.year = year;
         this.monthArg = monthArg;
         this.concurrency = concurrency ?? DEFAULT_CONCURRENCY;
+        this.singleRaceId = singleRaceId;
     }
 
     /**
      * エントリポイント: Puppeteer を初期化して対象月すべての処理を実行します。
+     * `singleRaceId` が指定された場合は year/monthArg を無視し、その1件のみ処理します。
      */
     async run(): Promise<void> {
-        logger.info(`指定された年: ${this.year}${this.monthArg ? `, 月: ${this.monthArg}` : ""}, 並列数: ${this.concurrency}`);
+        let allRaceIds: string[];
 
-        const months = this.getTargetMonths();
+        if (this.singleRaceId) {
+            logger.info(`単一 raceId モード: ${this.singleRaceId}, 並列数: ${this.concurrency}`);
+            allRaceIds = [this.singleRaceId];
+        } else {
+            logger.info(`指定された年: ${this.year}${this.monthArg ? `, 月: ${this.monthArg}` : ""}, 並列数: ${this.concurrency}`);
 
-        // 全対象月の raceId を先に収集する
-        const allRaceIds: string[] = [];
-        for (const month of months) {
-            const ids = await this.collectRaceIds(month);
-            allRaceIds.push(...ids);
+            const months = this.getTargetMonths();
+
+            // 全対象月の raceId を先に収集する
+            allRaceIds = [];
+            for (const month of months) {
+                const ids = await this.collectRaceIds(month);
+                allRaceIds.push(...ids);
+            }
         }
 
         if (allRaceIds.length === 0) {
@@ -211,10 +222,18 @@ export class Main_RaceResult {
 }
 
 // CLI 実行
+// args[0] が 4 文字より長い場合は raceId として扱い、年月は無視する
 const args = process.argv.slice(2);
-const year = parseInt(args[0], 10) || 2025;
-const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
-const concurrency = args[2] ? parseInt(args[2], 10) : undefined;
 
-const main = new Main_RaceResult(year, monthArg, concurrency);
-main.run();
+if (args[0] && args[0].length > 4) {
+    const singleRaceId = args[0];
+    const concurrency = args[1] ? parseInt(args[1], 10) : undefined;
+    const main = new Main_RaceResult(0, undefined, concurrency, singleRaceId);
+    main.run();
+} else {
+    const year = parseInt(args[0], 10) || 2025;
+    const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
+    const concurrency = args[2] ? parseInt(args[2], 10) : undefined;
+    const main = new Main_RaceResult(year, monthArg, concurrency);
+    main.run();
+}
