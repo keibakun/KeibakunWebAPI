@@ -28,6 +28,7 @@ export class Main_Shutuba {
     private day?: number;
     private debug: boolean;
     private concurrency: number;
+    private singleRaceId?: string;
     /**
      * コンストラクタ
      * @param year 対象年（例: 2026）
@@ -35,19 +36,29 @@ export class Main_Shutuba {
      * @param day 対象日（1-31）
      * @param debug デバッグモードフラグ
      * @param concurrency 並列実行数（デフォルト: 5）
+     * @param singleRaceId 1件だけ取得する raceId（指定時は年月日を無視）
      */
-    constructor(year: number, month?: number, day?: number, debug?: boolean, concurrency?: number) {
+    constructor(year: number, month?: number, day?: number, debug?: boolean, concurrency?: number, singleRaceId?: string) {
         this.year = year;
         this.month = month;
         this.day = day;
         this.debug = debug || false;
         this.concurrency = concurrency ?? DEFAULT_CONCURRENCY;
+        this.singleRaceId = singleRaceId;
     }
 
     /**
      * エントリポイント: スケジュールから開催日を抽出して処理を開始します。
+     * `singleRaceId` が指定された場合は年月日・debug フラグを無視し、その1件のみ処理します。
      */
     async run(): Promise<void> {
+        // singleRaceId モード
+        if (this.singleRaceId) {
+            logger.info(`単一 raceId モード: ${this.singleRaceId}, 並列数: ${this.concurrency}`);
+            await this.runWithRaceIds([this.singleRaceId]);
+            return;
+        }
+
         let kaisaiDates: string[] = [];
 
         if (!this.debug) {
@@ -128,12 +139,19 @@ export class Main_Shutuba {
             allRaceIds.push(...ids);
         }
 
-        if (allRaceIds.length === 0) {
+        await this.runWithRaceIds(allRaceIds);
+    }
+
+    /**
+     * raceId 一覧を受け取り、Puppeteer を起動してワーカープールで処理します。
+     */
+    private async runWithRaceIds(raceIds: string[]): Promise<void> {
+        if (raceIds.length === 0) {
             logger.warn("処理対象の raceId がありません");
             return;
         }
 
-        logger.info(`合計 ${allRaceIds.length} 件の raceId を処理します（並列数: ${this.concurrency}）`);
+        logger.info(`合計 ${raceIds.length} 件の raceId を処理します（並列数: ${this.concurrency}）`);
 
         // Puppeteer を起動してワーカープールで並列処理
         const pm = new PuppeteerManager();
@@ -147,7 +165,7 @@ export class Main_Shutuba {
                 pages.push(page);
             }
 
-            await this.runWorkerPool(pages, allRaceIds);
+            await this.runWorkerPool(pages, raceIds);
         } catch (e) {
             logger.error(`致命的なエラー: ${String(e)}`);
         } finally {
@@ -320,16 +338,25 @@ export class Main_Shutuba {
 }
 
 // CLI 実行
+// args[0] が 4 文字より長い場合は raceId として扱い、年月日は無視する
 const args = process.argv.slice(2);
-const year = args[0] ? parseInt(args[0], 10) : undefined;
-const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
-const dayArg = args[2] ? parseInt(args[2], 10) : undefined;
-const debugArg = typeof args[3] !== "undefined" ? (String(args[3]).toLowerCase() === "true") : undefined;
 
-if (!year) {
-    logger.error("年の指定が必要です（例: 2025）。");
-    process.exit(1);
+if (args[0] && args[0].length > 4) {
+    const singleRaceId = args[0];
+    const concurrency = args[1] ? parseInt(args[1], 10) : undefined;
+    const main = new Main_Shutuba(0, undefined, undefined, undefined, concurrency, singleRaceId);
+    main.run();
+} else {
+    const year = args[0] ? parseInt(args[0], 10) : undefined;
+    const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
+    const dayArg = args[2] ? parseInt(args[2], 10) : undefined;
+    const debugArg = typeof args[3] !== "undefined" ? (String(args[3]).toLowerCase() === "true") : undefined;
+
+    if (!year) {
+        logger.error("年の指定が必要です（例: 2025）。");
+        process.exit(1);
+    }
+
+    const main = new Main_Shutuba(year, monthArg, dayArg, debugArg);
+    main.run();
 }
-
-const main = new Main_Shutuba(year, monthArg, dayArg, debugArg);
-main.run();

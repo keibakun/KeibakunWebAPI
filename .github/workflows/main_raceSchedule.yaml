@@ -1,5 +1,5 @@
 name: 【手動】レース開催日程取得
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+
 on:
   workflow_dispatch:
     inputs:
