@@ -1,17 +1,22 @@
 name: 【手動】レース結果取得
-run-name: 【手動】レース結果取得 ${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月
+run-name: 【手動】レース結果取得 ${{ github.event.inputs.raceId != '' && github.event.inputs.raceId || format('{0}年{1}月', github.event.inputs.year, github.event.inputs.month) }}
 
 on:
   workflow_dispatch:
     inputs:
+      raceId:
+        description: "取得対象の raceId を入力（指定した場合、年月は無視されます）"
+        required: false
+        default: ""
+
       year:
-        description: "取得対象の年を入力"
-        required: true
+        description: "取得対象の年を入力（raceId 未指定時に使用）"
+        required: false
         default: "2025"
 
       month:
-        description: "取得対象の月を入力"
-        required: true
+        description: "取得対象の月を入力（raceId 未指定時に使用）"
+        required: false
         default: "5"
 
 jobs:
@@ -49,7 +54,11 @@ jobs:
           PUPPETEER_HEADLESS: new
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
+          if [ -n "${{ github.event.inputs.raceId }}" ]; then
+            npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.raceId }}
+          else
+            npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
+          fi
           ls ./RaceResult || echo "RaceList directory is empty"
           cat ./RaceResult/index.html || echo "index.html not found"
 
@@ -66,7 +75,7 @@ jobs:
             git pull --rebase --autostash origin main
             git add ./RaceResult/
             git diff --staged --exit-code && break
-            git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.year }}年${{ github.event.inputs.month }}月" || true
+            git commit -m "下記期間のレース結果データを取得しました\n${{ github.event.inputs.raceId != '' && github.event.inputs.raceId || format('{0}年{1}月', github.event.inputs.year, github.event.inputs.month) }}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
