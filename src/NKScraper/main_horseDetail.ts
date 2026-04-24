@@ -9,7 +9,7 @@ import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 
 const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
-const DEFAULT_CONCURRENCY = 5;
+const DEFAULT_CONCURRENCY = 2;
 
 /**
  * Main_HorseDetail
@@ -168,7 +168,7 @@ export class Main_HorseDetail {
 
     /**
      * horseId 一覧を並列処理して HorseDetail を保存します。
-     * 並列数は最大5固定です。
+     * 並列数は最大2固定です。
      */
     private async scrapeAndSaveHorseDetails(
         horseIds: string[],
@@ -221,6 +221,9 @@ export class Main_HorseDetail {
                         break;
                     }
                 }
+                // レートリミット対策: リクエスト間にランダム待機（3〜7秒）
+                const waitMs = 3000 + Math.floor(Math.random() * 4000);
+                await new Promise((r) => setTimeout(r, waitMs));
             }
         };
 
