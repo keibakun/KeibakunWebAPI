@@ -1,0 +1,68 @@
+name: 【本番】競走馬詳細取得
+run-name: 【本番】競走馬詳細取得
+
+on:
+  schedule:
+    # JST 21:03〜22:53 を10分おきで実行（UTC 12:03〜13:53）
+    - cron: '3,13,23,33,43,53 12 * * 5'
+    - cron: '3,13,23,33,43,53 13 * * 5'
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    name: scrape
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: Run production horse detail
+        run: |
+          npm install
+          echo "Run production horse detail for workPool queue"
+          npx tsx ./src/NKScraper/main_horseDetail.ts true
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail and workPool updates
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "本番実行: 競走馬詳細データを取得しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  report:
+    needs: [scrape]
+    if: always()
+    permissions:
+      contents: write
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番】競走馬詳細取得'
+      conclusion: ${{ needs.scrape.result }}

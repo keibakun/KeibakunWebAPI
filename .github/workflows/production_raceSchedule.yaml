@@ -1,5 +1,5 @@
 name: 【本番】レース開催日程取得
-run-name: ${{ github.actor }} runs production schedule
+run-name: 【本番】レース開催日程取得
 on:
   workflow_dispatch:
     inputs:
@@ -9,7 +9,7 @@ on:
   schedule:
     # 毎週金/土/日 18:10 (JST) に起動。GitHub Actions の cron は UTC 基準のため UTC 9:10 に設定しています。
     # ジョブ内で0〜120秒ランダムに待機して18:10〜18:12のランダム開始を実現します。
-    - cron: '10 9 * * FRI,SAT,SUN'
+    - cron: '11 9 * * FRI,SAT,SUN,MON'
 
 jobs:
   scrape:

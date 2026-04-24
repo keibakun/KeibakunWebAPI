@@ -1,12 +1,12 @@
 name: 【本番】出馬表取得
-run-name: production shutuba run
+run-name: 【本番】出馬表取得
 on:
   schedule:
     # JST 20:00 は UTC 11:00 のため、金曜〜月曜を UTC11:00 に設定
-    - cron: '0 11 * * 5' # 金
-    - cron: '0 11 * * 6' # 土
-    - cron: '0 11 * * 0' # 日
-    - cron: '0 11 * * 1' # 月
+    - cron: '3 10 * * 5' # 金
+    - cron: '3 10 * * 6' # 土
+    - cron: '3 10 * * 0' # 日
+    - cron: '3 10 * * 1' # 月
   workflow_dispatch: {}
 
 jobs:

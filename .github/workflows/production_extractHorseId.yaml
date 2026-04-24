@@ -1,0 +1,68 @@
+name: 【本番】horseId抽出
+run-name: 【本番】horseId抽出
+
+on:
+  schedule:
+    # JST 19:34 は UTC 10:34
+    - cron: '34 10 * * 5'
+  workflow_dispatch: {}
+
+jobs:
+  extract:
+    name: extract
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure workPool directory exists
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: Run extractHorseId
+        run: |
+          npm install
+          EXECUTION_DATETIME=$(TZ=Asia/Tokyo date +%Y%m%d%H%M)
+          echo "execution datetime: ${EXECUTION_DATETIME}"
+          npx tsx ./src/NKScraper/main_extractHorseId.ts "${EXECUTION_DATETIME}"
+          ls -R ./temp/work/workPool/horseDetail || echo "workPool directory is empty"
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool files
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "本番実行: horseId抽出workPoolを更新しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  report:
+    needs: [extract]
+    if: always()
+    permissions:
+      contents: write
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番】horseId抽出'
+      conclusion: ${{ needs.extract.result }}
