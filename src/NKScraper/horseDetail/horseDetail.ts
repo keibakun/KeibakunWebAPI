@@ -269,6 +269,11 @@ export class HorseDetailScraper {
                 return { profile, raceResults };
             } catch (error) {
                 this.logger.warn(`馬情報取得 attempt=${attempt} で失敗: ${String(error)}`);
+                // TargetCloseError はページが死んでいるため同じページでのリトライは無意味
+                if (error instanceof Error && error.name === 'TargetCloseError') {
+                    this.logger.error(`ページが閉じられているためリトライをスキップします: ${error}`);
+                    throw error;
+                }
                 if (attempt >= 2) {
                     this.logger.error(`馬情報の取得中にエラー: ${error}`);
                     throw error;
