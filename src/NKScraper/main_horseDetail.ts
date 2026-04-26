@@ -1,5 +1,6 @@
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { HorseDetailScraper } from "./horseDetail/horseDetail";
+import { HorseEntry } from "./main_extractHorseId";
 import { Page } from "puppeteer";
 import fs from "fs/promises";
 import path from "path";
@@ -16,8 +17,10 @@ const DEFAULT_CONCURRENCY = 2;
  *
  * `RaceSchedule/{year}{month}/index.html` から開催日を取得し、
  * `RaceList/{kaisaiDate}/index.html` から raceId を取得、
- * `Shutuba/{raceId}/index.html` から horseId を抽出、
+ * `Shutuba/{raceId}/index.html` から horseId / raceId / umaban を抽出、
  * `HorseDetail` に各馬の詳細を保存する処理を行うクラスです。
+ *
+ * スクレイピング先は `race.sp.netkeiba.com/modal/horse.html` (SP版モーダル) を使用します。
  */
 export class Main_HorseDetail {
     private year: number;
@@ -100,8 +103,8 @@ export class Main_HorseDetail {
 
             const uniqueRaceIds = [...new Set(raceIds)];
 
-            // Shutuba ファイルから horseId を抽出
-            const horseIdSet = new Set<string>();
+            // Shutuba ファイルから HorseEntry（horseId / raceId / umaban）を抽出
+            const horseEntryMap = new Map<string, HorseEntry>(); // horseId で重複排除
             for (const raceId of uniqueRaceIds) {
                 try {
                     const shutubaPath = this.getShutubaPath(raceId);
@@ -110,18 +113,18 @@ export class Main_HorseDetail {
                         continue;
                     }
                     const content = await fs.readFile(shutubaPath, "utf8");
-                    const ids = this.extractHorseIdsFromHtml(content);
-                    ids.forEach((id) => horseIdSet.add(id));
-                    logger.info(`raceId: ${raceId} から ${ids.length} 件のhorseIdを抽出`);
+                    const entries = this.extractHorseEntriesFromHtml(content, raceId);
+                    entries.forEach((e) => { if (!horseEntryMap.has(e.horseId)) horseEntryMap.set(e.horseId, e); });
+                    logger.info(`raceId: ${raceId} から ${entries.length} 件のHorseEntryを抽出`);
                 } catch (e: any) {
                     logger.warn(`raceId: ${raceId} のShutubaファイルが存在しないかraceId形式が不正です: ${String(e)}`);
                 }
             }
 
-            const horseIds = Array.from(horseIdSet).sort();
-            logger.info(`抽出した horseId 件数: ${horseIds.length}`);
+            const horseEntries = Array.from(horseEntryMap.values()).sort((a, b) => a.horseId.localeCompare(b.horseId));
+            logger.info(`抽出した HorseEntry 件数: ${horseEntries.length}`);
 
-            await this.scrapeAndSaveHorseDetails(horseIds, pm, outDir, false);
+            await this.scrapeAndSaveHorseDetails(horseEntries, pm, outDir, false);
         } catch (e: any) {
             logger.error(`処理中にエラー: ${String(e)}`);
         } finally {
@@ -145,9 +148,9 @@ export class Main_HorseDetail {
         const targetFilePath = path.join(workPoolDir, targetFileName);
         logger.info(`処理対象ファイル: ${targetFilePath}`);
 
-        const horseIds = await this.readHorseIdsFromWorkPoolFile(targetFilePath);
-        if (horseIds.length === 0) {
-            logger.warn(`horseId 配列が空のため処理をスキップします: ${targetFilePath}`);
+        const horseEntries = await this.readHorseEntriesFromWorkPoolFile(targetFilePath);
+        if (horseEntries.length === 0) {
+            logger.warn(`HorseEntry 配列が空のため処理をスキップします: ${targetFilePath}`);
             await fs.rm(targetFilePath, { force: true });
             logger.info(`処理済みファイルを削除しました: ${targetFilePath}`);
             return;
@@ -158,7 +161,7 @@ export class Main_HorseDetail {
         await pm.init();
 
         try {
-            await this.scrapeAndSaveHorseDetails(horseIds, pm, outDir, true);
+            await this.scrapeAndSaveHorseDetails(horseEntries, pm, outDir, true);
             await fs.rm(targetFilePath, { force: true });
             logger.info(`処理済みファイルを削除しました: ${targetFilePath}`);
         } finally {
@@ -167,20 +170,20 @@ export class Main_HorseDetail {
     }
 
     /**
-     * horseId 一覧を並列処理して HorseDetail を保存します。
+     * HorseEntry 一覧を並列処理して HorseDetail を保存します。
      * 並列数は最大2固定です。
      */
     private async scrapeAndSaveHorseDetails(
-        horseIds: string[],
+        horseEntries: HorseEntry[],
         pm: PuppeteerManager,
         outDir: string,
         failFast: boolean
     ): Promise<void> {
-        if (horseIds.length === 0) {
+        if (horseEntries.length === 0) {
             return;
         }
 
-        const workerCount = Math.min(DEFAULT_CONCURRENCY, horseIds.length);
+        const workerCount = Math.min(DEFAULT_CONCURRENCY, horseEntries.length);
         logger.info(`horse detail を並列処理します（並列数: ${workerCount}）`);
 
         const pages: Page[] = [];
@@ -202,22 +205,22 @@ export class Main_HorseDetail {
                 }
 
                 const idx = cursor++;
-                if (idx >= horseIds.length) {
+                if (idx >= horseEntries.length) {
                     break;
                 }
 
-                const horseId = horseIds[idx];
+                const entry = horseEntries[idx];
                 try {
-                    logger.info(`[Worker${workerId}] (${idx + 1}/${horseIds.length}) 処理中: ${horseId}`);
-                    const horseDetail = await horseScraper.getHorseDetail(horseId);
+                    logger.info(`[Worker${workerId}] (${idx + 1}/${horseEntries.length}) 処理中: horseId=${entry.horseId} raceId=${entry.raceId} umaban=${entry.umaban}`);
+                    const horseDetail = await horseScraper.getHorseDetail(entry.raceId, entry.horseId, entry.umaban);
 
-                    const target = this.getHorseDetailOutPath(outDir, horseId);
+                    const target = this.getHorseDetailOutPath(outDir, entry.horseId);
                     await jsonWriter.writeJson(target.dir, "index.html", horseDetail);
                     logger.info(`[Worker${workerId}] 保存完了: ${target.file}`);
                 } catch (e: any) {
-                    logger.error(`[Worker${workerId}] horseId=${horseId} の取得でエラー: ${String(e)}`);
+                    logger.error(`[Worker${workerId}] horseId=${entry.horseId} の取得でエラー: ${String(e)}`);
                     if (failFast) {
-                        firstError = new Error(`本番モードで horseId=${horseId} の処理に失敗しました: ${String(e)}`);
+                        firstError = new Error(`本番モードで horseId=${entry.horseId} の処理に失敗しました: ${String(e)}`);
                         break;
                     }
                 }
@@ -282,9 +285,11 @@ export class Main_HorseDetail {
     }
 
     /**
-     * workPool の JSON ファイルを読み込み horseId 配列を返します。
+     * workPool の JSON ファイルを読み込み HorseEntry 配列を返します。
+     * 後方互換性のため、旧形式（`string[]` / `{ horseId: string[] }`）も受け付け、
+     * その場合は raceId・umaban を空文字として補完します。
      */
-    private async readHorseIdsFromWorkPoolFile(filePath: string): Promise<string[]> {
+    private async readHorseEntriesFromWorkPoolFile(filePath: string): Promise<HorseEntry[]> {
         let raw = "";
         try {
             raw = await fs.readFile(filePath, "utf-8");
@@ -299,20 +304,39 @@ export class Main_HorseDetail {
             throw new Error(`workPool ファイルの JSON パースに失敗しました: ${filePath}, ${String(e)}`);
         }
 
-        // 互換性のため、旧形式(string[])と新形式({ horseId: string[] })の両方を受け付ける
-        let horseIds: unknown[];
-        if (Array.isArray(json)) {
-            horseIds = json;
-        } else if (json && typeof json === "object" && Array.isArray((json as { horseId?: unknown }).horseId)) {
-            horseIds = (json as { horseId: unknown[] }).horseId;
-        } else {
-            throw new Error(`workPool ファイルの形式が不正です（string[] または { horseId: string[] } ではありません）: ${filePath}`);
+        // 新形式: { horses: HorseEntry[] }
+        const asObj = json as Record<string, unknown>;
+        if (asObj && typeof asObj === "object" && Array.isArray(asObj.horses)) {
+            return (asObj.horses as unknown[])
+                .filter((item): item is HorseEntry => !!item && typeof item === "object" && typeof (item as any).horseId === "string")
+                .map((item) => ({
+                    horseId: String((item as any).horseId).trim(),
+                    raceId: String((item as any).raceId ?? '').trim(),
+                    umaban: String((item as any).umaban ?? '').trim(),
+                }))
+                .filter((e) => e.horseId.length > 0)
+                .sort((a, b) => a.horseId.localeCompare(b.horseId));
         }
 
-        return horseIds
-            .map((item) => String(item).trim())
-            .filter((id) => id.length > 0)
-            .sort((a, b) => a.localeCompare(b));
+        // 旧形式 (string[]): raceId / umaban は空文字で補完
+        if (Array.isArray(json)) {
+            return (json as unknown[])
+                .map((item) => String(item).trim())
+                .filter((id) => id.length > 0)
+                .sort((a, b) => a.localeCompare(b))
+                .map((id) => ({ horseId: id, raceId: '', umaban: '' }));
+        }
+
+        // 旧形式 ({ horseId: string[] }): raceId / umaban は空文字で補完
+        if (asObj && typeof asObj === "object" && Array.isArray(asObj.horseId)) {
+            return (asObj.horseId as unknown[])
+                .map((item) => String(item).trim())
+                .filter((id) => id.length > 0)
+                .sort((a, b) => a.localeCompare(b))
+                .map((id) => ({ horseId: id, raceId: '', umaban: '' }));
+        }
+
+        throw new Error(`workPool ファイルの形式が不正です: ${filePath}`);
     }
 
     /**
@@ -328,17 +352,22 @@ export class Main_HorseDetail {
     }
 
     /**
-     * Shutuba ファイルの HTML/JSON から horseId を抽出するユーティリティ
+     * Shutuba ファイルの HTML/JSON から HorseEntry（horseId / raceId / umaban）を抽出するユーティリティ
+     * @param content Shutuba ファイルの内容
+     * @param raceId この Shutuba に対応するレースID
      */
-    private extractHorseIdsFromHtml(content: string): string[] {
-        const ids = new Set<string>();
+    private extractHorseEntriesFromHtml(content: string, raceId: string): HorseEntry[] {
+        const entries = new Map<string, HorseEntry>(); // horseId で重複排除
+
         // 1) JSON パースして syutuba 配列から抽出
         try {
             const obj = JSON.parse(content);
             if (obj && Array.isArray(obj.syutuba)) {
                 for (const item of obj.syutuba) {
-                    if (item && (item.horseId || item.horseid)) {
-                        ids.add(String(item.horseId ?? item.horseid));
+                    const horseId = item?.horseId ?? item?.horseid;
+                    const umaban = String(item?.umaban ?? '');
+                    if (horseId && !entries.has(String(horseId))) {
+                        entries.set(String(horseId), { horseId: String(horseId), raceId, umaban });
                     }
                 }
             }
@@ -346,20 +375,24 @@ export class Main_HorseDetail {
             // JSONでなければフォールバックへ
         }
 
-        // 2) /horse/123456/ のパス形式を抽出
+        // 2) /horse/123456/ のパス形式を抽出（umaban は不明のため空文字）
         const re = /\/horse\/(\d+)\/?/g;
         let m: RegExpExecArray | null;
         while ((m = re.exec(content)) !== null) {
-            ids.add(m[1]);
+            if (!entries.has(m[1])) {
+                entries.set(m[1], { horseId: m[1], raceId, umaban: '' });
+            }
         }
 
-        // 3) "horseId":"123456" のようなキー/値パターン
+        // 3) "horseId":"123456" のようなキー/値パターン（umaban は不明のため空文字）
         const kvRe = /"horseId"\s*:\s*"(\d+)"/g;
         while ((m = kvRe.exec(content)) !== null) {
-            ids.add(m[1]);
+            if (!entries.has(m[1])) {
+                entries.set(m[1], { horseId: m[1], raceId, umaban: '' });
+            }
         }
 
-        return Array.from(ids);
+        return Array.from(entries.values());
     }
 
     /**
