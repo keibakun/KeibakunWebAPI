@@ -35,7 +35,9 @@ export class HorseDetailScraper {
      */
     async getHorseDetail(raceId: string, horseId: string, umaban: string): Promise<HorseDetail> {
         // i パラメータは馬番の 0 始まりインデックス
-        const iParam = Math.max(0, Number(umaban) - 1);
+        // umaban が空文字や非数値の場合は 1 にフォールバックして i=0 とする
+        const umabanNum = Number(umaban) || 1;
+        const iParam = Math.max(0, umabanNum - 1);
         const url = `https://race.sp.netkeiba.com/modal/horse.html?race_id=${raceId}&horse_id=${horseId}&i=${iParam}&rf=shutuba_modal`;
         this.logger.info(`馬情報ページへアクセス: ${url}`);
 

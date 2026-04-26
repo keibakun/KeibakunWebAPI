@@ -114,7 +114,11 @@ export class Main_HorseDetail {
                     }
                     const content = await fs.readFile(shutubaPath, "utf8");
                     const entries = this.extractHorseEntriesFromHtml(content, raceId);
-                    entries.forEach((e) => { if (!horseEntryMap.has(e.horseId)) horseEntryMap.set(e.horseId, e); });
+                    entries.forEach((e) => {
+                        if (!horseEntryMap.has(e.horseId)) {
+                            horseEntryMap.set(e.horseId, e);
+                        }
+                    });
                     logger.info(`raceId: ${raceId} から ${entries.length} 件のHorseEntryを抽出`);
                 } catch (e: any) {
                     logger.warn(`raceId: ${raceId} のShutubaファイルが存在しないかraceId形式が不正です: ${String(e)}`);
@@ -308,12 +312,13 @@ export class Main_HorseDetail {
         const asObj = json as Record<string, unknown>;
         if (asObj && typeof asObj === "object" && Array.isArray(asObj.horses)) {
             return (asObj.horses as unknown[])
-                .filter((item): item is HorseEntry => !!item && typeof item === "object" && typeof (item as any).horseId === "string")
-                .map((item) => ({
-                    horseId: String((item as any).horseId).trim(),
-                    raceId: String((item as any).raceId ?? '').trim(),
-                    umaban: String((item as any).umaban ?? '').trim(),
-                }))
+                .filter((item): item is Record<string, unknown> => !!item && typeof item === "object" && typeof (item as Record<string, unknown>).horseId === "string")
+                .map((item) => {
+                    const horseId = String(item.horseId).trim();
+                    const raceId = String(item.raceId ?? '').trim();
+                    const umaban = String(item.umaban ?? '').trim();
+                    return { horseId, raceId, umaban };
+                })
                 .filter((e) => e.horseId.length > 0)
                 .sort((a, b) => a.horseId.localeCompare(b.horseId));
         }
