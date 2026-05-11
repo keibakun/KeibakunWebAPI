@@ -5,7 +5,9 @@ import path from "path";
 
 /**
  * デバッグ用: レースID をコマンドライン引数に取り、そのレースの Shutuba/index.html を探して
- * 含まれる horseId をすべて抽出し、順に HorseDetail を取得して出力する。
+ * 含まれる horseId・umaban をすべて抽出し、順に HorseDetail を取得して出力する。
+ *
+ * スクレイピング先: race.sp.netkeiba.com/modal/horse.html（SP版モーダル）
  *
  * 実行例:
  *   npx tsx src/NKScraper/debug/main_horseDetail_test.ts 202501010101
@@ -71,20 +73,26 @@ async function findShutubaIndexForRace(raceId: string): Promise<string | null> {
 }
 
 /**
- * Shutuba のコンテンツ（HTML か JSON）から馬ID を抽出するヘルパー関数
- * - まず JSON パースを試みて syutuba 配列から horseId を抽出
- * - フォールバックで /horse/<id>/ のパスや "horseId":"<id>" の key/value を検索
+ * Shutuba のコンテンツ（HTML か JSON）から HorseEntry（horseId / umaban）を抽出するヘルパー関数。
+ * - まず JSON パースを試みて syutuba 配列から horseId と umaban を抽出
+ * - フォールバックで /horse/<id>/ のパスや "horseId":"<id>" の key/value を検索（umaban は空文字）
+ *
+ * @param content Shutuba ファイルの内容
+ * @param raceId この Shutuba に対応するレースID
+ * @returns horseId / umaban のオブジェクト配列
  */
-function extractHorseIdsFromHtml(content: string): string[] {
-    const ids = new Set<string>();
+function extractHorseEntriesFromHtml(content: string, raceId: string): { horseId: string; umaban: string; raceId: string }[] {
+    const entries = new Map<string, { horseId: string; umaban: string; raceId: string }>();
 
     // 1) JSON として解析できるか試す
     try {
         const obj = JSON.parse(content);
         if (obj && Array.isArray(obj.syutuba)) {
             for (const item of obj.syutuba) {
-                if (item && (item.horseId || item.horseid)) {
-                    ids.add(String(item.horseId ?? item.horseid));
+                const horseId = item?.horseId ?? item?.horseid;
+                const umaban = String(item?.umaban ?? '');
+                if (horseId && !entries.has(String(horseId))) {
+                    entries.set(String(horseId), { horseId: String(horseId), umaban, raceId });
                 }
             }
         }
@@ -92,21 +100,25 @@ function extractHorseIdsFromHtml(content: string): string[] {
         // JSON でなければフォールバック処理へ
     }
 
-    // 2) /horse/<id>/ のパス形式を抽出
+    // 2) /horse/<id>/ のパス形式を抽出（umaban は不明のため空文字）
     const re = /\/horse\/(\d+)\/?/g;
     let m: RegExpExecArray | null;
     while ((m = re.exec(content)) !== null) {
-        ids.add(m[1]);
+        if (!entries.has(m[1])) {
+            entries.set(m[1], { horseId: m[1], umaban: '', raceId });
+        }
     }
 
-    // 3) キー/バリュー形式の "horseId":"123456" を抽出
+    // 3) キー/バリュー形式の "horseId":"123456" を抽出（umaban は不明のため空文字）
     const kvRe = /"horseId"\s*:\s*"(\d+)"/g;
     while ((m = kvRe.exec(content)) !== null) {
-        ids.add(m[1]);
+        if (!entries.has(m[1])) {
+            entries.set(m[1], { horseId: m[1], umaban: '', raceId });
+        }
     }
 
     // 重複を排除して配列で返却
-    return Array.from(ids);
+    return Array.from(entries.values());
 }
 
 /**
@@ -158,14 +170,14 @@ async function main(): Promise<void> {
     console.log('Found Shutuba file:', shutubaIndex);
 
     const content = await fs.readFile(shutubaIndex, 'utf8');
-    const horseIds = extractHorseIdsFromHtml(content);
-    if (horseIds.length === 0) {
+    const horseEntries = extractHorseEntriesFromHtml(content, raceId);
+    if (horseEntries.length === 0) {
         console.warn('horseId が見つかりませんでした in', shutubaIndex);
         process.exit(0);
     }
 
-    console.log(`抽出した horseId 件数: ${horseIds.length}`);
-    console.log(horseIds.join(', '));
+    console.log(`抽出した HorseEntry 件数: ${horseEntries.length}`);
+    console.log(horseEntries.map(e => `horseId=${e.horseId} umaban=${e.umaban}`).join(', '));
 
     const pm = new PuppeteerManager();
     await pm.init();
@@ -173,17 +185,17 @@ async function main(): Promise<void> {
     const scraper = new HorseDetailScraper(page);
 
     try {
-        for (const hid of horseIds) {
+        for (const entry of horseEntries) {
             try {
-                console.log('処理中 horseId=', hid);
-                const detail = await scraper.getHorseDetail(hid);
+                console.log(`処理中 horseId=${entry.horseId} raceId=${entry.raceId} umaban=${entry.umaban}`);
+                const detail = await scraper.getHorseDetail(entry.raceId, entry.horseId, entry.umaban);
                 const outDir = path.join(process.cwd(), 'HorseDetail');
-                const target = getHorseDetailOutPath(outDir, hid);
+                const target = getHorseDetailOutPath(outDir, entry.horseId);
                 await fs.mkdir(target.dir, { recursive: true });
                 await fs.writeFile(target.file, JSON.stringify(detail, null, 2), 'utf8');
                 console.log('保存完了:', target.file);
             } catch (e) {
-                console.error('horseId=', hid, 'の取得でエラー:', e);
+                console.error(`horseId=${entry.horseId} の取得でエラー:`, e);
             }
         }
     } finally {

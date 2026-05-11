@@ -11,6 +11,20 @@ const WORK_POOL_DIR = path.join(ROOT, "temp/work/workPool/horseDetail");
 const CHUNK_SIZE = 200;
 
 /**
+ * workPool に保存する 1 頭分のエントリ。
+ * HorseDetailScraper.getHorseDetail() が必要とするパラメータを保持します。
+ *
+ * @property horseId - 馬ID（例: "2021107071"）
+ * @property raceId  - 対象レースID（12桁, 例: "202401010303"）
+ * @property umaban  - 馬番（1始まり文字列, 例: "3"）
+ */
+export interface HorseEntry {
+    horseId: string;
+    raceId: string;
+    umaban: string;
+}
+
+/**
  * 指定パスが存在するかを返します。
  * @param targetPath 判定対象のファイルまたはディレクトリパス
  * @returns 存在する場合は true
@@ -160,13 +174,14 @@ function raceIdToShutubaPath(raceId: string): string {
 }
 
 /**
- * Shutuba の内容から horseId を抽出します。
- * JSON 抽出に加え、文字列パターン抽出も実施します。
+ * Shutuba の内容から HorseEntry（horseId / raceId / umaban）を抽出します。
+ * JSON 抽出を優先し、失敗時に文字列パターン抽出へフォールバックします。
  * @param content Shutuba/index.html の内容
- * @returns horseId 配列
+ * @param raceId この Shutuba に対応するレースID
+ * @returns HorseEntry 配列
  */
-function extractHorseIdsFromShutuba(content: string): string[] {
-    const ids = new Set<string>();
+function extractHorseEntriesFromShutuba(content: string, raceId: string): HorseEntry[] {
+    const entries = new Map<string, HorseEntry>(); // horseId をキーとして重複排除
 
     // 1) JSON として syutuba 配列から抽出
     try {
@@ -174,8 +189,9 @@ function extractHorseIdsFromShutuba(content: string): string[] {
         if (Array.isArray(parsed?.syutuba)) {
             for (const item of parsed.syutuba) {
                 const horseId = item?.horseId ?? item?.horseid;
-                if (horseId) {
-                    ids.add(String(horseId));
+                const umaban = String(item?.umaban ?? '');
+                if (horseId && !entries.has(String(horseId))) {
+                    entries.set(String(horseId), { horseId: String(horseId), raceId, umaban });
                 }
             }
         }
@@ -183,20 +199,24 @@ function extractHorseIdsFromShutuba(content: string): string[] {
         // フォールバックへ
     }
 
-    // 2) horseId キー形式
+    // 2) フォールバック: horseId キー形式（umaban は不明なため空文字）
     let match: RegExpExecArray | null;
     const kvRe = /"horseId"\s*:\s*"(\d+)"/g;
     while ((match = kvRe.exec(content)) !== null) {
-        ids.add(match[1]);
+        if (!entries.has(match[1])) {
+            entries.set(match[1], { horseId: match[1], raceId, umaban: '' });
+        }
     }
 
-    // 3) /horse/{id}/ パス形式
+    // 3) フォールバック: /horse/{id}/ パス形式（umaban は不明なため空文字）
     const pathRe = /\/horse\/(\d+)\/?/g;
     while ((match = pathRe.exec(content)) !== null) {
-        ids.add(match[1]);
+        if (!entries.has(match[1])) {
+            entries.set(match[1], { horseId: match[1], raceId, umaban: '' });
+        }
     }
 
-    return Array.from(ids);
+    return Array.from(entries.values());
 }
 
 /**
@@ -218,22 +238,32 @@ async function clearWorkPoolFiles(dirPath: string): Promise<void> {
 }
 
 /**
- * horseId 配列を200件ごとに分割して workPool ファイルへ保存します。
- * horseId が0件でも workPool0.json を1件作成します。
- * @param horseIds 保存対象の horseId 配列
+ * HorseEntry 配列を200件ごとに分割して workPool ファイルへ保存します。
+ * エントリが0件でも workPool0.json を1件作成します。
+ * 保存形式: `{ "horses": HorseEntry[] }`
+ * @param entries 保存対象の HorseEntry 配列
  */
-async function saveHorseIdsAsWorkPoolFiles(horseIds: string[]): Promise<void> {
+async function saveHorseEntriesAsWorkPoolFiles(entries: HorseEntry[]): Promise<void> {
     await fs.mkdir(WORK_POOL_DIR, { recursive: true });
     await clearWorkPoolFiles(WORK_POOL_DIR);
 
-    // 重複除去・空文字除去・昇順ソートして安定した出力順を保証する
-    const normalized = Array.from(new Set(horseIds.map((id) => String(id).trim()).filter((id) => id !== ""))).sort((a, b) => a.localeCompare(b));
+    // horseId で重複除去し、horseId 昇順でソートして安定した出力順を保証する
+    const seen = new Set<string>();
+    const normalized: HorseEntry[] = [];
+    for (const e of entries) {
+        const id = String(e.horseId).trim();
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        normalized.push({ horseId: id, raceId: String(e.raceId).trim(), umaban: String(e.umaban).trim() });
+    }
+    normalized.sort((a, b) => a.horseId.localeCompare(b.horseId));
+
     const fileCount = Math.max(1, Math.ceil(normalized.length / CHUNK_SIZE));
 
     for (let i = 0; i < fileCount; i++) {
         const chunk = normalized.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
         const outPath = path.join(WORK_POOL_DIR, `workPool${i}.json`);
-        const payload = { horseId: chunk };
+        const payload = { horses: chunk };
         await fs.writeFile(outPath, JSON.stringify(payload, null, 4), "utf-8");
         logger.info(`保存完了: ${outPath} (${chunk.length}件)`);
     }
@@ -241,7 +271,7 @@ async function saveHorseIdsAsWorkPoolFiles(horseIds: string[]): Promise<void> {
 
 /**
  * メイン処理。
- * 基準日時から対象開催日を算出し、RaceList -> Shutuba の順で horseId を抽出して
+ * 基準日時から対象開催日を算出し、RaceList -> Shutuba の順で HorseEntry（horseId / raceId / umaban）を抽出して
  * workPool ファイルへ保存します。
  */
 async function main(): Promise<void> {
@@ -272,9 +302,9 @@ async function main(): Promise<void> {
     const raceIds = Array.from(raceIdSet).sort((a, b) => a.localeCompare(b));
     logger.info(`抽出 raceId 合計: ${raceIds.length}件`);
 
-    const horseIdSet = new Set<string>();
+    const allEntries: HorseEntry[] = [];
 
-    // raceId に対応する Shutuba から horseId を収集
+    // raceId に対応する Shutuba から HorseEntry を収集
     for (const raceId of raceIds) {
         let shutubaPath = "";
         try {
@@ -290,14 +320,13 @@ async function main(): Promise<void> {
         }
 
         const shutubaContent = await fs.readFile(shutubaPath, "utf-8");
-        const horseIds = extractHorseIdsFromShutuba(shutubaContent);
-        horseIds.forEach((id) => horseIdSet.add(id));
+        const entries = extractHorseEntriesFromShutuba(shutubaContent, raceId);
+        allEntries.push(...entries);
     }
 
-    const horseIds = Array.from(horseIdSet).sort((a, b) => a.localeCompare(b));
-    logger.info(`抽出 horseId 合計: ${horseIds.length}件`);
+    logger.info(`抽出 HorseEntry 合計: ${allEntries.length}件`);
 
-    await saveHorseIdsAsWorkPoolFiles(horseIds);
+    await saveHorseEntriesAsWorkPoolFiles(allEntries);
 }
 
 main().catch((e: any) => {
