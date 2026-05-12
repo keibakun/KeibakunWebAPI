@@ -27,7 +27,7 @@ export class PuppeteerManager {
         // デフォルトは "new"（可能な場合は新しい headless モード）
         const headlessSetting: any = headlessFromEnv !== undefined
             ? (headlessFromEnv === 'false' ? false : (headlessFromEnv === 'true' ? true : headlessFromEnv))
-            : (options && (options as any).headless !== undefined ? (options as any).headless : 'new');
+            : (options && (options as any).headless !== undefined ? (options as any).headless : "new");
 
         const defaultArgs: string[] = isCI
             ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
