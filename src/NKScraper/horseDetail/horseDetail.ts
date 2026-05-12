@@ -452,29 +452,28 @@ export class HorseDetailScraper {
             `?race_id=${raceId}&horse_id=${horseId}&i=${Number(umaban)}&rf=shutuba_modal`;
         this.logger.info(`sp.netkeiba モーダルへアクセス（comment 補完）: ${url}`);
 
+        // db.netkeiba ページの残留スクリプト・状態から完全に独立させるため
+        // SP モーダル専用の新規ページを作成して使用する。
+        // about:blank 遷移によるページ状態汚染も不要になる。
+        const spPage = await this.page.browserContext().newPage();
         try {
-            // db.netkeiba ページのスクリプトが非同期で残りタブをクラッシュさせるケースがある。
-            // about:blank に遷移してリソースを解放してから UA/Viewport を設定することで安定化する。
-            // （血統取得を同一ページで行わなくなったため about:blank 遷移が安全に使える）
-            await this.page.goto("about:blank", { waitUntil: "domcontentloaded", timeout: 10000 })
-                .catch((e) => { this.logger.warn(`about:blank 遷移失敗（続行）: ${String(e)}`); });
-            await this.page.setUserAgent(MOBILE_UA);
-            await this.page.setViewport({ width: 390, height: 844, isMobile: true });
-            await this.page.setExtraHTTPHeaders({
+            await spPage.setUserAgent(MOBILE_UA);
+            await spPage.setViewport({ width: 390, height: 844, isMobile: true });
+            await spPage.setExtraHTTPHeaders({
                 "accept-language": "ja,en-US;q=0.9,en;q=0.8",
                 Referer: `https://race.sp.netkeiba.com/race/shutuba.html?race_id=${raceId}`,
             });
 
-            // gotoを最大3回リトライ（ロードが遅いケースに対応）
-            // waitUntil: "domcontentloaded" = DOM解析完了後。
-            // "load" は全リソース待ちのため、SPモーダルの非同期リソースが残ると永遠にブロックされる。
-            // コンテンツ出現は後続の waitForSelector で担保する。
+            // goto を最大 3 回リトライ（CI のネットワーク遅延に対応）
+            // waitUntil: "domcontentloaded" = DOM 解析完了後に返る。
+            // "load" は全リソース完了待ちで SP モーダルの非同期ポーリングにより永続ブロックする危険がある。
+            // コンテンツ出現の保証は後続の waitForSelector で行う。
             let gotoSuccess = false;
             for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
-                    await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 25000 });
+                    await spPage.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
                     gotoSuccess = true;
-                    this.logger.info(`SP page.goto 成功（試行${attempt}/3）URL: ${this.page.url()}`);
+                    this.logger.info(`SP page.goto 成功（試行${attempt}/3）URL: ${spPage.url()}`);
                     break;
                 } catch (e) {
                     this.logger.warn(`SP page.goto 試行${attempt}/3 失敗: ${String(e)}`);
@@ -492,15 +491,15 @@ export class HorseDetailScraper {
                 `horse_data[horse_id="${horseId}"] .RacingResultsArea, ` +
                 `horse_data[horse-id="${horseId}"] .RacingResultsArea`;
 
-            // waitForSelectorも失敗したらリロードして再試行
-            let selectorFound = await this.page.waitForSelector(selector, { timeout: 25000 })
+            // waitForSelector も失敗したらリロードして再試行
+            let selectorFound = await spPage.waitForSelector(selector, { timeout: 30000 })
                 .then(() => true)
                 .catch(() => false);
 
             if (!selectorFound) {
                 this.logger.warn(`SP selector 1回目タイムアウト、リロードして再試行: horseId=${horseId}`);
-                await this.page.reload({ waitUntil: "domcontentloaded", timeout: 25000 }).catch(() => {});
-                selectorFound = await this.page.waitForSelector(selector, { timeout: 25000 })
+                await spPage.reload({ waitUntil: "domcontentloaded", timeout: 30000 }).catch(() => {});
+                selectorFound = await spPage.waitForSelector(selector, { timeout: 30000 })
                     .then(() => true)
                     .catch(() => false);
             }
@@ -510,9 +509,9 @@ export class HorseDetailScraper {
                 return;
             }
 
-            await this.expandAllResults(horseId);
+            await this.expandAllResults(spPage, horseId);
 
-            const commentMap: Record<string, string> = await this.page.evaluate((hid) => {
+            const commentMap: Record<string, string> = await spPage.evaluate((hid) => {
                 const horseDataEl = document.querySelector(
                     `horse_data[horse-id="${hid}"], horse_data[horse_id="${hid}"]`
                 );
@@ -542,6 +541,8 @@ export class HorseDetailScraper {
 
         } catch (error) {
             this.logger.warn(`comment 補完中にエラー（スキップ）: ${String(error)}`);
+        } finally {
+            await spPage.close().catch(() => {});
         }
     }
 
@@ -549,18 +550,18 @@ export class HorseDetailScraper {
      * SP モーダルの「もっと見る」ボタンをクリックして全成績を展開する。
      * ボタンが存在しない場合は何もしない。
      */
-    private async expandAllResults(horseId: string): Promise<void> {
-        const moreButton = await this.page.$(`#RacingResultMore_${horseId}`);
+    private async expandAllResults(spPage: Page, horseId: string): Promise<void> {
+        const moreButton = await spPage.$(`#RacingResultMore_${horseId}`);
         if (!moreButton) return;
 
-        const initialCount = await this.page.evaluate(
+        const initialCount = await spPage.evaluate(
             (hid) => document.querySelectorAll(`.result_${hid} li`).length,
             horseId
         );
         await moreButton.click();
         this.logger.info(`「もっと見る」ボタンをクリック（horseId=${horseId}）`);
 
-        await this.page
+        await spPage
             .waitForFunction(
                 (hid, cnt) => document.querySelectorAll(`.result_${hid} li`).length > cnt,
                 { timeout: 8000 },
