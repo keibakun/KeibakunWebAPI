@@ -453,9 +453,11 @@ export class HorseDetailScraper {
         this.logger.info(`sp.netkeiba モーダルへアクセス（comment 補完）: ${url}`);
 
         try {
-            // UA/Viewport/Headers は goto 前に設定するだけでよい
-            // about:blank 経由すると Puppeteer の内部ナビゲーション状態がリセットされ
-            // 次の goto が正常に発火しないケースがあるため直接設定する
+            // db.netkeiba ページのスクリプトが非同期で残りタブをクラッシュさせるケースがある。
+            // about:blank に遷移してリソースを解放してから UA/Viewport を設定することで安定化する。
+            // （血統取得を同一ページで行わなくなったため about:blank 遷移が安全に使える）
+            await this.page.goto("about:blank", { waitUntil: "domcontentloaded", timeout: 10000 })
+                .catch((e) => { this.logger.warn(`about:blank 遷移失敗（続行）: ${String(e)}`); });
             await this.page.setUserAgent(MOBILE_UA);
             await this.page.setViewport({ width: 390, height: 844, isMobile: true });
             await this.page.setExtraHTTPHeaders({
