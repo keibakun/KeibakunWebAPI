@@ -265,6 +265,16 @@ export class Main_HorseDetail {
                     const horseScraper = new HorseDetailScraper(page);
                     const horseDetail = await horseScraper.getHorseDetail(raceId, horseId, umaban);
 
+                    // 保存前に主要プロパティの空チェック
+                    const p = horseDetail.profile;
+                    if (!p.name)      logger.warn(`[Worker${workerId}] 警告: profile.name が空 horseId=${horseId}`);
+                    if (!p.sex)       logger.warn(`[Worker${workerId}] 警告: profile.sex が0 horseId=${horseId}`);
+                    if (!p.birthDate) logger.warn(`[Worker${workerId}] 警告: profile.birthDate が空 horseId=${horseId}`);
+                    if (!p.trainer)   logger.warn(`[Worker${workerId}] 警告: profile.trainer が空 horseId=${horseId}`);
+                    if (horseDetail.raceResults.length === 0) {
+                        logger.warn(`[Worker${workerId}] 警告: raceResults が0件 horseId=${horseId}`);
+                    }
+
                     const target = this.getHorseDetailOutPath(outDir, horseId);
                     await jsonWriter.writeJson(target.dir, "index.html", horseDetail);
                     logger.info(`[Worker${workerId}] 保存完了: ${target.file}`);
