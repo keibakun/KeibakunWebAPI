@@ -209,8 +209,13 @@ export class Main_HorseDetail {
         const pm = new PuppeteerManager();
         await pm.init();
 
+        // CI 環境（GitHub Actions）ではメモリ節約のため並列数を1に制限する
+        const isCI = !!process.env.CI || process.env.GITHUB_ACTIONS === "true";
+        const concurrency = isCI ? 1 : 2;
+        logger.info(`並列数: ${concurrency}${isCI ? " (CI環境)" : ""}`);
+
         try {
-            await this.scrapeAndSaveHorseDetails(horseEntries, pm, outDir, false, 2);
+            await this.scrapeAndSaveHorseDetails(horseEntries, pm, outDir, false, concurrency);
             await fs.rm(targetFilePath, { force: true });
             logger.info(`処理済みファイルを削除しました: ${targetFilePath}`);
         } finally {
