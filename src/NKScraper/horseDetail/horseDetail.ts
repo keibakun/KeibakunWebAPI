@@ -366,39 +366,46 @@ export class HorseDetailScraper {
         const url = `https://db.netkeiba.com/horse/${horseId}/`;
         this.logger.info(`db.netkeiba.com 馬情報ページへアクセス: ${url}`);
 
-        return retry(async (attempt) => {
-            await this.page.setUserAgent(DESKTOP_UA);
-            await this.page.setViewport({ width: 1280, height: 900, isMobile: false });
-            await this.page.setExtraHTTPHeaders({ "accept-language": "ja,en-US;q=0.9,en;q=0.8" });
-            await this.page.goto(url, { waitUntil: "domcontentloaded" });
-            await this.page.evaluate("window.__name = function(fn) { return fn; };");
+        // 長時間実行（100件/ファイル）でページを使い回すとリソースが蓄積して60件前後でハングする。
+        // 毎回新規ページを作成して finally で close することで完全にリセットする。
+        const dbPage = await this.page.browserContext().newPage();
+        try {
+            return await retry(async (attempt) => {
+                await dbPage.setUserAgent(DESKTOP_UA);
+                await dbPage.setViewport({ width: 1280, height: 900, isMobile: false });
+                await dbPage.setExtraHTTPHeaders({ "accept-language": "ja,en-US;q=0.9,en;q=0.8" });
+                await dbPage.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+                await dbPage.evaluate("window.__name = function(fn) { return fn; };");
 
-            // .horse_title は静的 HTML なので先に待機
-            await this.page.waitForSelector(".horse_title", { timeout: 15000 }).catch(() => {
-                this.logger.warn(`db.netkeiba .horse_title 待機タイムアウト（attempt=${attempt}）`);
-            });
+                // .horse_title は静的 HTML なので先に待機
+                await dbPage.waitForSelector(".horse_title", { timeout: 15000 }).catch(() => {
+                    this.logger.warn(`db.netkeiba .horse_title 待機タイムアウト（attempt=${attempt}）`);
+                });
 
-            // 成績テーブルは .horse_title より後にレンダリングされる場合がある
-            await this.page.waitForSelector("table.db_h_race_results", { timeout: 15000 }).catch(() => {
-                this.logger.info(`db.netkeiba 成績テーブルなし（未出走・引退の可能性）: horseId=${horseId}`);
-            });
+                // 成績テーブルは .horse_title より後にレンダリングされる場合がある
+                await dbPage.waitForSelector("table.db_h_race_results", { timeout: 15000 }).catch(() => {
+                    this.logger.info(`db.netkeiba 成績テーブルなし（未出走・引退の可能性）: horseId=${horseId}`);
+                });
 
-            const profile = await this.page.evaluate(parseProfile, horseId, SEX_MAP, COAT_MAP);
-            const raceResults = await this.page.evaluate(parseRaceResults, VENUE_MAP, COURSE_MAP, GRADE_MAP, WEATHER_MAP, BABA_MAP);
+                const profile = await dbPage.evaluate(parseProfile, horseId, SEX_MAP, COAT_MAP);
+                const raceResults = await dbPage.evaluate(parseRaceResults, VENUE_MAP, COURSE_MAP, GRADE_MAP, WEATHER_MAP, BABA_MAP);
 
-            if (!profile.name && raceResults.length === 0) {
-                const title   = await this.page.title().catch(() => "");
-                const snippet = await this.page
-                    .evaluate(() => document.body?.innerText?.slice(0, 300) ?? "")
-                    .catch(() => "");
-                throw new Error(`空データを検知しました title=${title} body=${snippet}`);
-            }
+                if (!profile.name && raceResults.length === 0) {
+                    const title   = await dbPage.title().catch(() => "");
+                    const snippet = await dbPage
+                        .evaluate(() => document.body?.innerText?.slice(0, 300) ?? "")
+                        .catch(() => "");
+                    throw new Error(`空データを検知しました title=${title} body=${snippet}`);
+                }
 
-            this.logger.info(
-                `db.netkeiba からデータ取得成功（attempt=${attempt}）horseId=${horseId} races=${raceResults.length}`
-            );
-            return { profile, raceResults };
-        }, 2, 3000);
+                this.logger.info(
+                    `db.netkeiba からデータ取得成功（attempt=${attempt}）horseId=${horseId} races=${raceResults.length}`
+                );
+                return { profile, raceResults };
+            }, 2, 3000);
+        } finally {
+            await dbPage.close().catch(() => {});
+        }
     }
 
     // -------------------------------------------------------------------------
