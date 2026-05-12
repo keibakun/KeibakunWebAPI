@@ -374,21 +374,47 @@ export class HorseDetailScraper {
                 await dbPage.setUserAgent(DESKTOP_UA);
                 await dbPage.setViewport({ width: 1280, height: 900, isMobile: false });
                 await dbPage.setExtraHTTPHeaders({ "accept-language": "ja,en-US;q=0.9,en;q=0.8" });
+
+                this.logger.info(`[db] goto 開始（attempt=${attempt}）: ${url}`);
                 await dbPage.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+                this.logger.info(`[db] goto 完了: title="${await dbPage.title().catch(() => "")}"`);
+
                 await dbPage.evaluate("window.__name = function(fn) { return fn; };");
 
                 // .horse_title は静的 HTML なので先に待機
-                await dbPage.waitForSelector(".horse_title", { timeout: 15000 }).catch(() => {
-                    this.logger.warn(`db.netkeiba .horse_title 待機タイムアウト（attempt=${attempt}）`);
-                });
+                const horseTitleFound = await dbPage.waitForSelector(".horse_title", { timeout: 15000 })
+                    .then(() => true)
+                    .catch(() => false);
+                if (!horseTitleFound) {
+                    this.logger.warn(`[db] .horse_title が見つかりません（attempt=${attempt}）horseId=${horseId}`);
+                } else {
+                    this.logger.info(`[db] .horse_title 確認済み（attempt=${attempt}）`);
+                }
 
                 // 成績テーブルは .horse_title より後にレンダリングされる場合がある
-                await dbPage.waitForSelector("table.db_h_race_results", { timeout: 15000 }).catch(() => {
-                    this.logger.info(`db.netkeiba 成績テーブルなし（未出走・引退の可能性）: horseId=${horseId}`);
-                });
+                const tableFound = await dbPage.waitForSelector("table.db_h_race_results", { timeout: 15000 })
+                    .then(() => true)
+                    .catch(() => false);
+                if (!tableFound) {
+                    this.logger.info(`[db] 成績テーブルなし（未出走・引退の可能性）: horseId=${horseId}`);
+                } else {
+                    this.logger.info(`[db] 成績テーブル確認済み（attempt=${attempt}）`);
+                }
 
+                this.logger.info(`[db] プロフィール解析中...`);
                 const profile = await dbPage.evaluate(parseProfile, horseId, SEX_MAP, COAT_MAP);
+                this.logger.info(`[db] プロフィール解析完了: name="${profile.name}" sex=${profile.sex} age=${profile.age}`);
+
+                this.logger.info(`[db] 成績解析中...`);
                 const raceResults = await dbPage.evaluate(parseRaceResults, VENUE_MAP, COURSE_MAP, GRADE_MAP, WEATHER_MAP, BABA_MAP);
+                this.logger.info(`[db] 成績解析完了: ${raceResults.length} 件`);
+
+                if (!profile.name) {
+                    this.logger.warn(`[db] 警告: 馬名が空です horseId=${horseId}`);
+                }
+                if (raceResults.length === 0) {
+                    this.logger.warn(`[db] 警告: 成績データが0件です horseId=${horseId}`);
+                }
 
                 if (!profile.name && raceResults.length === 0) {
                     const title   = await dbPage.title().catch(() => "");
