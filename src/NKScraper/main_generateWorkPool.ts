@@ -90,28 +90,6 @@ async function clearWorkPool(): Promise<void> {
 }
 
 /**
- * 既存の workPool*.json に含まれる horseId を収集する。
- * 生成時に重複を除外するために使用する。
- */
-async function getExistingWorkPoolIds(): Promise<Set<string>> {
-    const ids = new Set<string>();
-    if (!await dirExists(WORK_POOL_DIR)) return ids;
-    const files = await fs.readdir(WORK_POOL_DIR);
-    for (const name of files) {
-        if (!/^workPool\d+\.json$/i.test(name)) continue;
-        try {
-            const raw  = await fs.readFile(path.join(WORK_POOL_DIR, name), "utf-8");
-            const json = JSON.parse(raw) as { horses?: { horseId?: unknown }[] };
-            for (const h of json?.horses ?? []) {
-                const id = String(h?.horseId ?? "").trim();
-                if (id) ids.add(id);
-            }
-        } catch { /* ignore */ }
-    }
-    return ids;
-}
-
-/**
  * エントリ配列を CHUNK_SIZE 件ごとに workPool ファイルへ保存する。
  */
 async function saveWorkPool(entries: HorseEntry[]): Promise<void> {
@@ -161,16 +139,14 @@ export class Main_GenerateWorkPool {
         }
 
         const allEntries: HorseEntry[] = [];
-        const existingIds = await getExistingWorkPoolIds();
-        logger.info(`既存 workPool から ${existingIds.size} 件のIDを除外対象に設定`);
-        const seenHorseIds = new Set<string>(existingIds);
+        const seenHorseIds = new Set<string>();
 
         // 年ディレクトリを降順（最新優先）で走査
         const years = (await fs.readdir(SHUTUBA_ROOT))
             .filter((n) => /^\d{4}$/.test(n))
             .sort((a, b) => b.localeCompare(a));
 
-        outer: for (const year of years) {
+        for (const year of years) {
             const yearDir = path.join(SHUTUBA_ROOT, year);
             if (!await dirExists(yearDir)) continue;
 
@@ -210,7 +186,6 @@ export class Main_GenerateWorkPool {
                             allEntries.push(entry);
                         }
                     }
-                    if (allEntries.length >= CHUNK_SIZE) break outer;
                 }
             }
 
