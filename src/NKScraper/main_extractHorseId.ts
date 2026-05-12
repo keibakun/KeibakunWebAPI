@@ -159,44 +159,53 @@ function raceIdToShutubaPath(raceId: string): string {
     return path.join(SHUTUBA_ROOT, year, month, dirName, "index.html");
 }
 
-/**
- * Shutuba の内容から horseId を抽出します。
- * JSON 抽出に加え、文字列パターン抽出も実施します。
- * @param content Shutuba/index.html の内容
- * @returns horseId 配列
- */
-function extractHorseIdsFromShutuba(content: string): string[] {
-    const ids = new Set<string>();
+/** 1件の馬エントリ（workPool に保存する単位） */
+interface HorseEntry {
+    raceId: string;
+    horseId: string;
+    umaban: string;
+}
 
-    // 1) JSON として syutuba 配列から抽出
+/**
+ * Shutuba の内容から馬エントリ（raceId, horseId, umaban）を抽出します。
+ * @param content Shutuba/index.html の内容
+ * @param raceId 対応する raceId
+ * @returns HorseEntry 配列
+ */
+function extractHorseEntriesFromShutuba(content: string, raceId: string): HorseEntry[] {
+    const entries: HorseEntry[] = [];
+    const seen = new Set<string>();
+
+    // 1) JSON として syutuba 配列から抽出（umaban も取得）
     try {
         const parsed = JSON.parse(content);
         if (Array.isArray(parsed?.syutuba)) {
             for (const item of parsed.syutuba) {
-                const horseId = item?.horseId ?? item?.horseid;
-                if (horseId) {
-                    ids.add(String(horseId));
+                const horseId = String(item?.horseId ?? item?.horseid ?? '').trim();
+                const umaban = String(item?.umaban ?? '').trim();
+                if (horseId && !seen.has(horseId)) {
+                    seen.add(horseId);
+                    entries.push({ raceId, horseId, umaban });
                 }
             }
+            return entries;
         }
     } catch {
         // フォールバックへ
     }
 
-    // 2) horseId キー形式
+    // 2) フォールバック: horseId キー形式（umaban は不明のため空文字）
     let match: RegExpExecArray | null;
     const kvRe = /"horseId"\s*:\s*"(\d+)"/g;
     while ((match = kvRe.exec(content)) !== null) {
-        ids.add(match[1]);
+        const horseId = match[1];
+        if (!seen.has(horseId)) {
+            seen.add(horseId);
+            entries.push({ raceId, horseId, umaban: '' });
+        }
     }
 
-    // 3) /horse/{id}/ パス形式
-    const pathRe = /\/horse\/(\d+)\/?/g;
-    while ((match = pathRe.exec(content)) !== null) {
-        ids.add(match[1]);
-    }
-
-    return Array.from(ids);
+    return entries;
 }
 
 /**
@@ -218,22 +227,31 @@ async function clearWorkPoolFiles(dirPath: string): Promise<void> {
 }
 
 /**
- * horseId 配列を200件ごとに分割して workPool ファイルへ保存します。
- * horseId が0件でも workPool0.json を1件作成します。
- * @param horseIds 保存対象の horseId 配列
+ * 馬エントリ配列を200件ごとに分割して workPool ファイルへ保存します。
+ * エントリが0件でも workPool0.json を1件作成します。
+ * @param entries 保存対象の HorseEntry 配列
  */
-async function saveHorseIdsAsWorkPoolFiles(horseIds: string[]): Promise<void> {
+async function saveHorseEntriesAsWorkPoolFiles(entries: HorseEntry[]): Promise<void> {
     await fs.mkdir(WORK_POOL_DIR, { recursive: true });
     await clearWorkPoolFiles(WORK_POOL_DIR);
 
-    // 重複除去・空文字除去・昇順ソートして安定した出力順を保証する
-    const normalized = Array.from(new Set(horseIds.map((id) => String(id).trim()).filter((id) => id !== ""))).sort((a, b) => a.localeCompare(b));
+    // horseId の重複除去・空エントリ除去・horseId 昇順ソート
+    const seen = new Set<string>();
+    const normalized: HorseEntry[] = [];
+    for (const e of entries) {
+        const horseId = String(e.horseId ?? '').trim();
+        if (!horseId || seen.has(horseId)) continue;
+        seen.add(horseId);
+        normalized.push({ raceId: String(e.raceId ?? '').trim(), horseId, umaban: String(e.umaban ?? '').trim() });
+    }
+    normalized.sort((a, b) => a.horseId.localeCompare(b.horseId));
+
     const fileCount = Math.max(1, Math.ceil(normalized.length / CHUNK_SIZE));
 
     for (let i = 0; i < fileCount; i++) {
         const chunk = normalized.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
         const outPath = path.join(WORK_POOL_DIR, `workPool${i}.json`);
-        const payload = { horseId: chunk };
+        const payload = { horses: chunk };
         await fs.writeFile(outPath, JSON.stringify(payload, null, 4), "utf-8");
         logger.info(`保存完了: ${outPath} (${chunk.length}件)`);
     }
@@ -272,9 +290,9 @@ async function main(): Promise<void> {
     const raceIds = Array.from(raceIdSet).sort((a, b) => a.localeCompare(b));
     logger.info(`抽出 raceId 合計: ${raceIds.length}件`);
 
-    const horseIdSet = new Set<string>();
+    const horseEntries: HorseEntry[] = [];
 
-    // raceId に対応する Shutuba から horseId を収集
+    // raceId に対応する Shutuba から馬エントリを収集
     for (const raceId of raceIds) {
         let shutubaPath = "";
         try {
@@ -290,14 +308,13 @@ async function main(): Promise<void> {
         }
 
         const shutubaContent = await fs.readFile(shutubaPath, "utf-8");
-        const horseIds = extractHorseIdsFromShutuba(shutubaContent);
-        horseIds.forEach((id) => horseIdSet.add(id));
+        const entries = extractHorseEntriesFromShutuba(shutubaContent, raceId);
+        horseEntries.push(...entries);
     }
 
-    const horseIds = Array.from(horseIdSet).sort((a, b) => a.localeCompare(b));
-    logger.info(`抽出 horseId 合計: ${horseIds.length}件`);
+    logger.info(`抽出 horseId 合計: ${horseEntries.length}件`);
 
-    await saveHorseIdsAsWorkPoolFiles(horseIds);
+    await saveHorseEntriesAsWorkPoolFiles(horseEntries);
 }
 
 main().catch((e: any) => {

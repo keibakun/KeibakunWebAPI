@@ -6,11 +6,73 @@ on:
     # JST 21:03〜22:43 を20分おきで実行（UTC 12:03〜13:43）
     - cron: '3,23,43 12 * * 5'
     - cron: '3,23,43 13 * * 5'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      skip_workpool:
+        description: 'workPool作成をスキップ（既存のworkPoolをそのまま使用）'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
-  scrape:
-    name: scrape
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Step①: workPool 作成（残存IDを除外して100件を新規生成）
+  # skip_workpool=true の場合はスキップ（既存 workPool をそのまま使用）
+  # ─────────────────────────────────────────────────────────────────────────────
+  generate_workpool:
+    name: generate_workpool
+    if: ${{ !inputs.skip_workpool }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: "Run Step1: Generate workPool"
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_generateWorkPool.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "Step①: workPool を生成しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Step②: db.netkeiba からプロフィール＋成績を取得
+  # ─────────────────────────────────────────────────────────────────────────────
+  fetch_db:
+    name: fetch_db
+    needs: [generate_workpool]
+    if: ${{ always() && (needs.generate_workpool.result == 'success' || needs.generate_workpool.result == 'skipped') }}
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     permissions:
@@ -36,16 +98,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
-          which chromium-browser || true
 
-      - name: Run production horse detail
+      - name: "Run Step2: DB scraping"
         env:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
           PUPPETEER_HEADLESS: new
         run: |
           npm install
-          echo "Run production horse detail for workPool queue"
-          npx tsx ./src/NKScraper/main_horseDetail.ts true
+          npx tsx ./src/NKScraper/main_horseDetail_db.ts
 
       - name: Setup Git user
         shell: bash
@@ -53,25 +113,196 @@ jobs:
           git config --global user.email "keibakun.manage@gmail.com"
           git config --global user.name "keibakun"
 
-      - name: Push HorseDetail and workPool updates
+      - name: Push HorseDetail (after DB)
         run: |
           YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
           for i in 1 2 3; do
             git pull --rebase --autostash origin main
-            git add ./HorseDetail/ ./temp/work/workPool/horseDetail/
+            git add ./HorseDetail/
             git diff --staged --exit-code && break
-            git commit -m "本番実行: 競走馬詳細データを取得しました ${YYYYMMDD}" || true
+            git commit -m "Step②: 競走馬DBデータを取得しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Step③: SP モーダルからコメント補完（別 runner → 別 IP）
+  # ─────────────────────────────────────────────────────────────────────────────
+  fetch_modal:
+    name: fetch_modal
+    needs: [fetch_db]
+    if: ${{ needs.fetch_db.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: Install Chromium and libs (for Puppeteer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
+
+      - name: "Run Step3: Modal comment supplement"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_modal.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after Modal)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "Step③: 競走馬コメントを補完しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Step④: 血統取得（別 runner → 別 IP）
+  # ─────────────────────────────────────────────────────────────────────────────
+  fetch_pedigree:
+    name: fetch_pedigree
+    needs: [fetch_modal]
+    if: ${{ needs.fetch_modal.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: Install Chromium and libs (for Puppeteer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
+
+      - name: "Run Step4: Pedigree scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_pedigree.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after Pedigree)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "Step④: 血統データを補完しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Step⑤: workPool 削除
+  # ─────────────────────────────────────────────────────────────────────────────
+  delete_workpool:
+    name: delete_workpool
+    needs: [fetch_pedigree]
+    if: ${{ needs.fetch_pedigree.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: "Run Step5: Delete workPool"
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_deleteWorkPool.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool deletion
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "Step⑤: workPool を削除しました ${YYYYMMDD}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
           done
 
   report:
-    needs: [scrape]
+    needs: [generate_workpool, fetch_db, fetch_modal, fetch_pedigree, delete_workpool]
     if: always()
     permissions:
       contents: write
     uses: ./.github/workflows/actions-report.yml
     with:
       workflow-name: '【本番】競走馬詳細取得'
-      conclusion: ${{ needs.scrape.result }}
+      conclusion: ${{ needs.delete_workpool.result }}
