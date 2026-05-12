@@ -81,6 +81,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: refs/heads/main
           fetch-depth: 0
           persist-credentials: true
 
@@ -141,6 +142,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: refs/heads/main
           fetch-depth: 0
           persist-credentials: true
 
@@ -201,6 +203,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: refs/heads/main
           fetch-depth: 0
           persist-credentials: true
 
@@ -261,6 +264,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: refs/heads/main
           fetch-depth: 0
           persist-credentials: true
 
