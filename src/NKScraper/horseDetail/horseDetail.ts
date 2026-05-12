@@ -466,11 +466,13 @@ export class HorseDetailScraper {
             });
 
             // gotoを最大3回リトライ（ロードが遅いケースに対応）
-            // waitUntil: "load" = JSの同期実行後。networkidle2はポーリングで永続化するためNG
+            // waitUntil: "domcontentloaded" = DOM解析完了後。
+            // "load" は全リソース待ちのため、SPモーダルの非同期リソースが残ると永遠にブロックされる。
+            // コンテンツ出現は後続の waitForSelector で担保する。
             let gotoSuccess = false;
             for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
-                    await this.page.goto(url, { waitUntil: "load", timeout: 25000 });
+                    await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 25000 });
                     gotoSuccess = true;
                     this.logger.info(`SP page.goto 成功（試行${attempt}/3）URL: ${this.page.url()}`);
                     break;
@@ -497,7 +499,7 @@ export class HorseDetailScraper {
 
             if (!selectorFound) {
                 this.logger.warn(`SP selector 1回目タイムアウト、リロードして再試行: horseId=${horseId}`);
-                await this.page.reload({ waitUntil: "load", timeout: 25000 }).catch(() => {});
+                await this.page.reload({ waitUntil: "domcontentloaded", timeout: 25000 }).catch(() => {});
                 selectorFound = await this.page.waitForSelector(selector, { timeout: 25000 })
                     .then(() => true)
                     .catch(() => false);
