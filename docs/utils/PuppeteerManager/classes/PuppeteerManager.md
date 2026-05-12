@@ -29,7 +29,7 @@ Puppeteerを管理するクラス
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [utils/PuppeteerManager.ts:67](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L67)
+Defined in: [utils/PuppeteerManager.ts:70](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L70)
 
 ブラウザ・ページのクローズ
 
@@ -43,7 +43,7 @@ Defined in: [utils/PuppeteerManager.ts:67](https://github.com/keibakun/KeibakunW
 
 > **getBrowser**(): `Browser`
 
-Defined in: [utils/PuppeteerManager.ts:92](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L92)
+Defined in: [utils/PuppeteerManager.ts:117](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L117)
 
 Browserインスタンス取得
 
@@ -57,7 +57,7 @@ Browserインスタンス取得
 
 > **getPage**(): `Page`
 
-Defined in: [utils/PuppeteerManager.ts:81](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L81)
+Defined in: [utils/PuppeteerManager.ts:92](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L92)
 
 Pageインスタンス取得
 
@@ -87,3 +87,17 @@ Defined in: [utils/PuppeteerManager.ts:21](https://github.com/keibakun/KeibakunW
 #### Returns
 
 `Promise`\<`void`\>
+
+***
+
+### newPage()
+
+> **newPage**(): `Promise`\<`Page`\>
+
+Defined in: [utils/PuppeteerManager.ts:103](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/utils/PuppeteerManager.ts#L103)
+
+新しいPageインスタンスを生成して返す（並列処理用）
+
+#### Returns
+
+`Promise`\<`Page`\>

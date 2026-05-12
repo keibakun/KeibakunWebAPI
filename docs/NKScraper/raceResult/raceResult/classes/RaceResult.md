@@ -9,6 +9,9 @@
 Defined in: [NKScraper/raceResult/raceResult.ts:15](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/raceResult/raceResult.ts#L15)
 
 RaceResultクラス
+
+## Description
+
 PuppeteerのPageインスタンスを使用してレース結果を取得するクラス
 
 ## Constructors

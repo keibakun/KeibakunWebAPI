@@ -6,7 +6,7 @@
 
 # Class: Main\_HorseDetail
 
-Defined in: [NKScraper/main\_horseDetail.ts:20](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L20)
+Defined in: [NKScraper/main\_horseDetail.ts:28](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L28)
 
 Main_HorseDetail
 
@@ -19,9 +19,9 @@ Main_HorseDetail
 
 ### Constructor
 
-> **new Main\_HorseDetail**(`year`, `monthArg?`): `Main_HorseDetail`
+> **new Main\_HorseDetail**(`year`, `monthArg?`, `production?`): `Main_HorseDetail`
 
-Defined in: [NKScraper/main\_horseDetail.ts:29](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L29)
+Defined in: [NKScraper/main\_horseDetail.ts:39](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L39)
 
 コンストラクタ
 
@@ -39,6 +39,12 @@ Defined in: [NKScraper/main\_horseDetail.ts:29](https://github.com/keibakun/Keib
 
 対象月（1-12）
 
+##### production?
+
+`boolean`
+
+本番実行フラグ（true の場合は workPool から horseId を取得）
+
 #### Returns
 
 `Main_HorseDetail`
@@ -49,9 +55,34 @@ Defined in: [NKScraper/main\_horseDetail.ts:29](https://github.com/keibakun/Keib
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: [NKScraper/main\_horseDetail.ts:37](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L37)
+Defined in: [NKScraper/main\_horseDetail.ts:48](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L48)
 
 エントリポイント: Puppeteer を初期化して horse detail を収集します。
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### runSingle()
+
+> **runSingle**(`horseId`, `raceId`): `Promise`\<`void`\>
+
+Defined in: [NKScraper/main\_horseDetail.ts:148](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_horseDetail.ts#L148)
+
+単体モード: horseId と raceId を直接指定して1件だけ取得・保存します。
+umaban は Shutuba ファイルがあれば自動取得し、なければ空文字でフォールバックします。
+
+#### Parameters
+
+##### horseId
+
+`string`
+
+##### raceId
+
+`string`
 
 #### Returns
 

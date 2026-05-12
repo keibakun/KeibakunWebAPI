@@ -6,13 +6,19 @@
 
 # Function: default()
 
-> **default**(`raceId`): `Promise`\<[`RaceIF`](../../syutubaIF/interfaces/RaceIF.md)\>
+> **default**(`page`, `raceId`): `Promise`\<[`RaceIF`](../../syutubaIF/interfaces/RaceIF.md)\>
 
-Defined in: [NKScraper/shutuba/shutuba.ts:10](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/shutuba/shutuba.ts#L10)
+Defined in: [NKScraper/shutuba/shutuba.ts:11](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/shutuba/shutuba.ts#L11)
 
 出馬表を取得する関数
 
 ## Parameters
+
+### page
+
+`Page`
+
+PuppeteerのPageインスタンス
 
 ### raceId
 

@@ -2,11 +2,11 @@
 
 ***
 
-[keibakun](../../../modules.md) / [NKScraper/main\_shutuba](../README.md) / Main\_Shutuba
+[keibakun](../../../modules.md) / [NKScraper/main\_shutuba\_temp](../README.md) / Main\_Shutuba
 
 # Class: Main\_Shutuba
 
-Defined in: [NKScraper/main\_shutuba.ts:25](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_shutuba.ts#L25)
+Defined in: [NKScraper/main\_shutuba\_temp.ts:25](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_shutuba_temp.ts#L25)
 
 Main_Shutuba
 
@@ -19,9 +19,9 @@ Main_Shutuba
 
 ### Constructor
 
-> **new Main\_Shutuba**(`year`, `month?`, `day?`, `debug?`, `concurrency?`, `singleRaceId?`): `Main_Shutuba`
+> **new Main\_Shutuba**(`year`, `month?`, `day?`, `debug?`, `concurrency?`): `Main_Shutuba`
 
-Defined in: [NKScraper/main\_shutuba.ts:41](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_shutuba.ts#L41)
+Defined in: [NKScraper/main\_shutuba\_temp.ts:39](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_shutuba_temp.ts#L39)
 
 コンストラクタ
 
@@ -55,13 +55,7 @@ Defined in: [NKScraper/main\_shutuba.ts:41](https://github.com/keibakun/Keibakun
 
 `number`
 
-並列実行数（デフォルト: 5）
-
-##### singleRaceId?
-
-`string`
-
-1件だけ取得する raceId（指定時は年月日を無視）
+並列実行数（デフォルト: 3）
 
 #### Returns
 
@@ -73,10 +67,9 @@ Defined in: [NKScraper/main\_shutuba.ts:41](https://github.com/keibakun/Keibakun
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: [NKScraper/main\_shutuba.ts:54](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_shutuba.ts#L54)
+Defined in: [NKScraper/main\_shutuba\_temp.ts:50](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/main_shutuba_temp.ts#L50)
 
 エントリポイント: スケジュールから開催日を抽出して処理を開始します。
-`singleRaceId` が指定された場合は年月日・debug フラグを無視し、その1件のみ処理します。
 
 #### Returns
 
