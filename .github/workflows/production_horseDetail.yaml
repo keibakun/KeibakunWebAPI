@@ -96,14 +96,14 @@ jobs:
           mkdir -p ./temp/work/workPool/horseDetail
           mkdir -p ./Log/HorseDetail
 
-      - name: Install Chromium and libs (for Puppeteer)
+      - name: Install Google Chrome (for Puppeteer)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
       - name: "Run Step2: DB scraping"
         env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
           PUPPETEER_HEADLESS: new
         run: |
           npm install
@@ -158,14 +158,14 @@ jobs:
           mkdir -p ./temp/work/workPool/horseDetail
           mkdir -p ./Log/HorseDetail
 
-      - name: Install Chromium and libs (for Puppeteer)
+      - name: Install Google Chrome (for Puppeteer)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
       - name: "Run Step3: Modal comment supplement"
         env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
           PUPPETEER_HEADLESS: new
         run: |
           npm install
@@ -220,14 +220,14 @@ jobs:
           mkdir -p ./temp/work/workPool/horseDetail
           mkdir -p ./Log/HorseDetail
 
-      - name: Install Chromium and libs (for Puppeteer)
+      - name: Install Google Chrome (for Puppeteer)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libnspr4 libnss3 libxss1 libgbm1
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
       - name: "Run Step4: Pedigree scraping"
         env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
           PUPPETEER_HEADLESS: new
         run: |
           npm install
