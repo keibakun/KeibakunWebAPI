@@ -16,7 +16,7 @@ const DESKTOP_UA =
 // =============================================================================
 
 /** 性別文字列 → HorseSex コード */
-const SEX_MAP: Record<string, number> = { 牡: 1, 牝: 2, せん: 3 };
+const SEX_MAP: Record<string, number> = { 牡: 1, 牝: 2, せん: 3, セ: 3, セン: 3, 騸: 3 };
 
 /** 毛色文字列 → HorseCoatColor コード（JRA公認8毛色） */
 const COAT_MAP: Record<string, number> = {
