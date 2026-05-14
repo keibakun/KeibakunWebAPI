@@ -60,7 +60,7 @@ jobs:
             git pull --rebase --autostash origin main
             git add ./temp/work/workPool/horseDetail/
             git diff --staged --exit-code && break
-            git commit -m "Step①: workPool を生成しました ${YYYYMMDD}" || true
+            git commit -m "【本番】競走馬詳細取得 Step①: workPool を生成しました ${YYYYMMDD}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
@@ -94,6 +94,7 @@ jobs:
         run: |
           mkdir -p ./HorseDetail
           mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
 
       - name: Install Chromium and libs (for Puppeteer)
         run: |
@@ -119,9 +120,9 @@ jobs:
           YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
           for i in 1 2 3; do
             git pull --rebase --autostash origin main
-            git add ./HorseDetail/
+            git add ./HorseDetail/ ./Log/HorseDetail/
             git diff --staged --exit-code && break
-            git commit -m "Step②: 競走馬DBデータを取得しました ${YYYYMMDD}" || true
+            git commit -m "【本番】競走馬詳細取得 Step②: 競走馬DBデータを取得しました ${YYYYMMDD}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
@@ -155,6 +156,7 @@ jobs:
         run: |
           mkdir -p ./HorseDetail
           mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
 
       - name: Install Chromium and libs (for Puppeteer)
         run: |
@@ -180,9 +182,9 @@ jobs:
           YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
           for i in 1 2 3; do
             git pull --rebase --autostash origin main
-            git add ./HorseDetail/
+            git add ./HorseDetail/ ./Log/HorseDetail/
             git diff --staged --exit-code && break
-            git commit -m "Step③: 競走馬コメントを補完しました ${YYYYMMDD}" || true
+            git commit -m "【本番】競走馬詳細取得 Step③: 競走馬コメントを補完しました ${YYYYMMDD}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
@@ -216,6 +218,7 @@ jobs:
         run: |
           mkdir -p ./HorseDetail
           mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
 
       - name: Install Chromium and libs (for Puppeteer)
         run: |
@@ -241,9 +244,9 @@ jobs:
           YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
           for i in 1 2 3; do
             git pull --rebase --autostash origin main
-            git add ./HorseDetail/
+            git add ./HorseDetail/ ./Log/HorseDetail/
             git diff --staged --exit-code && break
-            git commit -m "Step④: 血統データを補完しました ${YYYYMMDD}" || true
+            git commit -m "【本番】競走馬詳細取得 Step④: 血統データを補完しました ${YYYYMMDD}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
@@ -295,7 +298,7 @@ jobs:
             git pull --rebase --autostash origin main
             git add ./temp/work/workPool/horseDetail/
             git diff --staged --exit-code && break
-            git commit -m "Step⑤: workPool を削除しました ${YYYYMMDD}" || true
+            git commit -m "【本番】競走馬詳細取得 Step⑤: workPool を削除しました ${YYYYMMDD}" || true
             git push origin main && break
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))

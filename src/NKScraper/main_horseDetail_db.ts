@@ -6,6 +6,7 @@ import { Logger } from "../utils/Logger";
 import { FileUtil } from "../utils/FileUtil";
 import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 import { HorseDetail } from "./horseDetail/horseDetailIF";
+import { HorseDetailRunLogger } from "../utils/HorseDetailRunLogger";
 
 const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
@@ -23,6 +24,7 @@ interface HorseEntry {
 
 export const WORK_POOL_DIR = path.join(__dirname, "../../temp/work/workPool/horseDetail");
 export const HORSE_OUT_DIR = path.join(process.cwd(), "HorseDetail");
+export const HORSE_LOG_OUT_DIR = path.join(process.cwd(), "Log/HorseDetail");
 
 export function getHorseDetailOutPath(base: string, id: string): { dir: string; file: string } {
     if (id.length >= 10) {
@@ -113,17 +115,21 @@ class Main_HorseDetail_Db {
         const concurrency = isCI ? 1 : 3;
         logger.info(`並列数: ${concurrency}${isCI ? " (CI環境)" : ""}`);
 
+        const runLogger = new HorseDetailRunLogger("main_horseDetail_db", HORSE_LOG_OUT_DIR);
         try {
-            await this.processEntries(entries, pm, concurrency);
+            await this.processEntries(entries, pm, concurrency, runLogger);
         } finally {
             await pm.close();
+            const saved = await runLogger.save();
+            if (saved) logger.info(`実行ログを保存しました: ${saved}`);
         }
     }
 
     private async processEntries(
         entries: HorseEntry[],
         pm: PuppeteerManager,
-        concurrency: number
+        concurrency: number,
+        runLogger: HorseDetailRunLogger
     ): Promise<void> {
         const workerCount = Math.min(concurrency, entries.length);
         let cursor = 0;
@@ -153,6 +159,7 @@ class Main_HorseDetail_Db {
                     logger.info(`[Worker${workerId}] 保存完了: ${target.file}`);
                 } catch (e: unknown) {
                     logger.error(`[Worker${workerId}] DB取得エラー horseId=${horseId} raceId=${raceId}: ${String(e)}`);
+                    runLogger.recordFail(horseId, String(e).split("\n")[0]);
                     if (e instanceof Error && e.name === "TargetCloseError") break;
                 } finally {
                     await page.close().catch(() => {});

@@ -2,10 +2,12 @@ import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { HorseModalCommentScraper } from "./horseDetail/horseModalCommentScraper";
 import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 import { Logger } from "../utils/Logger";
+import { HorseDetailRunLogger } from "../utils/HorseDetailRunLogger";
 import path from "path";
 import {
     WORK_POOL_DIR,
     HORSE_OUT_DIR,
+    HORSE_LOG_OUT_DIR,
     getOldestWorkPoolFile,
     getHorseDetailOutPath,
     readWorkPoolEntries,
@@ -57,17 +59,21 @@ class Main_HorseDetail_Modal {
         const concurrency = isCI ? 1 : 3;
         logger.info(`並列数: ${concurrency}${isCI ? " (CI環境)" : ""}`);
 
+        const runLogger = new HorseDetailRunLogger("main_horseDetail_modal", HORSE_LOG_OUT_DIR);
         try {
-            await this.processEntries(entries, pm, concurrency);
+            await this.processEntries(entries, pm, concurrency, runLogger);
         } finally {
             await pm.close();
+            const saved = await runLogger.save();
+            if (saved) logger.info(`実行ログを保存しました: ${saved}`);
         }
     }
 
     private async processEntries(
         entries: HorseEntry[],
         pm: PuppeteerManager,
-        concurrency: number
+        concurrency: number,
+        runLogger: HorseDetailRunLogger
     ): Promise<void> {
         const workerCount = Math.min(concurrency, entries.length);
         let cursor = 0;
@@ -83,12 +89,14 @@ class Main_HorseDetail_Modal {
                 const horseDetail = await readHorseDetail(HORSE_OUT_DIR, horseId);
                 if (!horseDetail) {
                     logger.warn(`[Worker${workerId}] HorseDetail が存在しないためスキップ: horseId=${horseId}`);
+                    runLogger.recordSkip(horseId, "HorseDetailが存在しない、1層前のDB取得で失敗した可能性あり");
                     continue;
                 }
 
                 // raceId が空の場合（旧形式 workPool）はコメント補完不可
                 if (!raceId) {
                     logger.warn(`[Worker${workerId}] raceId が空のためスキップ: horseId=${horseId}`);
+                    runLogger.recordSkip(horseId, "raceIdが空");
                     continue;
                 }
 
@@ -104,6 +112,7 @@ class Main_HorseDetail_Modal {
                     logger.info(`[Worker${workerId}] comment 補完・保存完了: ${target.file}`);
                 } catch (e: unknown) {
                     logger.error(`[Worker${workerId}] comment 補完エラー horseId=${horseId}: ${String(e)}`);
+                    runLogger.recordFail(horseId, String(e).split("\n")[0]);
                     if (e instanceof Error && e.name === "TargetCloseError") break;
                 } finally {
                     await page.close().catch(() => {});
