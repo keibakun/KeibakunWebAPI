@@ -175,7 +175,9 @@ class Main_HorseDetail_Db {
 }
 
 // CLI
-new Main_HorseDetail_Db().run().catch((err) => {
-    logger.error(`main_horseDetail_db の実行で異常終了: ${String(err)}`);
-    process.exit(1);
-});
+if (require.main === module) {
+    new Main_HorseDetail_Db().run().catch((err) => {
+        logger.error(`main_horseDetail_db の実行で異常終了: ${String(err)}`);
+        process.exit(1);
+    });
+}
