@@ -1,0 +1,582 @@
+name: 【本番臨時】競走馬詳細取得（モーダル取得を除く）
+run-name: 【本番臨時】競走馬詳細取得（モーダル取得を除く）
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_workpool:
+        description: 'workPool作成をスキップ（既存のworkPoolをそのまま使用）'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Step①: workPool 作成
+  # ─────────────────────────────────────────────────────────────────────────────
+  generate_workpool:
+    name: generate_workpool
+    if: ${{ !inputs.skip_workpool }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: "Run Step1: Generate workPool"
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_generateWorkPool.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step①: workPool を生成しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1回目: DB取得 → 血統取得 → workPool削除
+  # ─────────────────────────────────────────────────────────────────────────────
+  fetch_db_1:
+    name: fetch_db_1
+    needs: [generate_workpool]
+    if: ${{ always() && (needs.generate_workpool.result == 'success' || needs.generate_workpool.result == 'skipped') }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
+
+      - name: Install Google Chrome (for Puppeteer)
+        run: |
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: "Run Step2-1: DB scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_db.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after DB 1)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./Log/HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step②-1: 競走馬DBデータを取得しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  fetch_pedigree_1:
+    name: fetch_pedigree_1
+    needs: [fetch_db_1]
+    if: ${{ always() && needs.fetch_db_1.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
+
+      - name: Install Google Chrome (for Puppeteer)
+        run: |
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: "Run Step4-1: Pedigree scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_pedigree.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after Pedigree 1)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./Log/HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step④-1: 血統データを補完しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  delete_workpool_1:
+    name: delete_workpool_1
+    needs: [fetch_pedigree_1]
+    if: ${{ always() && needs.fetch_pedigree_1.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: "Run Step5-1: Delete workPool"
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_deleteWorkPool.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool deletion 1
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step⑤-1: workPool を削除しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2回目: DB取得 → 血統取得 → workPool削除
+  # ─────────────────────────────────────────────────────────────────────────────
+  fetch_db_2:
+    name: fetch_db_2
+    needs: [delete_workpool_1]
+    if: ${{ always() && needs.delete_workpool_1.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
+
+      - name: Install Google Chrome (for Puppeteer)
+        run: |
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: "Run Step2-2: DB scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_db.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after DB 2)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./Log/HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step②-2: 競走馬DBデータを取得しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  fetch_pedigree_2:
+    name: fetch_pedigree_2
+    needs: [fetch_db_2]
+    if: ${{ always() && needs.fetch_db_2.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
+
+      - name: Install Google Chrome (for Puppeteer)
+        run: |
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: "Run Step4-2: Pedigree scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_pedigree.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after Pedigree 2)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./Log/HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step④-2: 血統データを補完しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  delete_workpool_2:
+    name: delete_workpool_2
+    needs: [fetch_pedigree_2]
+    if: ${{ always() && needs.fetch_pedigree_2.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: "Run Step5-2: Delete workPool"
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_deleteWorkPool.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool deletion 2
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step⑤-2: workPool を削除しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 3回目: DB取得 → 血統取得 → workPool削除
+  # ─────────────────────────────────────────────────────────────────────────────
+  fetch_db_3:
+    name: fetch_db_3
+    needs: [delete_workpool_2]
+    if: ${{ always() && needs.delete_workpool_2.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
+
+      - name: Install Google Chrome (for Puppeteer)
+        run: |
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: "Run Step2-3: DB scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_db.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after DB 3)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./Log/HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step②-3: 競走馬DBデータを取得しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  fetch_pedigree_3:
+    name: fetch_pedigree_3
+    needs: [fetch_db_3]
+    if: ${{ always() && needs.fetch_db_3.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./HorseDetail
+          mkdir -p ./temp/work/workPool/horseDetail
+          mkdir -p ./Log/HorseDetail
+
+      - name: Install Google Chrome (for Puppeteer)
+        run: |
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: "Run Step4-3: Pedigree scraping"
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PUPPETEER_HEADLESS: new
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_horseDetail_pedigree.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push HorseDetail (after Pedigree 3)
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./HorseDetail/ ./Log/HorseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step④-3: 血統データを補完しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  delete_workpool_3:
+    name: delete_workpool_3
+    needs: [fetch_pedigree_3]
+    if: ${{ always() && needs.fetch_pedigree_3.result == 'success' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p ./temp/work/workPool/horseDetail
+
+      - name: "Run Step5-3: Delete workPool"
+        run: |
+          npm install
+          npx tsx ./src/NKScraper/main_deleteWorkPool.ts
+
+      - name: Setup Git user
+        shell: bash
+        run: |
+          git config --global user.email "keibakun.manage@gmail.com"
+          git config --global user.name "keibakun"
+
+      - name: Push workPool deletion 3
+        run: |
+          YYYYMMDD=$(TZ=Asia/Tokyo date +%Y%m%d)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main
+            git add ./temp/work/workPool/horseDetail/
+            git diff --staged --exit-code && break
+            git commit -m "【本番臨時】競走馬詳細取得（モーダル取得を除く） Step⑤-3: workPool を削除しました ${YYYYMMDD}" || true
+            git push origin main && break
+            echo "Push failed (attempt $i), retrying..."
+            sleep $((RANDOM % 10 + 5))
+          done
+
+  report:
+    needs: [generate_workpool, fetch_db_1, fetch_pedigree_1, delete_workpool_1, fetch_db_2, fetch_pedigree_2, delete_workpool_2, fetch_db_3, fetch_pedigree_3, delete_workpool_3]
+    if: always()
+    permissions:
+      contents: write
+    uses: ./.github/workflows/actions-report.yml
+    with:
+      workflow-name: '【本番臨時】競走馬詳細取得（モーダル取得を除く）'
+      conclusion: ${{ needs.delete_workpool_3.result }}
