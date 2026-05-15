@@ -134,7 +134,7 @@ jobs:
   fetch_modal:
     name: fetch_modal
     needs: [fetch_db]
-    if: ${{ needs.fetch_db.result == 'success' }}
+    if: ${{ always() && needs.fetch_db.result == 'success' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     permissions:
@@ -196,7 +196,7 @@ jobs:
   fetch_pedigree:
     name: fetch_pedigree
     needs: [fetch_modal]
-    if: ${{ needs.fetch_modal.result == 'success' }}
+    if: ${{ always() && needs.fetch_modal.result == 'success' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     permissions:
@@ -258,7 +258,7 @@ jobs:
   delete_workpool:
     name: delete_workpool
     needs: [fetch_pedigree]
-    if: ${{ needs.fetch_pedigree.result == 'success' }}
+    if: ${{ always() && needs.fetch_pedigree.result == 'success' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     permissions:
