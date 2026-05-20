@@ -2,6 +2,9 @@ name: 【本番臨時】競走馬詳細取得（モーダル取得を除く）
 run-name: 【本番臨時】競走馬詳細取得（モーダル取得を除く）
 
 on:
+  schedule:
+    # GitHub Actions の cron は UTC。JST 2:00 開始で2時間おき = UTC 奇数時 0分。
+    - cron: '0 1,3,5,7,9,11,13,15,17,19,21,23 * * *'
   workflow_dispatch:
     inputs:
       skip_workpool:
