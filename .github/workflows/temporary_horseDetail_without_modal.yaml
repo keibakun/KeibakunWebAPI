@@ -11,7 +11,7 @@ on:
         description: 'workPool作成をスキップ（既存のworkPoolをそのまま使用）'
         type: boolean
         required: false
-        default: false
+        default: true
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
