@@ -2,108 +2,108 @@
     "horses": [
         {
             "raceId": "202608031003",
-            "horseId": "2023103431",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031003",
             "horseId": "2023100490",
-            "umaban": ""
+            "umaban": "8"
         },
         {
             "raceId": "202608031003",
             "horseId": "2023102101",
-            "umaban": ""
+            "umaban": "9"
+        },
+        {
+            "raceId": "202608031003",
+            "horseId": "2023103431",
+            "umaban": "11"
         },
         {
             "raceId": "202608031003",
             "horseId": "2023101969",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031003",
-            "horseId": "2023104936",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031003",
-            "horseId": "2023101700",
-            "umaban": ""
+            "umaban": "12"
         },
         {
             "raceId": "202608031003",
             "horseId": "2023101576",
-            "umaban": ""
+            "umaban": "15"
+        },
+        {
+            "raceId": "202608031003",
+            "horseId": "2023104936",
+            "umaban": "16"
+        },
+        {
+            "raceId": "202608031003",
+            "horseId": "2023101700",
+            "umaban": "17"
         },
         {
             "raceId": "202608031002",
             "horseId": "2023100541",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031002",
-            "horseId": "2023101572",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031002",
-            "horseId": "2023105917",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031002",
-            "horseId": "2023102585",
-            "umaban": ""
+            "umaban": "2"
         },
         {
             "raceId": "202608031002",
             "horseId": "2023103845",
-            "umaban": ""
+            "umaban": "3"
         },
         {
             "raceId": "202608031002",
-            "horseId": "2023105583",
-            "umaban": ""
+            "horseId": "2023105917",
+            "umaban": "5"
         },
         {
             "raceId": "202608031002",
             "horseId": "2023101006",
-            "umaban": ""
+            "umaban": "6"
         },
         {
-            "raceId": "202608031001",
-            "horseId": "2023100286",
-            "umaban": ""
+            "raceId": "202608031002",
+            "horseId": "2023105583",
+            "umaban": "7"
         },
         {
-            "raceId": "202608031001",
-            "horseId": "2023100580",
-            "umaban": ""
+            "raceId": "202608031002",
+            "horseId": "2023102585",
+            "umaban": "10"
         },
         {
-            "raceId": "202608031001",
-            "horseId": "2023103285",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031001",
-            "horseId": "2023102701",
-            "umaban": ""
-        },
-        {
-            "raceId": "202608031001",
-            "horseId": "2023102987",
-            "umaban": ""
+            "raceId": "202608031002",
+            "horseId": "2023101572",
+            "umaban": "12"
         },
         {
             "raceId": "202608031001",
             "horseId": "2023105206",
-            "umaban": ""
+            "umaban": "1"
+        },
+        {
+            "raceId": "202608031001",
+            "horseId": "2023100286",
+            "umaban": "3"
+        },
+        {
+            "raceId": "202608031001",
+            "horseId": "2023102987",
+            "umaban": "4"
+        },
+        {
+            "raceId": "202608031001",
+            "horseId": "2023100580",
+            "umaban": "6"
         },
         {
             "raceId": "202608031001",
             "horseId": "2023106550",
-            "umaban": ""
+            "umaban": "9"
+        },
+        {
+            "raceId": "202608031001",
+            "horseId": "2023102701",
+            "umaban": "13"
+        },
+        {
+            "raceId": "202608031001",
+            "horseId": "2023103285",
+            "umaban": "15"
         },
         {
             "raceId": "202608030912",
