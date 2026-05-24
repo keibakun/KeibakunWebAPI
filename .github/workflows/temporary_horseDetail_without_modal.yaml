@@ -19,7 +19,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   generate_workpool:
     name: generate_workpool
-    if: ${{ !inputs.skip_workpool }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.skip_workpool }}
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     permissions:
