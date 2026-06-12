@@ -1,14 +1,28 @@
-import { PuppeteerManager } from "../utils/PuppeteerManager";
-import { HorseDetailScraper } from "./horseDetail/horseDetail";
+/**
+ * main_horseDetail.ts
+ *
+ * DB（成績）・モーダル（コメント）・血統 の各 main を順に呼び出して
+ * 競走馬詳細データを取得するコーディネーター。
+ *
+ * Actions workflow (production_horseDetail.yaml) と同じ順序で処理する:
+ *   Step② main_horseDetail_db      – db.netkeiba からプロフィール＋成績取得
+ *   Step③ main_horseDetail_modal   – SP モーダルからコメント補完
+ *   Step④ main_horseDetail_pedigree – 5代血統表取得
+ *   Step⑤ workPool 削除
+ */
 import fs from "fs/promises";
 import path from "path";
 import { Logger } from "../utils/Logger";
 import { FileUtil } from "../utils/FileUtil";
-import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
+import {
+    WORK_POOL_DIR,
+    getOldestWorkPoolFile,
+    Main_HorseDetail_Db,
+} from "./main_horseDetail_db";
+import { Main_HorseDetail_Modal } from "./main_horseDetail_modal";
+import { Main_HorseDetail_Pedigree } from "./main_horseDetail_pedigree";
 
 const logger = new Logger();
-const jsonWriter = new JsonFileWriterUtil(logger);
-const DEFAULT_CONCURRENCY = 3;
 
 /** 1件の馬エントリ */
 interface HorseEntry {
@@ -17,33 +31,41 @@ interface HorseEntry {
     umaban: string;
 }
 
+// =============================================================================
+// コーディネーター
+// =============================================================================
+
 /**
  * Main_HorseDetail
  *
  * `RaceSchedule/{year}{month}/index.html` から開催日を取得し、
  * `RaceList/{kaisaiDate}/index.html` から raceId を取得、
- * `Shutuba/{raceId}/index.html` から horseId を抽出、
- * `HorseDetail` に各馬の詳細を保存する処理を行うクラスです。
+ * `Shutuba/{raceId}/index.html` から horseId を抽出して workPool を生成後、
+ * main_horseDetail_db → main_horseDetail_modal → main_horseDetail_pedigree
+ * の順に呼び出して HorseDetail を保存するコーディネータークラスです。
  */
 export class Main_HorseDetail {
     private year: number;
     private monthArg?: number;
+    private dayArg?: number;
     private production: boolean;
 
     /**
      * コンストラクタ
      * @param year 対象年
      * @param monthArg 対象月（1-12）
+     * @param dayArg 対象日（1-31）。省略時は月全体を対象にする
      * @param production 本番実行フラグ（true の場合は workPool から horseId を取得）
      */
-    constructor(year: number, monthArg?: number, production?: boolean) {
+    constructor(year: number, monthArg?: number, dayArg?: number, production?: boolean) {
         this.year = year;
         this.monthArg = monthArg;
+        this.dayArg = dayArg;
         this.production = production ?? false;
     }
 
     /**
-     * エントリポイント: Puppeteer を初期化して horse detail を収集します。
+     * エントリポイント
      */
     async run(): Promise<void> {
         if (this.production) {
@@ -57,103 +79,27 @@ export class Main_HorseDetail {
             return;
         }
 
-        const formattedMonth = this.monthArg.toString().padStart(2, "0");
-        logger.info(`指定された年: ${this.year}, 月: ${formattedMonth}`);
-
-        const outDir = path.join(process.cwd(), "HorseDetail");
-
-        // Puppeteer 初期化
-        const pm = new PuppeteerManager();
-        await pm.init();
-
-        try {
-            // RaceSchedule の index.html を読み、kaisaiDate を抽出
-            const schedulePath = path.join(__dirname, `../../RaceSchedule/${this.year}${formattedMonth}/index.html`);
-            if (! await FileUtil.exists(schedulePath)) {
-                logger.warn(`RaceSchedule の index.html が存在しません: ${schedulePath}`);
-                return;
-            }
-
-            const scheduleContent = await fs.readFile(schedulePath, "utf-8");
-            const kaisaiDates = this.extractKaisaiDates(scheduleContent, schedulePath);
-            if (kaisaiDates.length === 0) {
-                logger.warn(`指定された年 (${this.year}) の月 (${formattedMonth}) の開催日が見つかりませんでした。`);
-                return;
-            }
-
-            logger.info(`見つかった開催日の数: ${kaisaiDates.length}`);
-
-            // RaceList から raceId を収集
-            const raceIds: string[] = [];
-            for (const kaisaiDate of kaisaiDates) {
-                const raceListPath = path.join(__dirname, `../../RaceList/${kaisaiDate}/index.html`);
-                if (! await FileUtil.exists(raceListPath)) {
-                    logger.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
-                    continue;
-                }
-                const raceListContent = await fs.readFile(raceListPath, "utf-8");
-                const matches = raceListContent.match(/"raceId":\s*"([^"]+)"/g) || [];
-                const extracted = matches.map((m) => m.match(/"raceId":\s*"([^"]+)"/)?.[1] || "").filter((s) => s !== "");
-                raceIds.push(...extracted);
-            }
-
-            if (raceIds.length === 0) {
-                logger.warn("raceId が見つかりませんでした。");
-                return;
-            }
-
-            logger.info(`見つかった raceId の数: ${raceIds.length}`);
-
-            const uniqueRaceIds = [...new Set(raceIds)];
-
-            // Shutuba ファイルから horseEntry を抽出
-            const horseEntries: HorseEntry[] = [];
-            const seenHorseIds = new Set<string>();
-            for (const raceId of uniqueRaceIds) {
-                try {
-                    const shutubaPath = this.getShutubaPath(raceId);
-                    if (! await FileUtil.exists(shutubaPath)) {
-                        logger.warn(`Shutuba ファイルが存在しません: ${shutubaPath}`);
-                        continue;
-                    }
-                    const content = await fs.readFile(shutubaPath, "utf8");
-                    const entries = this.extractHorseEntriesFromShutuba(content, raceId);
-                    for (const e of entries) {
-                        if (!seenHorseIds.has(e.horseId)) {
-                            seenHorseIds.add(e.horseId);
-                            horseEntries.push(e);
-                        }
-                    }
-                    logger.info(`raceId: ${raceId} から ${entries.length} 件の馬エントリを抽出`);
-                } catch (e: any) {
-                    logger.warn(`raceId: ${raceId} のShutubaファイルが存在しないかraceId形式が不正です: ${String(e)}`);
-                }
-            }
-
-            horseEntries.sort((a, b) => a.horseId.localeCompare(b.horseId));
-            logger.info(`抽出した horseId 件数: ${horseEntries.length}`);
-
-            await this.scrapeAndSaveHorseDetails(horseEntries, pm, outDir, false);
-        } catch (e: any) {
-            logger.error(`処理中にエラー: ${String(e)}`);
-        } finally {
-            await pm.close();
+        // day 引数のバリデーション（省略可）
+        if (this.dayArg !== undefined && (isNaN(this.dayArg) || this.dayArg < 1 || this.dayArg > 31)) {
+            logger.error("日の指定が無効です。1～31の範囲で指定してください。");
+            return;
         }
+
+        await this.runManualMode();
     }
 
     /**
-     * 単体モード: horseId と raceId を直接指定して1件だけ取得・保存します。
+     * 単体モード: horseId と raceId を直接指定して1件だけ取得します。
      * umaban は Shutuba ファイルがあれば自動取得し、なければ空文字でフォールバックします。
      */
     async runSingle(horseId: string, raceId: string): Promise<void> {
         logger.info(`単体モードで起動しました: horseId=${horseId} raceId=${raceId}`);
 
-        // umaban を Shutuba から取得（任意）
-        let umaban = '';
+        let umaban = "";
         try {
             const shutubaPath = this.getShutubaPath(raceId);
             if (await FileUtil.exists(shutubaPath)) {
-                const content = await fs.readFile(shutubaPath, 'utf8');
+                const content = await fs.readFile(shutubaPath, "utf8");
                 const entries = this.extractHorseEntriesFromShutuba(content, raceId);
                 const matched = entries.find((e) => e.horseId === horseId);
                 if (matched) {
@@ -165,263 +111,197 @@ export class Main_HorseDetail {
             logger.warn(`umaban の取得に失敗しました（空文字でフォールバック）: ${String(e)}`);
         }
 
-        const outDir = path.join(process.cwd(), 'HorseDetail');
-        const pm = new PuppeteerManager();
-        await pm.init();
-
-        try {
-            await this.scrapeAndSaveHorseDetails(
-                [{ raceId, horseId, umaban }],
-                pm,
-                outDir,
-                true
-            );
-        } finally {
-            await pm.close();
-        }
+        await this.writeWorkPool([{ raceId, horseId, umaban }]);
+        await this.runSteps();
+        await this.deleteOldestWorkPool();
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // private
+    // ─────────────────────────────────────────────────────────────────────────
+
     /**
-     * 本番モード: workPool の先頭ファイルを1件消化して horse detail を収集します。
+     * 本番モード: 既存 workPool を消化して DB → モーダル → 血統 の順に取得する。
      */
     private async runProductionMode(): Promise<void> {
-        const workPoolDir = path.join(__dirname, "../../temp/work/workPool/horseDetail");
-        logger.info(`本番モードで起動しました: ${workPoolDir}`);
-
-        const targetFileName = await this.getOldestWorkPoolFileName(workPoolDir);
-        if (!targetFileName) {
-            logger.info("workPool に処理対象ファイルがありません。正常終了します。");
-            return;
-        }
-
-        const targetFilePath = path.join(workPoolDir, targetFileName);
-        logger.info(`処理対象ファイル: ${targetFilePath}`);
-
-        const horseEntries = await this.readHorseEntriesFromWorkPoolFile(targetFilePath);
-        if (horseEntries.length === 0) {
-            logger.warn(`horseId 配列が空のため処理をスキップします: ${targetFilePath}`);
-            await fs.rm(targetFilePath, { force: true });
-            logger.info(`処理済みファイルを削除しました: ${targetFilePath}`);
-            return;
-        }
-
-        const outDir = path.join(process.cwd(), "HorseDetail");
-        const pm = new PuppeteerManager();
-        await pm.init();
-
-        // CI 環境（GitHub Actions）ではメモリ節約のため並列数を1に制限する
-        const isCI = !!process.env.CI || process.env.GITHUB_ACTIONS === "true";
-        const concurrency = isCI ? 1 : 2;
-        logger.info(`並列数: ${concurrency}${isCI ? " (CI環境)" : ""}`);
-
-        try {
-            await this.scrapeAndSaveHorseDetails(horseEntries, pm, outDir, false, concurrency);
-            await fs.rm(targetFilePath, { force: true });
-            logger.info(`処理済みファイルを削除しました: ${targetFilePath}`);
-        } finally {
-            await pm.close();
-        }
+        logger.info("本番モードで起動しました。");
+        await this.runSteps();
+        await this.deleteOldestWorkPool();
     }
 
     /**
-     * horseId 一覧を並列処理して HorseDetail を保存します。
+     * 手動モード: RaceSchedule → RaceList → Shutuba から horseId を収集して
+     * workPool を生成し、DB → モーダル → 血統 の順に取得する。
      */
-    private async scrapeAndSaveHorseDetails(
-        horseEntries: HorseEntry[],
-        pm: PuppeteerManager,
-        outDir: string,
-        failFast: boolean,
-        concurrency: number = DEFAULT_CONCURRENCY
-    ): Promise<void> {
+    private async runManualMode(): Promise<void> {
+        const formattedMonth = this.monthArg!.toString().padStart(2, "0");
+        const formattedDay = this.dayArg !== undefined ? this.dayArg.toString().padStart(2, "0") : undefined;
+        const logSuffix = formattedDay ? ` day=${formattedDay}` : "";
+        logger.info(`手動モードで起動しました: year=${this.year} month=${formattedMonth}${logSuffix}`);
+
+        const horseEntries = await this.collectHorseEntries(formattedMonth, formattedDay);
         if (horseEntries.length === 0) {
+            logger.warn("処理対象の horseEntry が見つかりませんでした。");
             return;
         }
 
-        const workerCount = Math.min(concurrency, horseEntries.length);
-        logger.info(`horse detail を並列処理します（並列数: ${workerCount}）`);
+        await this.writeWorkPool(horseEntries);
+        await this.runSteps();
+        await this.deleteOldestWorkPool();
+    }
 
-        let cursor = 0;
-        let firstError: Error | null = null;
+    /**
+     * DB → モーダル → 血統 の各 main を順に呼び出す。
+     * Actions の fetch_db → fetch_modal → fetch_pedigree と同じ順序。
+     */
+    private async runSteps(): Promise<void> {
+        logger.info("Step②: DB取得を開始します。");
+        await new Main_HorseDetail_Db().run();
+        logger.info("Step②: DB取得が完了しました。");
 
-        const worker = async (workerId: number) => {
-            while (true) {
-                if (failFast && firstError) {
-                    break;
-                }
+        logger.info("Step③: モーダルコメント補完を開始します。");
+        await new Main_HorseDetail_Modal().run();
+        logger.info("Step③: モーダルコメント補完が完了しました。");
 
-                const idx = cursor++;
-                if (idx >= horseEntries.length) {
-                    break;
-                }
+        logger.info("Step④: 血統取得を開始します。");
+        await new Main_HorseDetail_Pedigree().run();
+        logger.info("Step④: 血統取得が完了しました。");
+    }
 
-                const entry = horseEntries[idx];
-                const { raceId, horseId, umaban } = entry;
+    /**
+     * 最古の workPool ファイルを削除する（Step⑤相当）。
+     */
+    private async deleteOldestWorkPool(): Promise<void> {
+        const fileName = await getOldestWorkPoolFile(WORK_POOL_DIR);
+        if (!fileName) {
+            logger.info("削除対象の workPool ファイルが存在しません。");
+            return;
+        }
+        const filePath = path.join(WORK_POOL_DIR, fileName);
+        await fs.rm(filePath, { force: true });
+        logger.info(`Step⑤: workPool を削除しました: ${fileName}`);
+    }
 
-                // 1件ごとにフレッシュなページを作成・破棄（状態汚染を防ぐ）
-                const page = await pm.newPage();
-                try {
-                    logger.info(`[Worker${workerId}] (${idx + 1}/${horseEntries.length}) 処理中: horseId=${horseId} raceId=${raceId}`);
-
-                    const horseScraper = new HorseDetailScraper(page);
-                    const horseDetail = await horseScraper.getHorseDetail(raceId, horseId, umaban);
-
-                    // 保存前に主要プロパティの空チェック
-                    const p = horseDetail.profile;
-                    if (!p.name)      logger.warn(`[Worker${workerId}] 警告: profile.name が空 horseId=${horseId}`);
-                    if (!p.sex)       logger.warn(`[Worker${workerId}] 警告: profile.sex が0 horseId=${horseId}`);
-                    if (!p.birthDate) logger.warn(`[Worker${workerId}] 警告: profile.birthDate が空 horseId=${horseId}`);
-                    if (!p.trainer)   logger.warn(`[Worker${workerId}] 警告: profile.trainer が空 horseId=${horseId}`);
-                    if (horseDetail.raceResults.length === 0) {
-                        logger.warn(`[Worker${workerId}] 警告: raceResults が0件 horseId=${horseId}`);
-                    }
-
-                    const target = this.getHorseDetailOutPath(outDir, horseId);
-                    await jsonWriter.writeJson(target.dir, "index.html", horseDetail);
-                    logger.info(`[Worker${workerId}] 保存完了: ${target.file}`);
-                } catch (e: any) {
-                    logger.error(`[Worker${workerId}] horseId=${horseId} の取得でエラー: ${String(e)}`);
-                    // ブラウザ自体が死んでいる場合はワーカーを即終了（failFast設定に関わらず）
-                    if (e instanceof Error && e.name === "TargetCloseError") {
-                        firstError = new Error(`ページが閉じられました: ${String(e)}`);
-                        break;
-                    }
-                    if (failFast) {
-                        firstError = new Error(`本番モードで horseId=${horseId} の処理に失敗しました: ${String(e)}`);
-                        break;
-                    }
-                } finally {
-                    try {
-                        await page.close();
-                    } catch {
-                        // ページが既に閉じている場合は無視
-                    }
-                }
-
-                // レートリミット対策: リクエスト間にランダム待機（3〜7秒）
-                const waitMs = 3000 + Math.floor(Math.random() * 4000);
-                await new Promise((r) => setTimeout(r, waitMs));
+    /**
+     * horseEntry 一覧を workPool0.json に書き出す。
+     * 既存の workPool*.json はすべて削除してから書き出す。
+     */
+    private async writeWorkPool(entries: HorseEntry[]): Promise<void> {
+        await fs.mkdir(WORK_POOL_DIR, { recursive: true });
+        const existing = await fs.readdir(WORK_POOL_DIR).catch(() => [] as string[]);
+        for (const name of existing) {
+            if (/^workPool\d*\.json$/i.test(name)) {
+                await fs.rm(path.join(WORK_POOL_DIR, name), { force: true });
             }
-        };
-
-        const workers = Array.from({ length: workerCount }, (_, i) => worker(i));
-        await Promise.all(workers);
-
-        if (failFast && firstError) {
-            throw firstError;
         }
+        await fs.writeFile(
+            path.join(WORK_POOL_DIR, "workPool0.json"),
+            JSON.stringify({ horses: entries }, null, 4),
+            "utf-8",
+        );
+        logger.info(`workPool0.json を作成しました: ${entries.length} 件`);
     }
 
     /**
-     * workPool ディレクトリから最小（昇順先頭）のファイル名を返します。
+     * RaceSchedule → RaceList → Shutuba の順に horseEntry を収集する。
      */
-    private async getOldestWorkPoolFileName(workPoolDir: string): Promise<string | null> {
-        if (! await FileUtil.exists(workPoolDir)) {
-            logger.info(`workPool ディレクトリが存在しません: ${workPoolDir}`);
-            return null;
+    private async collectHorseEntries(formattedMonth: string, formattedDay?: string): Promise<HorseEntry[]> {
+        const ROOT = path.join(__dirname, "../../");
+        const schedulePath = path.join(ROOT, `RaceSchedule/${this.year}${formattedMonth}/index.html`);
+        if (!await FileUtil.exists(schedulePath)) {
+            logger.warn(`RaceSchedule の index.html が存在しません: ${schedulePath}`);
+            return [];
         }
 
-        let entries: string[] = [];
-        try {
-            entries = await fs.readdir(workPoolDir);
-        } catch (e: any) {
-            throw new Error(`workPool の読み込みに失敗しました: ${String(e)}`);
+        const scheduleContent = await fs.readFile(schedulePath, "utf-8");
+        let kaisaiDates = this.extractKaisaiDates(scheduleContent, schedulePath);
+        if (kaisaiDates.length === 0) {
+            logger.warn(`開催日が見つかりませんでした: ${schedulePath}`);
+            return [];
         }
 
-        const files: string[] = [];
-        for (const name of entries) {
-            const fullPath = path.join(workPoolDir, name);
+        // 日付指定がある場合はその開催日のみに絞り込む
+        if (formattedDay) {
+            const targetDate = `${this.year}${formattedMonth}${formattedDay}`;
+            kaisaiDates = kaisaiDates.filter((d) => d === targetDate);
+            if (kaisaiDates.length === 0) {
+                logger.warn(`指定された日付 ${targetDate} は開催日に含まれていません。`);
+                return [];
+            }
+        }
+
+        logger.info(`見つかった開催日の数: ${kaisaiDates.length}`);
+
+        const raceIds: string[] = [];
+        for (const kaisaiDate of kaisaiDates) {
+            const raceListPath = path.join(ROOT, `RaceList/${kaisaiDate}/index.html`);
+            if (!await FileUtil.exists(raceListPath)) {
+                logger.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
+                continue;
+            }
+            const content = await fs.readFile(raceListPath, "utf-8");
+            const matches = content.match(/"raceId":\s*"([^"]+)"/g) ?? [];
+            for (const m of matches) {
+                const id = m.match(/"raceId":\s*"([^"]+)"/)?.[1];
+                if (id) raceIds.push(id);
+            }
+        }
+
+        if (raceIds.length === 0) {
+            logger.warn("raceId が見つかりませんでした。");
+            return [];
+        }
+        logger.info(`見つかった raceId の数: ${raceIds.length}`);
+
+        const uniqueRaceIds = [...new Set(raceIds)];
+        const horseEntries: HorseEntry[] = [];
+        const seenHorseIds = new Set<string>();
+
+        for (const raceId of uniqueRaceIds) {
             try {
-                const stat = await fs.stat(fullPath);
-                if (stat.isFile()) {
-                    files.push(name);
+                const shutubaPath = this.getShutubaPath(raceId);
+                if (!await FileUtil.exists(shutubaPath)) {
+                    logger.warn(`Shutuba ファイルが存在しません: ${shutubaPath}`);
+                    continue;
                 }
-            } catch {
-                // race condition 等で参照できない場合は無視
+                const content = await fs.readFile(shutubaPath, "utf8");
+                const entries = this.extractHorseEntriesFromShutuba(content, raceId);
+                for (const e of entries) {
+                    if (!seenHorseIds.has(e.horseId)) {
+                        seenHorseIds.add(e.horseId);
+                        horseEntries.push(e);
+                    }
+                }
+                logger.info(`raceId: ${raceId} から ${entries.length} 件の馬エントリを抽出`);
+            } catch (e) {
+                logger.warn(`Shutuba 読み取りエラー raceId=${raceId}: ${String(e)}`);
             }
         }
 
-        if (files.length === 0) {
-            return null;
-        }
-
-        files.sort((a, b) => a.localeCompare(b));
-        return files[0];
+        horseEntries.sort((a, b) => a.horseId.localeCompare(b.horseId));
+        logger.info(`抽出した horseId 件数: ${horseEntries.length}`);
+        return horseEntries;
     }
 
-    /**
-     * workPool の JSON ファイルを読み込み HorseEntry 配列を返します。
-     * 新形式 { horses: HorseEntry[] } と旧形式 { horseId: string[] } / string[] の両方を許容します。
-     */
-    private async readHorseEntriesFromWorkPoolFile(filePath: string): Promise<HorseEntry[]> {
-        let raw = "";
-        try {
-            raw = await fs.readFile(filePath, "utf-8");
-        } catch (e: any) {
-            throw new Error(`workPool ファイルの読み込みに失敗しました: ${filePath}, ${String(e)}`);
-        }
-
-        let json: unknown;
-        try {
-            json = JSON.parse(raw);
-        } catch (e: any) {
-            throw new Error(`workPool ファイルの JSON パースに失敗しました: ${filePath}, ${String(e)}`);
-        }
-
-        // 新形式: { horses: HorseEntry[] }
-        if (json && typeof json === "object" && Array.isArray((json as { horses?: unknown }).horses)) {
-            return (json as { horses: unknown[] }).horses
-                .filter((item): item is { raceId?: unknown; horseId?: unknown; umaban?: unknown } => !!item && typeof item === "object")
-                .map((item) => ({
-                    raceId: String(item.raceId ?? '').trim(),
-                    horseId: String(item.horseId ?? '').trim(),
-                    umaban: String(item.umaban ?? '').trim(),
-                }))
-                .filter((e) => e.horseId.length > 0);
-        }
-
-        // 旧形式互換: { horseId: string[] } または string[] — raceId/umaban は空文字でフォールバック
-        let horseIds: unknown[];
-        if (Array.isArray(json)) {
-            horseIds = json;
-        } else if (json && typeof json === "object" && Array.isArray((json as { horseId?: unknown }).horseId)) {
-            horseIds = (json as { horseId: unknown[] }).horseId;
-        } else {
-            throw new Error(`workPool ファイルの形式が不正です: ${filePath}`);
-        }
-
-        logger.warn(`workPool ファイルが旧形式です。raceId/umaban がないためエラーになる可能性があります: ${filePath}`);
-        return horseIds
-            .map((item) => String(item).trim())
-            .filter((id) => id.length > 0)
-            .map((horseId) => ({ raceId: '', horseId, umaban: '' }));
-    }
-
-    /**
-     * index.html の内容から kaisaiDate を抽出します。
-     */
     private extractKaisaiDates(htmlContent: string, indexPath: string): string[] {
-        const kaisaiDateMatches = htmlContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
-        if (!kaisaiDateMatches) {
+        const matches = htmlContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
+        if (!matches) {
             logger.warn(`kaisaiDate が見つかりません: ${indexPath}`);
             return [];
         }
-        return kaisaiDateMatches.map((m) => m.match(/"kaisaiDate":\s*"(\d{8})"/)?.[1] || "").filter((d) => d !== "");
+        return matches.map((m) => m.match(/"kaisaiDate":\s*"(\d{8})"/)?.[1] ?? "").filter((d) => d !== "");
     }
 
-    /**
-     * Shutuba ファイルの JSON から HorseEntry 配列を抽出するユーティリティ
-     */
     private extractHorseEntriesFromShutuba(content: string, raceId: string): HorseEntry[] {
         const entries: HorseEntry[] = [];
         const seen = new Set<string>();
 
-        // 1) JSON パースして syutuba 配列から抽出（umaban も取得）
         try {
             const obj = JSON.parse(content);
             if (obj && Array.isArray(obj.syutuba)) {
                 for (const item of obj.syutuba) {
-                    const horseId = String(item?.horseId ?? item?.horseid ?? '').trim();
-                    const umaban = String(item?.umaban ?? '').trim();
+                    const horseId = String(item?.horseId ?? item?.horseid ?? "").trim();
+                    const umaban  = String(item?.umaban  ?? "").trim();
                     if (horseId && !seen.has(horseId)) {
                         seen.add(horseId);
                         entries.push({ raceId, horseId, umaban });
@@ -429,64 +309,36 @@ export class Main_HorseDetail {
                 }
                 return entries;
             }
-        } catch (e) {
-            // JSONでなければフォールバックへ
+        } catch {
+            // フォールバックへ
         }
 
-        // 2) フォールバック: "horseId":"123456" 形式（umaban 不明）
         let m: RegExpExecArray | null;
         const kvRe = /"horseId"\s*:\s*"(\d+)"/g;
         while ((m = kvRe.exec(content)) !== null) {
             const horseId = m[1];
             if (!seen.has(horseId)) {
                 seen.add(horseId);
-                entries.push({ raceId, horseId, umaban: '' });
+                entries.push({ raceId, horseId, umaban: "" });
             }
         }
-
         return entries;
     }
 
-    /**
-     * raceId から Shutuba の index.html パスを生成します。
-     */
     private getShutubaPath(raceId: string): string {
-        if (raceId.length !== 12) {
-            throw new Error(`Invalid raceId format: ${raceId}`);
-        }
-        const year = raceId.substring(0, 4);
-        const month = raceId.substring(4, 6);
-        const day = raceId.substring(6, 8);
+        if (raceId.length !== 12) throw new Error(`Invalid raceId format: ${raceId}`);
+        const year   = raceId.substring(0, 4);
+        const month  = raceId.substring(4, 6);
+        const day    = raceId.substring(6, 8);
         const raceNo = raceId.substring(8, 12);
-        const dirName = `${day}${raceNo}`;
-        return path.join(__dirname, `../../Shutuba/${year}/${month}/${dirName}/index.html`);
-    }
-
-    /**
-     * horseId から出力先ディレクトリ/ファイルを決定します。
-     */
-    private getHorseDetailOutPath(base: string, id: string): { dir: string; file: string } {
-        if (id.length >= 10) {
-            const year = id.substring(0, 4);
-            const month = id.substring(4, 6);
-            const part3 = id.substring(6, 8);
-            const part4 = id.substring(8, 10);
-            const dir = path.join(base, year, month, part3, part4);
-            return { dir, file: path.join(dir, 'index.html') };
-        }
-        if (id.length >= 8) {
-            const year = id.substring(0, 4);
-            const month = id.substring(4, 6);
-            const part3 = id.substring(6, 8);
-            const dir = path.join(base, year, month, part3);
-            return { dir, file: path.join(dir, 'index.html') };
-        }
-        const dir = base;
-        return { dir, file: path.join(base, `${id}.html`) };
+        return path.join(__dirname, `../../Shutuba/${year}/${month}/${day}${raceNo}/index.html`);
     }
 }
 
+// =============================================================================
 // CLI 実行
+// =============================================================================
+
 const args = process.argv.slice(2);
 const isBooleanLiteral = (value?: string): boolean => {
     if (typeof value === "undefined") return false;
@@ -515,6 +367,7 @@ if (namedArgs["horseId"] && namedArgs["raceId"]) {
 } else {
     let year = new Date().getFullYear();
     let monthArg: number | undefined;
+    let dayArg: number | undefined;
     let productionArg = false;
 
     // production=true の場合は YYYY / MM なしで実行できるようにする
@@ -523,14 +376,23 @@ if (namedArgs["horseId"] && namedArgs["raceId"]) {
     } else {
         year = parseInt(positionalArgs[0], 10) || new Date().getFullYear();
         monthArg = positionalArgs[1] ? parseInt(positionalArgs[1], 10) : undefined;
-        if (isBooleanLiteral(positionalArgs[2])) {
-            productionArg = String(positionalArgs[2]).toLowerCase() === "true";
+        // positionalArgs[2] が数値なら日、ブール値なら production フラグ
+        if (positionalArgs[2] && !isBooleanLiteral(positionalArgs[2])) {
+            const parsed = parseInt(positionalArgs[2], 10);
+            if (!isNaN(parsed) && parsed >= 1 && parsed <= 31) {
+                dayArg = parsed;
+            }
+        }
+        const productionIdx = dayArg !== undefined ? 3 : 2;
+        if (isBooleanLiteral(positionalArgs[productionIdx])) {
+            productionArg = String(positionalArgs[productionIdx]).toLowerCase() === "true";
         }
     }
 
-    const main = new Main_HorseDetail(year, monthArg, productionArg);
+    const main = new Main_HorseDetail(year, monthArg, dayArg, productionArg);
     main.run().catch((err) => {
         logger.error(`main_horseDetail の実行で異常終了: ${String(err)}`);
         process.exit(1);
     });
 }
+

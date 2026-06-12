@@ -35,7 +35,7 @@ interface HorseEntry {
  * HorseDetail ファイルが存在しない horseId はスキップ（Step② が失敗した場合）。
  * workPool ファイルは削除しない（Step④が参照するため）。
  */
-class Main_HorseDetail_Modal {
+export class Main_HorseDetail_Modal {
     async run(): Promise<void> {
         const fileName = await getOldestWorkPoolFile(WORK_POOL_DIR);
         if (!fileName) {

@@ -91,7 +91,7 @@ export async function readHorseDetail(base: string, horseId: string): Promise<Ho
  * - pedigree は保存しない（Step④で補完する）
  * - workPool ファイルは削除しない（Step③④が同じファイルを参照するため Step⑤で削除）
  */
-class Main_HorseDetail_Db {
+export class Main_HorseDetail_Db {
     async run(): Promise<void> {
         const fileName = await getOldestWorkPoolFile(WORK_POOL_DIR);
         if (!fileName) {

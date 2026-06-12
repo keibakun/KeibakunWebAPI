@@ -37,7 +37,7 @@ interface HorseEntry {
  * **スキップ条件**: HorseDetail JSON 内の `profile.pedigree` が既に存在する場合はスキップ。
  * これにより再実行しても無駄なアクセスが発生しない。
  */
-class Main_HorseDetail_Pedigree {
+export class Main_HorseDetail_Pedigree {
     async run(): Promise<void> {
         const fileName = await getOldestWorkPoolFile(WORK_POOL_DIR);
         if (!fileName) {
