@@ -24,10 +24,21 @@ const COAT_MAP: Record<string, number> = {
     栗毛: 5, 栃栗毛: 6, 芦毛: 7, 白毛: 8,
 };
 
-/** 競馬場名 → VenueCode（JRA 10場） */
-const VENUE_MAP: Record<string, number> = {
+/** 競馬場名 → VenueCode */
+const VENUE_MAP: Record<string, number | string> = {
     札幌: 1, 函館: 2, 福島: 3, 新潟: 4, 東京: 5,
     中山: 6, 中京: 7, 京都: 8, 阪神: 9, 小倉: 10,
+    帯広: 30, 旭川: 31, 岩見沢: 32, 北見: 33, 門別: 35,
+    "札幌（地方）": 36, "函館（地方）": 38, 盛岡: 42, 水沢: 43, 上山: 44,
+    三条: 45, 足利: 46, 宇都宮: 47, 高崎: 48, 浦和: 49,
+    船橋: 50, 大井: 51, 川崎: 52, 金沢: 53, 笠松: 54,
+    名古屋: 55, "中京（地方）": 56, 園田: 58, 姫路: 59, 益田: 60,
+    福山: 61, 高知: 63, 佐賀: 64, 荒尾: 65,
+    地方: 90, 海外: 99, シャティン: "A1", ハッピーバレー: "A2", メイダン: "B1",
+    ロンシャン: "C1", シャンティイ: "C2", ドーヴィル: "C3", アスコット: "D1", グッドウッド: "D2",
+    ヨーク: "D3", レパーズタウン: "E1", チャーチルダウンズ: "F1", デルマー: "F2", サンタアニタ: "F3",
+    ベルモンドパーク: "F4", キーンランド: "F5", コールフィールド: "G1", フレミントン: "G2", ランドウィック: "G3",
+    ローズヒル: "G4", キングアブドゥルアジーズ: "H1",
 };
 
 /** コース種別文字列 → CourseType コード */
@@ -40,9 +51,10 @@ const WEATHER_MAP: Record<string, number> = {
 
 /** 馬場状態文字列 → BabaCode（芝・ダート共通） */
 const BABA_MAP: Record<string, number> = {
-    良: 1, 稍重: 2, 重: 3, 不良: 4,
+    良: 1, 稍: 2, 稍重: 2, 重: 3, 不良: 4,
 };
 
+/** レースグレード文字列 → GRADE コード */
 const GRADE_MAP: Record<string, number> = {
     GI: 1, G1: 1, "Ｇ１": 1,
     GII: 2, G2: 2, "Ｇ２": 2,
@@ -84,6 +96,7 @@ async function retry<T>(
 // ブラウザ文脈（evaluate 内）で動作する純粋解析関数
 // =============================================================================
 
+/** 馬詳細ページの DOM から HorseProfile を解析する関数（evaluate 内で実行される） */
 function parseProfile(
     hid: string,
     SEX: Record<string, number>,
@@ -94,6 +107,7 @@ function parseProfile(
         document.querySelector("h1")?.textContent?.trim() ??
         "";
 
+    // プロフィールテーブルを th → td のマップに変換
     const profMap: Record<string, string> = {};
     for (const tr of document.querySelectorAll(".db_prof_table tr")) {
         const th = tr.querySelector("th")?.textContent?.trim() ?? "";
@@ -101,32 +115,42 @@ function parseProfile(
         if (th) profMap[th] = td;
     }
 
+    // タイトルやプロフィールテーブルから性別・年齢・毛色を抽出
     const titleParts = (document.querySelector(".horse_title .txt_01")?.textContent?.trim() ?? "")
         .split(/[\s\u3000]+/)
         .map((s: string) => s.trim())
         .filter(Boolean);
 
+    // 性別・年齢はタイトルの2番目優先、なければプロフィールテーブルから。どちらもなければ0（不明）になる。
     const sexageStr = titleParts[1] ?? profMap["性齢"] ?? "";
     const sexRaw = sexageStr.match(/^(牡|牝|セン|セ|せん)/)?.[1] ?? "";
     const sexStr = sexRaw === "セン" || sexRaw === "セ" ? "せん" : sexRaw;
     const sex = SEX[sexStr] ?? 0;
     const age = parseInt(sexageStr.match(/(\d+)歳/)?.[1] ?? "0", 10);
 
+    // 毛色はタイトルの3番目優先、なければプロフィールテーブルから。どちらもなければ0（不明）になる。
     const coatKey = titleParts[2] ?? profMap["毛色"] ?? "";
     const type = COAT[coatKey] ?? 0;
 
+    // プロフィールテーブルのリンクから調教師・馬主・生産者の名前とIDを抽出
     const extractLink = (selector: string) => {
         const a = document.querySelector(selector) as HTMLAnchorElement | null;
         const id = a?.getAttribute("href")?.match(/\/([^/]+)\/?$/)?.[1] ?? "";
         return { name: a?.textContent?.trim() ?? "", id };
     };
+    // 調教師セルから旧名（旧姓）を抽出。例）「(旧)田中修次」→「田中修次」
     const trainer = extractLink(".db_prof_table a[href*='/trainer/']");
+    // 馬主セルから旧名を抽出。例）「(旧)サンデーサラブレッドクラブ」→「サンデーサラブレッドクラブ」
     const owner   = extractLink(".db_prof_table a[href*='/owner/']");
+    // 生産者セルから旧名を抽出。例）「(旧)ノーザンファーム」→「ノーザンファーム」
     const breeder = extractLink(".db_prof_table a[href*='/breeder/']");
 
+    // 調教師セルのテキストから厩舎を抽出。例）「(旧)田中修次（美浦）」→「美浦」
     const trainerCell = document.querySelector(".db_prof_table a[href*='/trainer/']")?.closest("td");
+    // 厩舎は「美浦」「栗東」「地方」「海外」のいずれかになる想定。例外的に「(旧)田中修次（地方）」→「地方」もある。
     const kyuusya = trainerCell?.textContent?.match(/[（(]([^）)]+)[）)]/)?.[1]?.trim() ?? "";
 
+    // 生年月日は「1990年1月1日」の形式で表記されている想定。例外的に「平成2年1月1日」などもあるが、現状は未対応でそのまま文字列を返す。
     const birthDate = (() => {
         const raw = profMap["生年月日"] ?? "";
         const m = raw.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
@@ -147,6 +171,7 @@ function parseProfile(
     };
 }
 
+/** 馬詳細ページの DOM から全成績テーブルを解析して HorseRaceResultRow[] を返す関数（evaluate 内で実行される） */
 function parseRaceResults(
     VENUE: Record<string, number>,
     COURSE: Record<string, number>,
@@ -157,10 +182,12 @@ function parseRaceResults(
     const table = document.querySelector("table.db_h_race_results");
     if (!table) return [];
 
+    // テーブルのヘッダー行から列名を抽出。例）["日付", "天気", "開催", "R", ...]
     const headers = Array.from(table.querySelectorAll("thead th")).map(
         (th) => th.textContent?.trim() ?? ""
     );
 
+    // 数値変換ヘルパー。空文字は null、カンマ区切りは除去してから変換。変換できない場合も null。
     const toFloat = (s: string): number | null => {
         if (!s.trim()) return null;
         const n = parseFloat(s.replace(/,/g, ""));
@@ -204,6 +231,7 @@ function parseRaceResults(
         const gradeStr    = gradeMatch?.[1]?.trim() ?? "";
         const raceName    = gradeMatch ? raceNameRaw.slice(0, gradeMatch.index).trim() : raceNameRaw;
 
+        // グレード文字列から GRADE コードを抽出。例）「GIII」→3、「OP」→5
         let grade = GRADE[gradeStr] ?? 0;
         if (grade === 0) {
             if      (raceNameRaw.includes("新馬"))                                           grade = 19;
