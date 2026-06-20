@@ -373,13 +373,16 @@ const isBooleanLiteral = (value?: string): boolean => {
     return /^(true|false)$/i.test(String(value));
 };
 
-// --horseId=XXX --raceId=YYY の名前付き引数を解析
+// --horseId=XXX --raceId=YYY --local などの名前付き引数を解析
 const namedArgs: Record<string, string> = {};
 const positionalArgs: string[] = [];
 for (const arg of args) {
-    const m = arg.match(/^--([\w]+)=(.+)$/);
-    if (m) {
-        namedArgs[m[1]] = m[2];
+    const mKv = arg.match(/^--([\w]+)=(.+)$/);
+    const mFlag = arg.match(/^--([\w]+)$/);
+    if (mKv) {
+        namedArgs[mKv[1]] = mKv[2];
+    } else if (mFlag) {
+        namedArgs[mFlag[1]] = "true";
     } else {
         positionalArgs.push(arg);
     }
