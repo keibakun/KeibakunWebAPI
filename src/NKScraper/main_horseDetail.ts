@@ -49,6 +49,7 @@ export class Main_HorseDetail {
     private monthArg?: number;
     private dayArg?: number;
     private production: boolean;
+    private localScheduled: boolean;
 
     /**
      * コンストラクタ
@@ -56,18 +57,25 @@ export class Main_HorseDetail {
      * @param monthArg 対象月（1-12）
      * @param dayArg 対象日（1-31）。省略時は月全体を対象にする
      * @param production 本番実行フラグ（true の場合は workPool から horseId を取得）
+     * @param localScheduled ローカル定期実行フラグ（true の場合は workPool を2回処理する）
      */
-    constructor(year: number, monthArg?: number, dayArg?: number, production?: boolean) {
+    constructor(year: number, monthArg?: number, dayArg?: number, production?: boolean, localScheduled?: boolean) {
         this.year = year;
         this.monthArg = monthArg;
         this.dayArg = dayArg;
         this.production = production ?? false;
+        this.localScheduled = localScheduled ?? false;
     }
 
     /**
      * エントリポイント
      */
     async run(): Promise<void> {
+        if (this.localScheduled) {
+            await this.runLocalScheduledMode();
+            return;
+        }
+
         if (this.production) {
             await this.runProductionMode();
             return;
@@ -119,6 +127,26 @@ export class Main_HorseDetail {
     // ─────────────────────────────────────────────────────────────────────────
     // private
     // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * ローカル定期実行モード: 既存 workPool を2回処理する。
+     * Actions と異なりローカルで定期実行する用途向け。
+     */
+    private async runLocalScheduledMode(): Promise<void> {
+        logger.info("ローカル定期実行モードで起動しました。（2回実行）");
+        for (let i = 1; i <= 2; i++) {
+            const poolFile = await getOldestWorkPoolFile(WORK_POOL_DIR);
+            if (!poolFile) {
+                logger.info(`Round ${i}: 処理対象の workPool ファイルが存在しません。終了します。`);
+                break;
+            }
+            logger.info(`Round ${i}/2 を開始します: ${poolFile}`);
+            await this.runSteps();
+            await this.deleteOldestWorkPool();
+            logger.info(`Round ${i}/2 が完了しました。`);
+        }
+        logger.info("ローカル定期実行モードが完了しました。");
+    }
 
     /**
      * 本番モード: 既存 workPool を消化して DB → モーダル → 血統 の順に取得する。
@@ -369,6 +397,10 @@ if (namedArgs["horseId"] && namedArgs["raceId"]) {
     let monthArg: number | undefined;
     let dayArg: number | undefined;
     let productionArg = false;
+    // --local フラグ: ローカル定期実行モード
+    const localScheduledArg = "local" in namedArgs
+        ? String(namedArgs["local"]).toLowerCase() !== "false"
+        : false;
 
     // production=true の場合は YYYY / MM なしで実行できるようにする
     if (isBooleanLiteral(positionalArgs[0])) {
@@ -389,7 +421,7 @@ if (namedArgs["horseId"] && namedArgs["raceId"]) {
         }
     }
 
-    const main = new Main_HorseDetail(year, monthArg, dayArg, productionArg);
+    const main = new Main_HorseDetail(year, monthArg, dayArg, productionArg, localScheduledArg);
     main.run().catch((err) => {
         logger.error(`main_horseDetail の実行で異常終了: ${String(err)}`);
         process.exit(1);
