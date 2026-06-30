@@ -6,7 +6,7 @@
 
 # Interface: HorseDetail
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:224](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L224)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:228](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L228)
 
 Horse detail container: profile + race results.
 
@@ -18,7 +18,7 @@ Horse detail container: profile + race results.
 
 > **profile**: [`HorseProfile`](HorseProfile.md)
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:225](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L225)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:229](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L229)
 
 ***
 
@@ -26,4 +26,4 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:225](https://github.com/keib
 
 > **raceResults**: [`HorseRaceResultRow`](HorseRaceResultRow.md)[]
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:226](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L226)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:230](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L230)

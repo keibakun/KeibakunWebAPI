@@ -6,7 +6,7 @@
 
 # Interface: ResultInfo
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:178](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L178)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:182](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L182)
 
 出走結果情報
 
@@ -18,7 +18,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:178](https://github.com/keib
 
 > **comment**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:200](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L200)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:204](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L204)
 
 厩舎コメント
 
@@ -28,7 +28,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:200](https://github.com/keib
 
 > **last3f**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:196](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L196)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:200](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L200)
 
 上り（上がり3F秒）
 
@@ -38,7 +38,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:196](https://github.com/keib
 
 > **prize**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:184](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L184)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:188](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L188)
 
 賞金（万円）
 
@@ -48,7 +48,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:184](https://github.com/keib
 
 > **rank**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:180](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L180)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:184](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L184)
 
 着順
 
@@ -58,7 +58,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:180](https://github.com/keib
 
 > **time**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:182](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L182)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:186](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L186)
 
 タイム
 
@@ -68,7 +68,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:182](https://github.com/keib
 
 > **tuuka1c**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:188](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L188)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:192](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L192)
 
 1コーナー通過順位
 
@@ -78,7 +78,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:188](https://github.com/keib
 
 > **tuuka2c**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:190](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L190)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:194](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L194)
 
 2コーナー通過順位
 
@@ -88,7 +88,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:190](https://github.com/keib
 
 > **tuuka3c**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:192](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L192)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:196](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L196)
 
 3コーナー通過順位
 
@@ -98,7 +98,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:192](https://github.com/keib
 
 > **tuuka4c**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:194](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L194)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:198](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L198)
 
 4コーナー通過順位
 
@@ -108,7 +108,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:194](https://github.com/keib
 
 > **tyakusa**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:186](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L186)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:190](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L190)
 
 着差
 
@@ -118,7 +118,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:186](https://github.com/keib
 
 > **weight**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:198](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L198)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:202](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L202)
 
 馬体重（kg）
 
@@ -128,6 +128,6 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:198](https://github.com/keib
 
 > **winnerOrSecondary**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:202](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L202)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:206](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L206)
 
 勝ち馬（1着時は2着馬）

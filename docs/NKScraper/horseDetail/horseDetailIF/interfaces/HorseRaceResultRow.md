@@ -6,7 +6,7 @@
 
 # Interface: HorseRaceResultRow
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:210](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L210)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:214](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L214)
 
 レース結果1行分（race / entry / result の3分割構造）
 
@@ -18,7 +18,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:210](https://github.com/keib
 
 > **entry**: [`EntryInfo`](EntryInfo.md)
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:214](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L214)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:218](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L218)
 
 出走登録情報（馬・騎手）
 
@@ -28,7 +28,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:214](https://github.com/keib
 
 > **race**: [`RaceInfo`](RaceInfo.md)
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:212](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L212)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:216](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L216)
 
 レース自体の情報
 
@@ -38,6 +38,6 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:212](https://github.com/keib
 
 > **result**: [`ResultInfo`](ResultInfo.md)
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:216](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L216)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:220](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L220)
 
 出走結果情報

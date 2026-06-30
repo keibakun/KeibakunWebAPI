@@ -23,5 +23,6 @@
 - [HorseCoatColor](type-aliases/HorseCoatColor.md)
 - [HorseGender](type-aliases/HorseGender.md)
 - [HorseSex](type-aliases/HorseSex.md)
+- [Pedigree](type-aliases/Pedigree.md)
 - [VenueCode](type-aliases/VenueCode.md)
 - [WeatherCode](type-aliases/WeatherCode.md)

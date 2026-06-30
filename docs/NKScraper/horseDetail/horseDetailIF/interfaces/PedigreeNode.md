@@ -6,52 +6,21 @@
 
 # Interface: PedigreeNode
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:51](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L51)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:50](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L50)
 
-血統ノード（再帰構造）。
-generation=0 が対象馬本人、1 が父母、2 が祖父母 ... 最大5代まで。
+5代血統表の1ノード（1頭分）。
 
  PedigreeNode
 
 ## Properties
 
-### birthYear?
-
-> `optional` **birthYear**: `number`
-
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:61](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L61)
-
-生年（世代整合性チェック用。不明な場合は省略）
-
-***
-
-### dam?
-
-> `optional` **dam**: `PedigreeNode`
-
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:65](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L65)
-
-母
-
-***
-
 ### gender
 
 > **gender**: [`HorseGender`](../type-aliases/HorseGender.md)
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:57](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L57)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:56](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L56)
 
 性別
-
-***
-
-### generation
-
-> **generation**: `number`
-
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:59](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L59)
-
-世代深度（0: 本人、1: 父母、2: 祖父母 ...）
 
 ***
 
@@ -59,9 +28,9 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:59](https://github.com/keiba
 
 > **id**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:53](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L53)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:52](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L52)
 
-馬ID
+馬ID（netkeiba horseId。不明の場合は空文字）
 
 ***
 
@@ -69,16 +38,6 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:53](https://github.com/keiba
 
 > **name**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:55](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L55)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:54](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L54)
 
 馬名
-
-***
-
-### sire?
-
-> `optional` **sire**: `PedigreeNode`
-
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:63](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L63)
-
-父

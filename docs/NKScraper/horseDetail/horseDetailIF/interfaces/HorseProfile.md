@@ -6,7 +6,7 @@
 
 # Interface: HorseProfile
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:73](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L73)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:77](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L77)
 
 馬の個別データのインターフェース。
 
@@ -18,7 +18,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:73](https://github.com/keiba
 
 > **age**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:81](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L81)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:85](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L85)
 
 馬齢（例：3）
 
@@ -28,7 +28,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:81](https://github.com/keiba
 
 > **birthDate**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:85](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L85)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:89](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L89)
 
 生年月日（元の表記）
 
@@ -38,7 +38,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:85](https://github.com/keiba
 
 > **breeder**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:97](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L97)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:101](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L101)
 
 生産者
 
@@ -48,7 +48,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:97](https://github.com/keiba
 
 > **breederId**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:99](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L99)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:103](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L103)
 
 生産者ID
 
@@ -58,7 +58,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:99](https://github.com/keiba
 
 > **kyuusya**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:91](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L91)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:95](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L95)
 
 厩舎（美浦・栗東など）
 
@@ -68,7 +68,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:91](https://github.com/keiba
 
 > **name**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:75](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L75)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:79](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L79)
 
 馬名
 
@@ -78,7 +78,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:75](https://github.com/keiba
 
 > **owner**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:93](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L93)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:97](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L97)
 
 馬主
 
@@ -88,7 +88,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:93](https://github.com/keiba
 
 > **ownerId**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:95](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L95)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:99](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L99)
 
 馬主ID
 
@@ -96,11 +96,11 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:95](https://github.com/keiba
 
 ### pedigree?
 
-> `optional` **pedigree**: [`PedigreeNode`](PedigreeNode.md)
+> `optional` **pedigree**: [`Pedigree`](../type-aliases/Pedigree.md)
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:101](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L101)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:105](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L105)
 
-5代血統表（未取得の場合は省略）
+5代血統表（ヒープインデックス形式。未取得の場合は省略）
 
 ***
 
@@ -108,7 +108,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:101](https://github.com/keib
 
 > **sex**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:79](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L79)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:83](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L83)
 
 性別コード。`1`=牡 / `2`=牝 / `3`=せん
 
@@ -118,7 +118,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:79](https://github.com/keiba
 
 > **status**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:77](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L77)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:81](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L81)
 
 現役/引退などの状態
 
@@ -128,7 +128,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:77](https://github.com/keiba
 
 > **trainer**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:87](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L87)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:91](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L91)
 
 調教師（調教師名）
 
@@ -138,7 +138,7 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:87](https://github.com/keiba
 
 > **trainerId**: `string`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:89](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L89)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:93](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L93)
 
 調教師ID
 
@@ -148,6 +148,6 @@ Defined in: [NKScraper/horseDetail/horseDetailIF.ts:89](https://github.com/keiba
 
 > **type**: `number`
 
-Defined in: [NKScraper/horseDetail/horseDetailIF.ts:83](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L83)
+Defined in: [NKScraper/horseDetail/horseDetailIF.ts:87](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/NKScraper/horseDetail/horseDetailIF.ts#L87)
 
 毛色コード
