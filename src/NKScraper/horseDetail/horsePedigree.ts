@@ -24,6 +24,7 @@ function parsePedigreeTable(): Record<string, PedigreeNode> {
     const table = document.querySelector(".blood_table");
     if (!table) return {};
 
+    // すべての td 要素を取得し、rowspan 属性を元に世代と位置を計算する
     const allCells = Array.from(table.querySelectorAll("td")) as HTMLTableCellElement[];
     if (allCells.length === 0) return {};
 
@@ -37,6 +38,7 @@ function parsePedigreeTable(): Record<string, PedigreeNode> {
     const countByRowspan: Record<number, number> = {};
 
     for (const cell of allCells) {
+        // rowspan 属性を取得（デフォルトは 1）
         const rowspan = parseInt(cell.getAttribute("rowspan") ?? "1", 10);
 
         // rowspan から世代を逆算（log2(TOTAL_ROWS / rowspan) が 1〜5 の整数）
@@ -44,6 +46,7 @@ function parsePedigreeTable(): Record<string, PedigreeNode> {
         const gen = Math.round(genFloat);
         if (Math.abs(genFloat - gen) > 0.01 || gen < 1 || gen > 5) continue;
 
+        // 同じ rowspan のセルが複数ある場合、順番に pos を割り当てる
         if (!countByRowspan[rowspan]) countByRowspan[rowspan] = 0;
         const pos = countByRowspan[rowspan]++;
 
@@ -120,11 +123,13 @@ export class HorsePedigreeScraper {
         const pedigree: Pedigree = {};
 
         try {
+            // ページのロードと DOM の安定化を待つ
             await this.page.setUserAgent(DESKTOP_UA);
             await this.page.setViewport({ width: 1280, height: 900, isMobile: false });
             await this.page.setExtraHTTPHeaders({ "accept-language": "ja,en-US;q=0.9,en;q=0.8" });
             await this.page.goto(url, { waitUntil: "load", timeout: 20000 });
 
+            // 血統表のテーブルが表示されるまで待機（最大 15 秒）
             await this.page.waitForSelector(".blood_table", { timeout: 15000 }).catch(() => {
                 this.logger.warn(`blood_table 待機タイムアウト: horseId=${horseId}`);
             });
