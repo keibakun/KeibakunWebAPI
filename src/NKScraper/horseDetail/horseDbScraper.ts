@@ -1,6 +1,17 @@
 import { Page } from "puppeteer";
 import { Logger } from "../../utils/Logger";
 import { HorseProfile, HorseRaceResultRow } from "./horseDetailIF";
+import {
+    SEX_MAP,
+    COAT_MAP,
+} from "../../../config/LookupTables/horse";
+import { 
+    VENUE_MAP,
+    COURSE_MAP,
+    WEATHER_MAP,
+    BABA_MAP,
+    GRADE_MAP,
+} from "../../../config/LookupTables/venue";
 
 // =============================================================================
 // 定数
@@ -10,65 +21,6 @@ import { HorseProfile, HorseRaceResultRow } from "./horseDetailIF";
 const DESKTOP_UA =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-
-// =============================================================================
-// evaluate 内で使用するルックアップテーブル（ブラウザ文脈に注入するため plain object）
-// =============================================================================
-
-/** 性別文字列 → HorseSex コード */
-const SEX_MAP: Record<string, number> = { 牡: 1, 牝: 2, せん: 3, セ: 3, セン: 3, 騸: 3 };
-
-/** 毛色文字列 → HorseCoatColor コード（JRA公認8毛色） */
-const COAT_MAP: Record<string, number> = {
-    鹿毛: 1, 黒鹿毛: 2, 青鹿毛: 3, 青毛: 4,
-    栗毛: 5, 栃栗毛: 6, 芦毛: 7, 白毛: 8,
-};
-
-/** 競馬場名 → VenueCode */
-const VENUE_MAP: Record<string, number | string> = {
-    札幌: 1, 函館: 2, 福島: 3, 新潟: 4, 東京: 5,
-    中山: 6, 中京: 7, 京都: 8, 阪神: 9, 小倉: 10,
-    帯広: 30, 旭川: 31, 岩見沢: 32, 北見: 33, 門別: 35,
-    "札幌（地方）": 36, "函館（地方）": 38, 盛岡: 42, 水沢: 43, 上山: 44,
-    三条: 45, 足利: 46, 宇都宮: 47, 高崎: 48, 浦和: 49,
-    船橋: 50, 大井: 51, 川崎: 52, 金沢: 53, 笠松: 54,
-    名古屋: 55, "中京（地方）": 56, 園田: 58, 姫路: 59, 益田: 60,
-    福山: 61, 高知: 63, 佐賀: 64, 荒尾: 65,
-    地方: 90, 海外: 99, シャティン: "A1", ハッピーバレー: "A2", メイダン: "B1",
-    ロンシャン: "C1", シャンティイ: "C2", ドーヴィル: "C3", アスコット: "D1", グッドウッド: "D2",
-    ヨーク: "D3", レパーズタウン: "E1", チャーチルダウンズ: "F1", デルマー: "F2", サンタアニタ: "F3",
-    ベルモンドパーク: "F4", キーンランド: "F5", コールフィールド: "G1", フレミントン: "G2", ランドウィック: "G3",
-    ローズヒル: "G4", キングアブドゥルアジーズ: "H1",
-};
-
-/** コース種別文字列 → CourseType コード */
-const COURSE_MAP: Record<string, number> = { 芝: 1, ダート: 2, 障: 3 };
-
-/** 天気文字列 → WeatherCode */
-const WEATHER_MAP: Record<string, number> = {
-    晴: 1, 曇: 2, 雨: 3, 小雨: 4, 雪: 5,
-};
-
-/** 馬場状態文字列 → BabaCode（芝・ダート共通） */
-const BABA_MAP: Record<string, number> = {
-    良: 1, 稍: 2, 稍重: 2, 重: 3, 不良: 4,
-};
-
-/** レースグレード文字列 → GRADE コード */
-const GRADE_MAP: Record<string, number> = {
-    GI: 1, G1: 1, "Ｇ１": 1,
-    GII: 2, G2: 2, "Ｇ２": 2,
-    GIII: 3, G3: 3, "Ｇ３": 3,
-    重賞: 4,
-    オープン: 5, OP: 5,
-    JG1: 10, "ＪＧ１": 10,
-    JG2: 11, "ＪＧ２": 11,
-    JG3: 12, "ＪＧ３": 12,
-    L: 15, "Ｌ": 15,
-    "3勝クラス": 16, "３勝クラス": 16,
-    "2勝クラス": 17, "２勝クラス": 17,
-    "1勝クラス": 18, "１勝クラス": 18,
-};
 
 // =============================================================================
 // ブラウザ文脈外で使える純粋ヘルパー
