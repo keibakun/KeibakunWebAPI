@@ -56,7 +56,7 @@ export class Main_HorseDetail_Modal {
         await pm.init();
 
         const isCI = !!process.env.CI || process.env.GITHUB_ACTIONS === "true";
-        const concurrency = isCI ? 1 : 3;
+        const concurrency = isCI ? 1 : 5;
         logger.info(`並列数: ${concurrency}${isCI ? " (CI環境)" : ""}`);
 
         const runLogger = new HorseDetailRunLogger("main_horseDetail_modal", HORSE_LOG_OUT_DIR);
