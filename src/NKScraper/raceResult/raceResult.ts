@@ -5,7 +5,7 @@ import {
     CornerOrderIF,
     LapTimeIF,
     RaceResultWithRefund,
-} from "./raceResultIF";
+} from "./raceResultDBIF";
 import { Logger } from "../../utils/Logger";
 
 /**
@@ -74,25 +74,59 @@ export class RaceResult {
             const trainer = trainerA?.textContent?.trim() ?? "";
             const trainerId = trainerA?.getAttribute("href")?.match(/trainer\/result\/recent\/(\d+)/)?.[1] ?? "";
 
-            // 体重は余分な空白を削除し、括弧内の注釈を取り除いて正規化
-            const bataijuuTd = row.querySelector("td:nth-child(15)");
-            const bataijuu = bataijuuTd?.textContent?.replace(/\s+/g, "").replace(/\(.*\)/, "") ?? "";
+// 馬体重: 括弧内の注釈（体重変化）を除いて数値化
+        const bataijuuTd = row.querySelector("td:nth-child(15)");
+        const bataijuuStr = bataijuuTd?.textContent?.replace(/\s+/g, "").replace(/\(.*\)/, "") ?? "";
+        const bataijuu = bataijuuStr ? (parseInt(bataijuuStr, 10) || null) : null;
 
-            return {
-                rank: row.querySelector("td:nth-child(1) .Rank")?.textContent?.trim() ?? "",
-                umaban: row.querySelector("td:nth-child(3) div")?.textContent?.trim() ?? "",
-                horseName,
-                horseId,
-                sexAge: row.querySelector("td:nth-child(5) span")?.textContent?.trim() ?? "",
-                kinryou: row.querySelector("td:nth-child(6) .JockeyWeight")?.textContent?.trim() ?? "",
-                jockey,
-                jockeyId,
-                time: row.querySelector("td:nth-child(8) .RaceTime")?.textContent?.trim() ?? "",
-                chakusa: row.querySelector("td:nth-child(9) .RaceTime")?.textContent?.trim() ?? "",
-                ninki: (row.querySelector("td:nth-child(10) .OddsPeople")?.textContent?.trim() ?? "").replace(/人気/g, "").trim(),
-                odds: row.querySelector("td:nth-child(11) span")?.textContent?.trim() ?? "",
-                agari: row.querySelector("td:nth-child(12)")?.textContent?.trim() ?? "",
-                tsuuka: row.querySelector("td:nth-child(13)")?.textContent?.trim() ?? "",
+        // 性別・年齢の分離（牡=1/牝=2/せん=3/不明=0）
+        const sexAgeStr = row.querySelector("td:nth-child(5) span")?.textContent?.trim() ?? "";
+        const SEX_MAP: Record<string, number> = { 牡: 1, 牝: 2, せん: 3, セ: 3, セン: 3 };
+        const sexRaw = sexAgeStr.match(/^(牡|牝|せん|セン|セ)/)?.[1] ?? "";
+        const sex = SEX_MAP[sexRaw] ?? 0;
+        const ageMatch = sexAgeStr.match(/(\d+)/);
+        const age = ageMatch ? (parseInt(ageMatch[1], 10) || null) : null;
+
+        // 通過順の分離: "3-3" → tuuka3c/4c のみ, "3-3-3-3" → 全コーナー
+        const tsuukaStr = row.querySelector("td:nth-child(13)")?.textContent?.trim() ?? "";
+        const tParts = tsuukaStr ? tsuukaStr.split("-") : [];
+        const tSlot = (s: number): number | null => {
+            const idx = s - (4 - tParts.length);
+            if (idx < 0 || idx >= tParts.length) return null;
+            const v = parseInt(tParts[idx], 10);
+            return isNaN(v) ? null : v;
+        };
+
+        const toFloat = (s: string | undefined): number | null => {
+            if (!s) return null;
+            const v = parseFloat(s);
+            return isNaN(v) ? null : v;
+        };
+        const toInt = (s: string | undefined): number | null => {
+            if (!s) return null;
+            const v = parseInt(s.trim(), 10);
+            return isNaN(v) ? null : v;
+        };
+
+        return {
+            rank: row.querySelector("td:nth-child(1) .Rank")?.textContent?.trim() ?? "",
+            umaban: toInt(row.querySelector("td:nth-child(3) div")?.textContent?.trim()) ?? 0,
+            horseName,
+            horseId,
+            sex,
+            age,
+            kinryou: toFloat(row.querySelector("td:nth-child(6) .JockeyWeight")?.textContent?.trim()),
+            jockey,
+            jockeyId,
+            time: row.querySelector("td:nth-child(8) .RaceTime")?.textContent?.trim() ?? "",
+            chakusa: row.querySelector("td:nth-child(9) .RaceTime")?.textContent?.trim() ?? "",
+            ninki: toInt((row.querySelector("td:nth-child(10) .OddsPeople")?.textContent?.trim() ?? "").replace(/人気/g, "").trim()),
+            odds: toFloat(row.querySelector("td:nth-child(11) span")?.textContent?.trim()),
+            agari: toFloat(row.querySelector("td:nth-child(12)")?.textContent?.trim()),
+            tuuka1c: tSlot(0),
+            tuuka2c: tSlot(1),
+            tuuka3c: tSlot(2),
+            tuuka4c: tSlot(3),
                 trainer,
                 trainerId,
                 bataijuu,
@@ -222,7 +256,7 @@ export class RaceResult {
                         // 不要文字を削除: '>' カンマ 空白 等
                         const cleaned = (payoutStr ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
                         combo.forEach((h) => {
-                            const normalizedTansho = { umaban: h, payout: cleaned, ninki: ninkiStr };
+                            const normalizedTansho = { umaban: parseInt(h, 10) || 0, payout: parseInt(cleaned, 10) || 0, ninki: parseInt(ninkiStr, 10) || 0 };
                             tansho.push(normalizedTansho);
                         });
                     });
@@ -231,7 +265,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         combo.forEach((num) => {
                                 const cleanedPayoutF = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedFukusho = { umaban: num, payout: cleanedPayoutF, ninki: ninki[idx] ?? "" };
+                                const normalizedFukusho = { umaban: parseInt(num, 10) || 0, payout: parseInt(cleanedPayoutF, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 fukusho.push(normalizedFukusho);
                         });
                     });
@@ -239,7 +273,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 1) {
                                 const cleanedPayoutW = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedWakuren = { combination: combo, payout: cleanedPayoutW, ninki: ninki[idx] ?? "" };
+                                const normalizedWakuren = { combination: combo.map(c => parseInt(c, 10) || 0), payout: parseInt(cleanedPayoutW, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 wakuren.push(normalizedWakuren);
                         }
                     });
@@ -247,7 +281,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
                                 const cleanedPayoutU = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedUmaren = { combination: combo, payout: cleanedPayoutU, ninki: ninki[idx] ?? "" };
+                                const normalizedUmaren = { combination: combo.map(c => parseInt(c, 10) || 0), payout: parseInt(cleanedPayoutU, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 umaren.push(normalizedUmaren);
                         }
                     });
@@ -255,7 +289,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
                                 const cleanedPayoutWd = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedWide = { combination: combo, payout: cleanedPayoutWd, ninki: ninki[idx] ?? "" };
+                                const normalizedWide = { combination: combo.map(c => parseInt(c, 10) || 0), payout: parseInt(cleanedPayoutWd, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 wide.push(normalizedWide);
                         }
                     });
@@ -263,7 +297,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 2) {
                                 const cleanedPayoutUt = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedUmatan = { combination: combo, payout: cleanedPayoutUt, ninki: ninki[idx] ?? "" };
+                                const normalizedUmatan = { combination: combo.map(c => parseInt(c, 10) || 0), payout: parseInt(cleanedPayoutUt, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 umatan.push(normalizedUmatan);
                         }
                     });
@@ -271,7 +305,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 3) {
                                 const cleanedPayoutSrp = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedSanrenpuku = { combination: combo, payout: cleanedPayoutSrp, ninki: ninki[idx] ?? "" };
+                                const normalizedSanrenpuku = { combination: combo.map(c => parseInt(c, 10) || 0), payout: parseInt(cleanedPayoutSrp, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 sanrenpuku.push(normalizedSanrenpuku);
                         }
                     });
@@ -279,7 +313,7 @@ export class RaceResult {
                     combos.forEach((combo, idx) => {
                         if (combo.length >= 3) {
                                 const cleanedPayoutSrt = (payouts[idx] ?? "").replace(/^>+/, "").replace(/,/g, "").replace(/\s/g, "").trim();
-                                const normalizedSanrentan = { combination: combo, payout: cleanedPayoutSrt, ninki: ninki[idx] ?? "" };
+                                const normalizedSanrentan = { combination: combo.map(c => parseInt(c, 10) || 0), payout: parseInt(cleanedPayoutSrt, 10) || 0, ninki: parseInt(ninki[idx] ?? "0", 10) || 0 };
                                 sanrentan.push(normalizedSanrentan);
                         }
                     });
@@ -332,7 +366,9 @@ export class RaceResult {
     private parseLapTime(): LapTimeIF {
         // 全体的なペース表示（例: 前半/後半のラベル）を取得
         const paceElem = document.querySelector(".RapPace_Title span");
-        const pace = paceElem ? paceElem.textContent?.trim() ?? "" : "";
+        const paceStr = paceElem ? paceElem.textContent?.trim() ?? "" : "";
+        const PACE_MAP: Record<string, number> = { S: 1, M: 2, H: 3 };
+        const pace = PACE_MAP[paceStr] ?? 0;
 
         const headers: string[] = [];
         const times: string[][] = [];
