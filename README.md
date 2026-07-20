@@ -23,10 +23,13 @@ npx tsc --noEmit
 ```
 
 **重要な環境変数**
+- `KEIBAKUN_SERVER_URL`: KeibakunServer のベース URL（例: https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/Prod）→URLは管理者に確認してください
 - `PUPPETEER_EXECUTABLE_PATH`: ローカルのChrome/Chromium実行ファイルパス（macOS 例: /Applications/Google Chrome.app/Contents/MacOS/Google Chrome）
 - `PUPPETEER_HEADLESS`: `true`/`false`/`new` で Puppeteer の headless モードを切替
 
-例（macOS, ローカルChromeを使う）:
+これらの環境変数は、`.env` ファイルに記述してください。`.env` ファイルは git 管理外にしてください。
+
+例（macOS, ローカルChromeを使って、コマンド実行時に環境変数を指定する場合（ただし `.env` ファイルに記述する方法が推奨。あくまで一時的対応））:
 
 ```
 PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" PUPPETEER_HEADLESS="false" npx tsx src/NKScraper/main_raceResult.ts 2025 10
