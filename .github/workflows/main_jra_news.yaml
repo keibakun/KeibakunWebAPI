@@ -34,6 +34,7 @@ jobs:
       - name: Run JRA News scraper
         env:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+          KEIBAKUN_SERVER_URL: ${{ secrets.KEIBAKUN_SERVER_URL }}
         run: npx tsx src/JRAScraper/main_JraNews.ts
       
       - name: Setup Git user

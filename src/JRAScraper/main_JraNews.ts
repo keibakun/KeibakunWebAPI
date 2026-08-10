@@ -3,6 +3,7 @@ import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { Logger } from "../utils/Logger";
 import { JraNews } from "./News/JraNews";
 import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
+import { JraNewsDbService } from "../service/JraNewsDbService";
 
 /**
  * JRAニューススクレイパーの簡易実行エントリ
@@ -13,6 +14,7 @@ import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 async function main(): Promise<void> {
     const logger = new Logger();
     const pm = new PuppeteerManager();
+    const dbService = new JraNewsDbService();
     // コマンドライン引数から yyyymm を受け取る (例: node main_JraNews.js 202501)
     const argv = process.argv.slice(2);
     const yyyymmArg = argv[0];
@@ -52,8 +54,12 @@ async function main(): Promise<void> {
         // writeJson はディレクトリ作成および上書きを行う
         await writer.writeJson(outputDir, "index.html", items);
         logger.info(`保存先: ${outputDir}/index.html`);
+
+        await dbService.store(outYyyymm, items);
+        logger.info(`DB 保存完了: yyyymm=${outYyyymm}, 件数=${items.length}`);
     } catch (err: any) {
         logger.error(`実行中にエラー: ${err}`);
+        throw err;
     } finally {
         await pm.close();
         logger.info("Puppeteer をクローズしました");
