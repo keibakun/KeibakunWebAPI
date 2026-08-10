@@ -73,7 +73,10 @@ export interface RaceResultRow {
     /** 斤量（kg） */
     kinryou: number | null;
 
-    /** 騎手名 */
+    /** 斤量軽減記号コード（JOCKEY_MARK_MAP: 0=なし, 1=☆, 2=▲, 3=△, 4=◇） */
+    jockeyMark: number;
+
+    /** 騎手名（記号除去済み） */
     jockey: string;
 
     /** 騎手ID */

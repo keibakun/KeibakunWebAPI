@@ -66,8 +66,13 @@ export class RaceResult {
 
             // 騎手名と騎手ID: td:nth-child(7) の a
             const jockeyA = row.querySelector("td:nth-child(7) a");
-            const jockey = jockeyA?.textContent?.trim() ?? "";
+            const rawJockey = jockeyA?.textContent?.trim() ?? "";
             const jockeyId = jockeyA?.getAttribute("href")?.match(/jockey\/result\/recent\/(\d+)/)?.[1] ?? "";
+            // 斤量軽減記号（☆=1, ▲=2, △=3, ◇=4）を分離
+            const JOCKEY_MARK_MAP: Record<string, number> = { "☆": 1, "▲": 2, "△": 3, "◇": 4 };
+            const markChar = rawJockey[0] ?? "";
+            const jockeyMark = JOCKEY_MARK_MAP[markChar] ?? 0;
+            const jockey = jockeyMark !== 0 ? rawJockey.slice(1) : rawJockey;
 
             // 調教師名と調教師ID: td:nth-child(14) の a
             const trainerA = row.querySelector("td:nth-child(14) a");
@@ -116,6 +121,7 @@ export class RaceResult {
             sex,
             age,
             kinryou: toFloat(row.querySelector("td:nth-child(6) .JockeyWeight")?.textContent?.trim()),
+            jockeyMark,
             jockey,
             jockeyId,
             time: row.querySelector("td:nth-child(8) .RaceTime")?.textContent?.trim() ?? "",

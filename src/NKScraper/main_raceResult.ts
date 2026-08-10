@@ -3,12 +3,12 @@ import fs from "fs/promises";
 import { Page } from "puppeteer";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { RaceResult } from "./raceResult/raceResult";
-import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
+import { RaceResultDbService } from "../service/RaceResultDbService";
 import { FileUtil } from "../utils/FileUtil";
 import { Logger } from "../utils/Logger";
 
 const logger = new Logger();
-const jsonWriter = new JsonFileWriterUtil(logger);
+const dbService = new RaceResultDbService();
 
 /** 並列処理のデフォルト同時実行数 */
 const DEFAULT_CONCURRENCY = 5;
@@ -112,12 +112,8 @@ export class Main_RaceResult {
                 try {
                     logger.info(`[Worker${workerId}] (${idx + 1}/${total}) raceId: ${raceId} のレース結果を取得します`);
                     const result = await scraper.getRaceResult(raceId);
-
-                    const ry = raceId.substring(0, 4);
-                    const rm = raceId.substring(4, 6);
-                    const rest = raceId.substring(6);
-                    const outDir = path.join(__dirname, `../../RaceResult/`, ry, rm, rest);
-                    await jsonWriter.writeJson(outDir, "index.html", result);
+                    await dbService.store(raceId, result);
+                    logger.info(`[Worker${workerId}] raceId: ${raceId} を DB に保存しました`);
                 } catch (err: any) {
                     logger.error(`[Worker${workerId}] raceId: ${raceId} の取得・保存でエラー: ${String(err)}`);
                 }
