@@ -6,10 +6,10 @@ import { RaceIF } from "./shutuba/syutubaIF";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { Logger } from "../utils/Logger";
 import { FileUtil } from "../utils/FileUtil";
-import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
+import { ShutubaDbService } from "../service/ShutubaDbService";
 
 const logger = new Logger();
-const jsonWriter = new JsonFileWriterUtil(logger);
+const dbService = new ShutubaDbService();
 
 /** 並列処理のデフォルト同時実行数 */
 const DEFAULT_CONCURRENCY = 5;
@@ -168,6 +168,7 @@ export class Main_Shutuba {
             await this.runWorkerPool(pages, raceIds);
         } catch (e) {
             logger.error(`致命的なエラー: ${String(e)}`);
+            throw e;
         } finally {
             for (const page of pages) {
                 try { await page.close(); } catch {}
@@ -193,14 +194,11 @@ export class Main_Shutuba {
                 logger.info(`[Worker${workerId}] (${idx + 1}/${total}) レースID: ${raceId} の出馬表を取得します`);
                 try {
                     const raceData: RaceIF = await getShutuba(page, raceId);
-
-                    const ry = raceId.substring(0, 4);
-                    const rm = raceId.substring(4, 6);
-                    const rest = raceId.substring(6);
-                    const outDir = path.join(__dirname, `../../Shutuba/`, ry, rm, rest);
-                    await jsonWriter.writeJson(outDir, "index.html", raceData);
+                    await dbService.store(raceId, raceData);
+                    logger.info(`[Worker${workerId}] レースID: ${raceId} の出馬表をDBへ保存しました`);
                 } catch (error: any) {
-                    logger.error(`[Worker${workerId}] レースID: ${raceId} の出馬表取得中にエラーが発生しました: ${String(error)}`);
+                    logger.error(`[Worker${workerId}] レースID: ${raceId} の出馬表取得または保存中にエラーが発生しました: ${String(error)}`);
+                    throw error;
                 }
             }
         };
@@ -358,5 +356,8 @@ if (args[0] && args[0].length > 4) {
     }
 
     const main = new Main_Shutuba(year, monthArg, dayArg, debugArg);
-    main.run();
+    main.run().catch((error) => {
+        logger.error(`Shutuba 実行中に致命的なエラーが発生しました: ${String(error)}`);
+        process.exit(1);
+    });
 }
