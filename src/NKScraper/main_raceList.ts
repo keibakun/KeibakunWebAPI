@@ -1,14 +1,15 @@
 import path from "path";
 import fs from "fs/promises";
+import "dotenv/config";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { RaceList } from "./raceList/raceList";
 import { RaceData } from "./raceList/raceListIF";
 import { Logger } from "../utils/Logger";
 import { FileUtil } from "../utils/FileUtil";
-import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
+import { RaceListDbService } from "../service/RaceListDbService";
 
 const logger = new Logger();
-const jsonWriter = new JsonFileWriterUtil(logger);
+const dbService = new RaceListDbService();
 
 /**
  * レースリスト取得・保存のメインクラス
@@ -46,6 +47,7 @@ export class Main_RaceList {
             }
         } catch (e) {
             logger.error(`致命的なエラー: ${e}`);
+            throw e;
         } finally {
             await pm.close();
         }
@@ -105,15 +107,21 @@ export class Main_RaceList {
     }
 
     /**
-     * レースリストを取得しJSONファイルとして保存
+     * レースリストを取得しDB格納APIへ送信する
      * @param raceListScraper RaceListインスタンス
      * @param kaisaiDate 開催日
      */
     private async fetchAndSaveRaceList(raceListScraper: RaceList, kaisaiDate: string): Promise<void> {
         logger.info(`kaisaiDate: ${kaisaiDate} のレースリストを取得します`);
         const raceList: RaceData[] = await raceListScraper.getRaceList(kaisaiDate);
-        const outputDir = path.join(__dirname, "../../RaceList/", kaisaiDate);
-        await jsonWriter.writeJson(outputDir, "index.html", raceList);
+
+        try {
+            await dbService.store(kaisaiDate, raceList);
+            logger.info(`DB格納API 完了: date=${kaisaiDate}, saved=${raceList.length}件`);
+        } catch (e) {
+            logger.error(`DB格納API 呼び出し失敗: ${e}`);
+            throw e;
+        }
     }
 }
 
@@ -125,4 +133,7 @@ const year = parseInt(args[0], 10) || 2025;
 const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
 
 const main = new Main_RaceList(year, monthArg);
-main.run();
+main.run().catch((error) => {
+    logger.error(`RaceList 実行中に致命的なエラーが発生しました: ${String(error)}`);
+    process.exit(1);
+});

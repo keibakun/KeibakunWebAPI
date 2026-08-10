@@ -65,35 +65,12 @@ jobs:
           echo "YEAR=$year" >> $GITHUB_ENV
           echo "MONTH=$month" >> $GITHUB_ENV
 
-      - name: Ensure RaceList directory exists
-        run: |
-          mkdir -p ./RaceList
-
       - name: scrape netkeiba_raceList
+        env:
+          KEIBAKUN_SERVER_URL: ${{ secrets.KEIBAKUN_SERVER_URL }}
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceList.ts "$YEAR" "$MONTH" --limit 1000 --offset 0
-          ls ./RaceList || echo "RaceList directory is empty"
-          cat ./RaceList/index.html || echo "index.html not found"
-
-      - name: Setup Git user
-        shell: bash
-        run: |
-          pwd
-          git config --global user.email "keibakun.manage@gmail.com"
-          git config --global user.name "keibakun"
-
-      - name: Push RaceList
-        run: |
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin main
-            git add ./RaceList/
-            git diff --staged --exit-code && break
-            git commit -m "本番実行: レースリストデータを取得しました ${YEAR}年${MONTH}月" || true
-            git push origin main && break
-            echo "Push failed (attempt $i), retrying..."
-            sleep $((RANDOM % 10 + 5))
-          done
+          npx tsx ./src/NKScraper/main_raceList.ts "$YEAR" "$MONTH"
 
   report:
     needs: [scrape]
