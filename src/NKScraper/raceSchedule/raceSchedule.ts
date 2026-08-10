@@ -1,6 +1,7 @@
 import { Page } from "puppeteer";
 import { Schedule, Race } from "./raceShceduleIF";
 import { Logger } from "../../utils/Logger";
+import { VENUE_MAP } from "../../../config/LookupTables/venue";
 
 /**
  * RaceScheduleクラス
@@ -30,7 +31,8 @@ export class RaceSchedule {
         try {
             const raceSchedule = await this.page.$$eval(
                 "table.Calendar_Table",
-                parseCalendarTable
+                parseCalendarTable,
+                VENUE_MAP as Record<string, number>
             );
             this.logger.info("レースカレンダーの取得に成功しました");
             return raceSchedule;
@@ -45,7 +47,7 @@ export class RaceSchedule {
  * カレンダーテーブルをパースする関数
  * Puppeteerのコールバックとして使うためトップレベル関数で定義
  */
-function parseCalendarTable(table: Element[]): Schedule[] {
+function parseCalendarTable(table: Element[], venueMap: Record<string, number>): Schedule[] {
     const schedule: Schedule[] = [];
     const rows = table[0].querySelectorAll("tbody tr");
 
@@ -72,8 +74,9 @@ function parseCalendarTable(table: Element[]): Schedule[] {
                 return Array.from(div.querySelectorAll("p"))
                     .slice(1) // 1回目の p 要素をスキップ
                     .map((p) => {
-                        const venue: string = p.querySelector("span.JyoName")?.textContent?.trim() || ""; // 開催場
-                        const raceName: string = p.querySelector("span.JName")?.textContent?.trim() || ""; // レース名（ない場合は空文字）
+                        const venueName: string = p.querySelector("span.JyoName")?.textContent?.trim() || "";
+                        const venue: number = venueMap[venueName] ?? 0; // 開催場コード
+                        const raceName: string = p.querySelector("span.JName")?.textContent?.trim() || "";
                         return { venue, raceName };
                     });
             });

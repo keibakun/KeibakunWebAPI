@@ -1,11 +1,11 @@
 /**
  * @interface Race
  * レース情報のインターフェース
- * @property {string} venue - 開催場
+ * @property {number} venue - 開催場コード（VENUE_MAP: 東京=5, 阪神=9 ...）
  * @property {string} raceName - レース名
  */
 export interface Race {
-    venue: string;
+    venue: number;
     raceName: string;
 }
 

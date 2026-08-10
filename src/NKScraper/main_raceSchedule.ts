@@ -1,12 +1,11 @@
-import path from "path";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { Logger } from "../utils/Logger";
 import { RaceSchedule } from "./raceSchedule/raceSchedule";
 import { Schedule } from "./raceSchedule/raceShceduleIF";
-import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
+import { RaceScheduleDbService } from "../service/RaceScheduleDbService";
 
 const logger = new Logger();
-const jsonWriter = new JsonFileWriterUtil(logger);
+const dbService = new RaceScheduleDbService();
 
 /**
  * Main_RaceSchedule
@@ -43,9 +42,10 @@ export class Main_RaceSchedule {
                 // 指定の年・月のスケジュールをスクレイピング
                 const schedule: Schedule[] = await raceScheduleScraper.getRaceSchedule(this.year, month);
 
-                // 開催日程のJSONファイルを生成して保存
-                const outputDir = path.join(__dirname, "../../RaceSchedule", this.year.toString() + formattedMonth);
-                await jsonWriter.writeJson(outputDir, "index.html", schedule);
+                // 開催日程を DB に保存
+                const yyyymm = this.year.toString() + formattedMonth;
+                await dbService.store(yyyymm, schedule);
+                logger.info(`開催日程を DB に保存しました: ${yyyymm}`);
             }
         } catch (e) {
             logger.error(`致命的なエラー: ${e}`);

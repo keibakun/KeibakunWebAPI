@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Randomized delay (0-120s)
         shell: bash
@@ -30,8 +30,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -52,35 +52,12 @@ jobs:
           fi
           echo "YEAR=$year" >> $GITHUB_ENV
 
-      - name: Ensure RaceSchedule directory exists
-        run: |
-          mkdir -p ./RaceSchedule
-
       - name: scrape netkeiba_raceSchedule
+        env:
+          KEIBAKUN_SERVER_URL: ${{ secrets.KEIBAKUN_SERVER_URL }}
         run: |
           npm install
           npx tsx ./src/NKScraper/main_raceSchedule.ts "$YEAR"
-          ls ./RaceSchedule || echo "RaceSchedule directory is empty"
-          cat ./RaceSchedule/index.html || echo "index.html not found"
-
-      - name: Setup Git user
-        shell: bash
-        run: |
-          pwd
-          git config --global user.email "keibakun.manage@gmail.com"
-          git config --global user.name "keibakun"
-
-      - name: Push RaceSchedule
-        run: |
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin main
-            git add ./RaceSchedule/
-            git diff --staged --exit-code && break
-            git commit -m "本番実行: レース開催日程データを取得しました ${YEAR}" || true
-            git push origin main && break
-            echo "Push failed (attempt $i), retrying..."
-            sleep $((RANDOM % 10 + 5))
-          done
 
   report:
     needs: [scrape]
