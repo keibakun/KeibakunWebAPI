@@ -7,11 +7,13 @@ import {
 } from "../../../config/LookupTables/horse";
 import { 
     VENUE_MAP,
+} from "../../../config/LookupTables/venue";
+import {
     COURSE_MAP,
     WEATHER_MAP,
     BABA_MAP,
     GRADE_MAP,
-} from "../../../config/LookupTables/venue";
+} from "../../../config/LookupTables/race";
 
 // =============================================================================
 // 定数

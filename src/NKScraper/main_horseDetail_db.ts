@@ -7,9 +7,11 @@ import { FileUtil } from "../utils/FileUtil";
 import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 import { HorseDetail } from "./horseDetail/horseDetailIF";
 import { HorseDetailRunLogger } from "../utils/HorseDetailRunLogger";
+import { HorseDetailDbService } from "../service/HorseDetailDbService";
 
 const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);
+const dbService = new HorseDetailDbService();
 
 /** workPool の1エントリ */
 interface HorseEntry {
@@ -157,6 +159,14 @@ export class Main_HorseDetail_Db {
                     const target = getHorseDetailOutPath(HORSE_OUT_DIR, horseId);
                     await jsonWriter.writeJson(target.dir, "index.html", horseDetail);
                     logger.info(`[Worker${workerId}] 保存完了: ${target.file}`);
+
+                    try {
+                        await dbService.store(horseId, horseDetail);
+                        logger.info(`[Worker${workerId}] DB保存完了: horseId=${horseId}`);
+                    } catch (dbError) {
+                        logger.error(`[Worker${workerId}] DB保存に失敗しました horseId=${horseId}: ${String(dbError)}`);
+                        runLogger.recordFail(horseId, `DB保存失敗: ${String(dbError).split("\n")[0]}`);
+                    }
                 } catch (e: unknown) {
                     logger.error(`[Worker${workerId}] DB取得エラー horseId=${horseId} raceId=${raceId}: ${String(e)}`);
                     runLogger.recordFail(horseId, String(e).split("\n")[0]);
