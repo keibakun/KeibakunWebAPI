@@ -43,11 +43,9 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Ensure Shutuba directory exists
-        run: |
-          mkdir -p ./Shutuba
-
       - name: scrape netkeiba_shutuba
+        env:
+          KEIBAKUN_SERVER_URL: ${{ secrets.KEIBAKUN_SERVER_URL }}
         run: |
           npm install
           if [ -n "${{ github.event.inputs.raceId }}" ]; then
@@ -55,27 +53,6 @@ jobs:
           else
             npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} ${{ github.event.inputs.debug }}
           fi
-          ls -R ./Shutuba || echo "Shutuba directory is empty"
-
-      - name: Setup Git user
-        shell: bash
-        run: |
-          pwd
-          git config --global user.email "keibakun.manage@gmail.com"
-          git config --global user.name "keibakun"
-
-      - name: Push Shutuba
-        run: |
-          # Ensure local is up-to-date before committing; retry up to 3 times on push conflict
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin main
-            git add ./Shutuba/
-            git diff --staged --exit-code && break
-            git commit -m "デバッグモードで下記期間の出馬表データを取得しました\n${{ github.event.inputs.raceId != '' && github.event.inputs.raceId || format('{0}年{1}月', github.event.inputs.year, github.event.inputs.month) }}" || true
-            git push origin main && break
-            echo "Push failed (attempt $i), retrying..."
-            sleep $((RANDOM % 10 + 5))
-          done
 
   report:
     needs: [scrape]
