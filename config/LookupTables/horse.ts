@@ -18,3 +18,8 @@ export const COAT_MAP: Record<string, number> = {
     鹿毛: 1, 黒鹿毛: 2, 青鹿毛: 3, 青毛: 4,
     栗毛: 5, 栃栗毛: 6, 芦毛: 7, 白毛: 8,
 };
+
+/** 騎手マーク文字 → JockeyMarkCode (0=なし, 1=☆, 2=▲, 3=△, 4=◇) */
+export const JOCKEY_MARK_MAP: Record<string, number> = {
+    "": 0, "☆": 1, "▲": 2, "△": 3, "◇": 4,
+};
