@@ -2,6 +2,7 @@ import { Page } from "puppeteer";
 import { RaceItem, RaceTitle, RaceData, Condition } from "./raceListIF";
 import { Logger } from "../../utils/Logger";
 import { VENUE_MAP } from "../../../config/LookupTables/venue";
+import { COURSE_CHAR_MAP, BABA_MAP, SHIBA_COURSE_MAP } from "../../../config/LookupTables/race";
 
 /**
  * RaceListクラス
@@ -44,7 +45,10 @@ export class RaceList {
             const raceList = await this.page.$$eval(
                 "div.RaceList_Box.clearfix",
                 parseRaceListBoxes,
-                VENUE_MAP as Record<string, number>
+                VENUE_MAP as Record<string, number>,
+                COURSE_CHAR_MAP as Record<string, number>,
+                BABA_MAP as Record<string, number>,
+                SHIBA_COURSE_MAP as Record<string, number>
             );
             this.logger.info("レースリストの取得に成功しました");
             return raceList;
@@ -61,13 +65,13 @@ export class RaceList {
  * @param venueMap 開催場名 → VenueCode のマップ
  * @returns パースされたレースデータの配列
  */
-function parseRaceListBoxes(raceListBoxes: Element[], venueMap: Record<string, number | string>): RaceData[] {
-    // コース種別文字列 → コード (ブラウザ文脈内でインライン定義)
-    const INLINE_COURSE_MAP: Record<string, number> = { "芝": 1, "ダ": 2, "障": 3 };
-    // 馬場状態文字列 → コード (ブラウザ文脈内でインライン定義)
-    const INLINE_BABA_MAP: Record<string, number> = { "良": 1, "稍": 2, "稍重": 2, "重": 3, "不": 4, "不良": 4 };
-    // 芝コース種別文字 → コード (ブラウザ文脈内でインライン定義)
-    const INLINE_SHIBA_COURSE_MAP: Record<string, number> = { "A": 1, "B": 2, "C": 3, "D": 4 };
+function parseRaceListBoxes(
+    raceListBoxes: Element[],
+    venueMap: Record<string, number>,
+    courseCharMap: Record<string, number>,
+    babaMap: Record<string, number>,
+    shibaCourseMap: Record<string, number>,
+): RaceData[] {
 
     const results: RaceData[] = [];
     raceListBoxes.forEach((box) => {
@@ -90,14 +94,14 @@ function parseRaceListBoxes(raceListBoxes: Element[], venueMap: Record<string, n
             //         "芝：良"    → shibaCourse=0,    condition.shiba=1
             const shibaRaw: string = dataList.querySelector("span.Shiba")?.textContent?.trim() || "";
             const shibaCourseStr: string = shibaRaw.match(/芝\(([A-Z])\)/)?.[1] || "";
-            const shibaCourse: number = INLINE_SHIBA_COURSE_MAP[shibaCourseStr] ?? 0;
+            const shibaCourse: number = shibaCourseMap[shibaCourseStr] ?? 0;
             const shibaCondStr: string = shibaRaw.match(/：(.+)$/)?.[1] || "";
-            const shibaCondCode: number = INLINE_BABA_MAP[shibaCondStr] ?? 0;
+            const shibaCondCode: number = babaMap[shibaCondStr] ?? 0;
 
             // ダート馬場: "ダ：稍" → condition.dart=2
             const daRaw: string = dataList.querySelector("span.Da")?.textContent?.trim() || "";
             const daCondStr: string = daRaw.match(/：(.+)$/)?.[1] || "";
-            const dartCondCode: number = INLINE_BABA_MAP[daCondStr] ?? 0;
+            const dartCondCode: number = babaMap[daCondStr] ?? 0;
 
             const condition: Condition = { shiba: shibaCondCode, dart: dartCondCode };
 
@@ -113,7 +117,7 @@ function parseRaceListBoxes(raceListBoxes: Element[], venueMap: Record<string, n
                 // コース種別・距離のパース ("ダ1800m" → raceCourse=2, raceDistance=1800)
                 const raceCourseRaw = match?.[3] || "";
                 const courseTypeStr = raceCourseRaw.match(/^(芝|ダ|障)/)?.[1] || "";
-                const raceCourse: number = INLINE_COURSE_MAP[courseTypeStr] ?? 0;
+                const raceCourse: number = courseCharMap[courseTypeStr] ?? 0;
                 const raceDistance: number = parseInt(raceCourseRaw.match(/(\d+)/)?.[1] || "0");
 
                 // 頭数のパース ("16頭" → 16)
