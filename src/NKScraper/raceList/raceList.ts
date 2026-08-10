@@ -1,6 +1,7 @@
 import { Page } from "puppeteer";
-import { RaceItem, RaceTitle, RaceData } from "./raceListIF";
+import { RaceItem, RaceTitle, RaceData, Condition } from "./raceListIF";
 import { Logger } from "../../utils/Logger";
+import { VENUE_MAP } from "../../../config/LookupTables/venue";
 
 /**
  * RaceListクラス
@@ -42,7 +43,8 @@ export class RaceList {
         try {
             const raceList = await this.page.$$eval(
                 "div.RaceList_Box.clearfix",
-                parseRaceListBoxes
+                parseRaceListBoxes,
+                VENUE_MAP as Record<string, number>
             );
             this.logger.info("レースリストの取得に成功しました");
             return raceList;
@@ -56,25 +58,49 @@ export class RaceList {
 /**
  * レースリストの各Box要素を取得してパースする関数
  * @param raceListBoxes レースリストのボックス要素の配列
+ * @param venueMap 開催場名 → VenueCode のマップ
  * @returns パースされたレースデータの配列
  */
-function parseRaceListBoxes(raceListBoxes: Element[]): RaceData[] {
+function parseRaceListBoxes(raceListBoxes: Element[], venueMap: Record<string, number | string>): RaceData[] {
+    // コース種別文字列 → コード (ブラウザ文脈内でインライン定義)
+    const INLINE_COURSE_MAP: Record<string, number> = { "芝": 1, "ダ": 2, "障": 3 };
+    // 馬場状態文字列 → コード (ブラウザ文脈内でインライン定義)
+    const INLINE_BABA_MAP: Record<string, number> = { "良": 1, "稍": 2, "稍重": 2, "重": 3, "不": 4, "不良": 4 };
+    // 芝コース種別文字 → コード (ブラウザ文脈内でインライン定義)
+    const INLINE_SHIBA_COURSE_MAP: Record<string, number> = { "A": 1, "B": 2, "C": 3, "D": 4 };
+
     const results: RaceData[] = [];
     raceListBoxes.forEach((box) => {
         const dataLists = box.querySelectorAll("dl.RaceList_DataList");
         dataLists.forEach((dataList) => {
             const rawTitle: string = dataList.querySelector("p.RaceList_DataTitle")?.textContent?.trim() || "";
             const titleMatch = rawTitle.match(/(\d+回)\s*(\S+)\s*(\d+日目)/);
+
+            const kaijiRaw = titleMatch?.[1] || "";
+            const venueRaw = titleMatch?.[2] || "";
+            const timesRaw = titleMatch?.[3] || "";
+
             const title: RaceTitle = {
-                kaiji: titleMatch?.[1] || "",
-                venue: titleMatch?.[2] || "",
-                times: titleMatch?.[3] || "",
+                kaiji: parseInt(kaijiRaw.match(/(\d+)/)?.[1] || "0"),
+                venue: venueMap[venueRaw] ?? 0,
+                times: parseInt(timesRaw.match(/(\d+)/)?.[1] || "0"),
             };
 
-            const shiba: string = dataList.querySelector("span.Shiba")?.textContent?.trim() || "";
-            const da: string = dataList.querySelector("span.Da")?.textContent?.trim() || "";
+            // 芝馬場: "芝(C)：良" → shibaCourse=3(C), condition.shiba=1
+            //         "芝：良"    → shibaCourse=0,    condition.shiba=1
+            const shibaRaw: string = dataList.querySelector("span.Shiba")?.textContent?.trim() || "";
+            const shibaCourseStr: string = shibaRaw.match(/芝\(([A-Z])\)/)?.[1] || "";
+            const shibaCourse: number = INLINE_SHIBA_COURSE_MAP[shibaCourseStr] ?? 0;
+            const shibaCondStr: string = shibaRaw.match(/：(.+)$/)?.[1] || "";
+            const shibaCondCode: number = INLINE_BABA_MAP[shibaCondStr] ?? 0;
 
-            // ここで直接パースする
+            // ダート馬場: "ダ：稍" → condition.dart=2
+            const daRaw: string = dataList.querySelector("span.Da")?.textContent?.trim() || "";
+            const daCondStr: string = daRaw.match(/：(.+)$/)?.[1] || "";
+            const dartCondCode: number = INLINE_BABA_MAP[daCondStr] ?? 0;
+
+            const condition: Condition = { shiba: shibaCondCode, dart: dartCondCode };
+
             const items: RaceItem[] = Array.from(dataList.querySelectorAll("div.RaceList_ItemContent")).map((item) => {
                 const text: string = item.textContent?.replace(/\s+/g, " ").trim() || "";
                 const match = text.match(/^(.*?) (\d{2}:\d{2}) (.*?) (\d+頭)$/);
@@ -84,23 +110,33 @@ function parseRaceListBoxes(raceListBoxes: Element[]): RaceData[] {
                 const raceIdMatch = href.match(/race_id=(\d{12})/);
                 const raceId = raceIdMatch?.[1] || "";
 
+                // コース種別・距離のパース ("ダ1800m" → raceCourse=2, raceDistance=1800)
+                const raceCourseRaw = match?.[3] || "";
+                const courseTypeStr = raceCourseRaw.match(/^(芝|ダ|障)/)?.[1] || "";
+                const raceCourse: number = INLINE_COURSE_MAP[courseTypeStr] ?? 0;
+                const raceDistance: number = parseInt(raceCourseRaw.match(/(\d+)/)?.[1] || "0");
+
+                // 頭数のパース ("16頭" → 16)
+                const tousuu: number = parseInt((match?.[4] || "").match(/(\d+)/)?.[1] || "0");
+
+                // グレードのパース (CSSクラス "Icon_GradeType1" → 1)
                 const gradeSpan = item.querySelector("span.Icon_GradeType");
                 const gradeClassList = Array.from(gradeSpan?.classList || []);
-                const grade = gradeClassList
-                    .find((className) => className.startsWith("Icon_GradeType") && className !== "Icon_GradeType")
-                    ?.replace("Icon_", "");
+                const gradeClassName = gradeClassList.find((c) => c.startsWith("Icon_GradeType") && c !== "Icon_GradeType") || "";
+                const grade: number = parseInt(gradeClassName.replace("Icon_GradeType", "")) || 0;
 
                 return {
                     raceName: match?.[1] || "",
                     raceTime: match?.[2] || "",
-                    raceCourse: match?.[3] || "",
-                    tousuu: match?.[4] || "",
+                    raceCourse,
+                    raceDistance,
+                    tousuu,
                     raceId,
-                    grade: grade || "",
+                    grade,
                 };
             });
 
-            results.push({ title, shiba, da, items });
+            results.push({ title, condition, shibaCourse, items });
         });
     });
     return results;
