@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { Logger } from "../utils/Logger";
 import { RaceSchedule } from "./raceSchedule/raceSchedule";
@@ -11,7 +12,7 @@ const dbService = new RaceScheduleDbService();
  * Main_RaceSchedule
  *
  * 指定年の月ごとに `RaceSchedule` をスクレイピングして
- * `RaceSchedule/<YYYYMM>/index.html` を生成するクラスです。
+ * KeibakunServer 経由で DB に保存するクラスです。
  *
  */
 export class Main_RaceSchedule {
@@ -49,6 +50,7 @@ export class Main_RaceSchedule {
             }
         } catch (e) {
             logger.error(`致命的なエラー: ${e}`);
+            throw e;
         } finally {
             // ブラウザを必ずクローズ
             await pm.close();
