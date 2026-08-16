@@ -1,15 +1,13 @@
-import path from "path";
 import { PuppeteerManager } from "../utils/PuppeteerManager";
 import { Logger } from "../utils/Logger";
 import { JraNews } from "./News/JraNews";
-import { JsonFileWriterUtil } from "../utils/JsonFileWriterUtil";
 import { JraNewsDbService } from "../service/JraNewsDbService";
 
 /**
  * JRAニューススクレイパーの簡易実行エントリ
  *
  * 実行例:
- * PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npx tsx src/JRAScraper/News/main_JraNews.ts
+ * PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npx tsx src/JRAScraper/main_JraNews.ts
  */
 async function main(): Promise<void> {
     const logger = new Logger();
@@ -38,25 +36,17 @@ async function main(): Promise<void> {
 
         logger.info(`取得したニュース件数: ${items.length}`);
 
-        // 保存先ディレクトリ: JRANews/YYYYMM/index.html
-        // 出力先ディレクトリ: 指定があればその yyyymm を使い、なければ実行時の年月を使用
-        const outYyyymm = useYyyymm
+        const targetYyyymm = useYyyymm
             ? useYyyymm
             : (() => {
-                  const now = new Date();
-                  const yyyy = now.getFullYear().toString();
-                  const mm = (now.getMonth() + 1).toString().padStart(2, "0");
-                  return `${yyyy}${mm}`;
-              })();
-        const outputDir = path.join(__dirname, `../../JRANews/${outYyyymm}`);
+                const now = new Date();
+                const yyyy = now.getFullYear().toString();
+                const mm = (now.getMonth() + 1).toString().padStart(2, "0");
+                return `${yyyy}${mm}`;
+            })();
 
-        const writer = new JsonFileWriterUtil(logger);
-        // writeJson はディレクトリ作成および上書きを行う
-        await writer.writeJson(outputDir, "index.html", items);
-        logger.info(`保存先: ${outputDir}/index.html`);
-
-        await dbService.store(outYyyymm, items);
-        logger.info(`DB 保存完了: yyyymm=${outYyyymm}, 件数=${items.length}`);
+        await dbService.store(targetYyyymm, items);
+        logger.info(`DB 保存完了: yyyymm=${targetYyyymm}, 件数=${items.length}`);
     } catch (err: any) {
         logger.error(`実行中にエラー: ${err}`);
         throw err;
