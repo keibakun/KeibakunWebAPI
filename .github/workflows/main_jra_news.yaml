@@ -9,14 +9,9 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,35 +31,3 @@ jobs:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
           KEIBAKUN_SERVER_URL: ${{ secrets.KEIBAKUN_SERVER_URL }}
         run: npx tsx src/JRAScraper/main_JraNews.ts
-      
-      - name: Setup Git user
-        shell: bash
-        run: |
-          pwd
-          git config --global user.email "keibakun.manage@gmail.com"
-          git config --global user.name "keibakun"
-
-      - name: Push JRANews
-        run: |
-          # use JST date for commit metadata
-          YYYMM=$(TZ=Asia/Tokyo date +%Y%m)
-          # Ensure local branch is up-to-date; retry up to 3 times on push conflict
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin main
-            git add ./JRANews/
-            git diff --staged --exit-code && break
-            git commit -m "本番実行: JRAニュースを取得しました ${YYYMM}" || true
-            git push origin main && break
-            echo "Push failed (attempt $i), retrying..."
-            sleep $((RANDOM % 10 + 5))
-          done
-
-  report:
-    needs: [scrape]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【本番】JRAニュース取得'
-      conclusion: ${{ needs.scrape.result }}
