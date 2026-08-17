@@ -53,13 +53,3 @@ jobs:
           else
             npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} ${{ github.event.inputs.debug }}
           fi
-
-  report:
-    needs: [scrape]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【手動】出馬表取得'
-      conclusion: ${{ needs.scrape.result }}

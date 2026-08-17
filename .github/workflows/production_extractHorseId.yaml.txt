@@ -56,13 +56,3 @@ jobs:
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
           done
-
-  report:
-    needs: [extract]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【本番】horseId抽出'
-      conclusion: ${{ needs.extract.result }}

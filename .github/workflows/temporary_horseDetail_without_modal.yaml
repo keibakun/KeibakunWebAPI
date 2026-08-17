@@ -573,13 +573,3 @@ jobs:
             echo "Push failed (attempt $i), retrying..."
             sleep $((RANDOM % 10 + 5))
           done
-
-  report:
-    needs: [generate_workpool, fetch_db_1, fetch_pedigree_1, delete_workpool_1, fetch_db_2, fetch_pedigree_2, delete_workpool_2, fetch_db_3, fetch_pedigree_3, delete_workpool_3]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【本番臨時】競走馬詳細取得（モーダル取得を除く）'
-      conclusion: ${{ needs.delete_workpool_3.result }}

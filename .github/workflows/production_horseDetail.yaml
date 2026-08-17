@@ -304,12 +304,3 @@ jobs:
             sleep $((RANDOM % 10 + 5))
           done
 
-  report:
-    needs: [generate_workpool, fetch_db, fetch_modal, fetch_pedigree, delete_workpool]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【本番】競走馬詳細取得'
-      conclusion: ${{ needs.delete_workpool.result }}

@@ -43,13 +43,3 @@ jobs:
           echo "Random sleep for ${SLEEP} seconds to randomize start time within the hour"
           sleep ${SLEEP}
           npx tsx ./src/NKScraper/main_shutuba.ts ${YYYY} ${MM} ${DD}
-
-  report:
-    needs: [scrape]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【本番】出馬表取得'
-      conclusion: ${{ needs.scrape.result }}

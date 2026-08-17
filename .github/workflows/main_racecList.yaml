@@ -36,13 +36,3 @@ jobs:
         run: |
           npm install
           npx tsx ./src/NKScraper/main_raceList.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
-
-  report:
-    needs: [scrape]
-    if: always()
-    permissions:
-      contents: write
-    uses: ./.github/workflows/actions-report.yml
-    with:
-      workflow-name: '【手動】レースリスト取得'
-      conclusion: ${{ needs.scrape.result }}
