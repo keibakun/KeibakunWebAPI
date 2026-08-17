@@ -6,7 +6,7 @@
 
 # Interface: SyutubaIF
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:35
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:35](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L35)
 
 SyutubaIF
 
@@ -16,7 +16,7 @@ SyutubaIF
 
 > **age**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:40
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:40](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L40)
 
 年齢
 
@@ -26,7 +26,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:40
 
 > **horseId**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:38
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:38](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L38)
 
 馬ID
 
@@ -36,7 +36,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:38
 
 > **horseName**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:37
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:37](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L37)
 
 馬名
 
@@ -46,7 +46,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:37
 
 > **jockey**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:43
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:43](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L43)
 
 騎手名（マーク除去済み）
 
@@ -56,7 +56,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:43
 
 > **jockeyId**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:44
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:44](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L44)
 
 騎手ID
 
@@ -66,7 +66,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:44
 
 > **jockeyMark**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:42
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:42](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L42)
 
 騎手マークコード（JOCKEY_MARK_MAP: 0=なし, 1=☆, 2=▲, 3=△, 4=◇）
 
@@ -76,7 +76,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:42
 
 > **kinryou**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:41
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:41](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L41)
 
 斤量
 
@@ -86,7 +86,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:41
 
 > **sex**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:39
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:39](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L39)
 
 性別コード（SEX_MAP: 牡=1, 牝=2, セン=3）
 
@@ -96,7 +96,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:39
 
 > **trainer**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:45
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:45](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L45)
 
 調教師名
 
@@ -106,7 +106,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:45
 
 > **trainerId**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:46
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:46](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L46)
 
 調教師ID
 
@@ -116,7 +116,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:46
 
 > **umaban**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:36
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:36](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L36)
 
 馬番
 
@@ -126,7 +126,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:36
 
 > **weightDiff**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:48
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:48](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L48)
 
 馬体重増減（kg、符号付き）
 
@@ -136,6 +136,6 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:48
 
 > **weightNum**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:47
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:47](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L47)
 
 馬体重（kg）

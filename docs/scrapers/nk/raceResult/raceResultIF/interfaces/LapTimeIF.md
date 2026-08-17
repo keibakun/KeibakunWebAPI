@@ -6,7 +6,7 @@
 
 # Interface: LapTimeIF
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:51
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:51](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L51)
 
 ラップタイム（ヘッダーと各馬のタイム行）を表すインターフェース
 
@@ -16,7 +16,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:51
 
 > **headers**: `string`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:53
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:53](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L53)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:53
 
 > **pace**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:52
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:52](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L52)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:52
 
 > **times**: `string`[][]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:54
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:54](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L54)

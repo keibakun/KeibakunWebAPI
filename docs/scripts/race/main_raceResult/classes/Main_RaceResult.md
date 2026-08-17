@@ -6,7 +6,7 @@
 
 # Class: Main\_RaceResult
 
-Defined in: scripts/race/main\_raceResult.ts:23
+Defined in: [scripts/race/main\_raceResult.ts:23](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_raceResult.ts#L23)
 
 Main_RaceResult
 
@@ -20,7 +20,7 @@ Main_RaceResult
 
 > **new Main\_RaceResult**(`year`, `monthArg?`, `concurrency?`, `singleRaceId?`): `Main_RaceResult`
 
-Defined in: scripts/race/main\_raceResult.ts:36
+Defined in: [scripts/race/main\_raceResult.ts:36](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_raceResult.ts#L36)
 
 コンストラクタ
 
@@ -60,7 +60,7 @@ Defined in: scripts/race/main\_raceResult.ts:36
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/race/main\_raceResult.ts:47
+Defined in: [scripts/race/main\_raceResult.ts:47](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_raceResult.ts#L47)
 
 エントリポイント: Puppeteer を初期化して対象月すべての処理を実行します。
 `singleRaceId` が指定された場合は year/monthArg を無視し、その1件のみ処理します。

@@ -6,7 +6,7 @@
 
 # Interface: RaceResultRow
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:47
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:47](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L47)
 
 レース結果テーブルの1行（DB格納用）。
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:47
 
 > **agari**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:105
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:105](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L105)
 
 上がり3F（秒）
 
@@ -28,7 +28,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:105
 
 > **age**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:71
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:71](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L71)
 
 馬齢
 
@@ -38,7 +38,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:71
 
 > **bataijuu**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:129
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:129](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L129)
 
 馬体重（kg）
 
@@ -48,7 +48,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:129
 
 > **chakusa**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:96
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:96](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L96)
 
 着差（馬身を表す文字列をそのまま保持）。
 例: `""` (1着) / `"ハナ"` / `"クビ"` / `"アタマ"` /
@@ -60,7 +60,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:96
 
 > **horseId**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:62
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:62](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L62)
 
 馬ID（netkeiba horseId）
 
@@ -70,7 +70,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:62
 
 > **horseName**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:59
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:59](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L59)
 
 馬名
 
@@ -80,7 +80,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:59
 
 > **jockey**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:80
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:80](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L80)
 
 騎手名（記号除去済み）
 
@@ -90,7 +90,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:80
 
 > **jockeyId**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:83
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:83](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L83)
 
 騎手ID
 
@@ -100,7 +100,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:83
 
 > **jockeyMark**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:77
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:77](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L77)
 
 斤量軽減記号コード（JOCKEY_MARK_MAP: 0=なし, 1=☆, 2=▲, 3=△, 4=◇）
 
@@ -110,7 +110,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:77
 
 > **kinryou**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:74
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:74](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L74)
 
 斤量（kg）
 
@@ -120,7 +120,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:74
 
 > **ninki**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:99
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:99](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L99)
 
 人気
 
@@ -130,7 +130,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:99
 
 > **odds**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:102
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:102](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L102)
 
 単勝オッズ
 
@@ -140,7 +140,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:102
 
 > **rank**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:53
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:53](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L53)
 
 着順。
 通常は数値文字列 `"1"` 〜 `"18"` だが、
@@ -152,7 +152,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:53
 
 > **sex**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:68
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:68](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L68)
 
 性別コード。
 `1`=牡 / `2`=牝 / `3`=せん / `0`=不明
@@ -163,7 +163,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:68
 
 > **time**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:89
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:89](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L89)
 
 タイム（元の文字列表記を保持）。
 例: `"1:33.8"`
@@ -174,7 +174,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:89
 
 > **trainer**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:123
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:123](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L123)
 
 調教師名
 
@@ -184,7 +184,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:123
 
 > **trainerId**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:126
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:126](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L126)
 
 調教師ID
 
@@ -194,7 +194,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:126
 
 > **tuuka1c**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:111
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:111](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L111)
 
 1コーナー通過順位。
 そのコーナーが存在しないコース（例: 1200m 等）は `null`。
@@ -205,7 +205,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:111
 
 > **tuuka2c**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:114
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:114](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L114)
 
 2コーナー通過順位。存在しない場合は `null`。
 
@@ -215,7 +215,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:114
 
 > **tuuka3c**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:117
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:117](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L117)
 
 3コーナー通過順位。存在しない場合は `null`。
 
@@ -225,7 +225,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:117
 
 > **tuuka4c**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:120
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:120](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L120)
 
 4コーナー通過順位。存在しない場合は `null`。
 
@@ -235,6 +235,6 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:120
 
 > **umaban**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:56
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:56](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L56)
 
 馬番

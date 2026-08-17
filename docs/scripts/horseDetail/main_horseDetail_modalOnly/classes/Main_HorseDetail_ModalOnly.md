@@ -6,7 +6,7 @@
 
 # Class: Main\_HorseDetail\_ModalOnly
 
-Defined in: scripts/horseDetail/main\_horseDetail\_modalOnly.ts:40
+Defined in: [scripts/horseDetail/main\_horseDetail\_modalOnly.ts:40](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_modalOnly.ts#L40)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: scripts/horseDetail/main\_horseDetail\_modalOnly.ts:40
 
 > **new Main\_HorseDetail\_ModalOnly**(`year`, `monthArg`, `dayArg?`): `Main_HorseDetail_ModalOnly`
 
-Defined in: scripts/horseDetail/main\_horseDetail\_modalOnly.ts:50
+Defined in: [scripts/horseDetail/main\_horseDetail\_modalOnly.ts:50](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_modalOnly.ts#L50)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: scripts/horseDetail/main\_horseDetail\_modalOnly.ts:50
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/horseDetail/main\_horseDetail\_modalOnly.ts:56
+Defined in: [scripts/horseDetail/main\_horseDetail\_modalOnly.ts:56](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_modalOnly.ts#L56)
 
 #### Returns
 

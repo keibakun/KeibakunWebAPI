@@ -6,7 +6,7 @@
 
 # Interface: RaceIF
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:92
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:92](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L92)
 
 RaceIF
 レース情報（コード化済み）
@@ -17,7 +17,7 @@ RaceIF
 
 > **baba**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:102
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:102](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L102)
 
 馬場状態コード（BABA_MAP）
 
@@ -27,7 +27,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:102
 
 > **courseType**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:97
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:97](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L97)
 
 コース種別コード（COURSE_MAP: 芝=1, ダート=2, 障=3）
 
@@ -37,7 +37,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:97
 
 > **distance**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:98
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:98](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L98)
 
 距離（m）
 
@@ -47,7 +47,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:98
 
 > **grade**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:95
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:95](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L95)
 
 グレードコード（GRADE_MAP: G1=1, G2=2, G3=3, L=15 ...）
 
@@ -57,7 +57,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:95
 
 > **honShokin**: `number`[]
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:111
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:111](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L111)
 
 本賞金（万円）配列（1着〜5着）
 
@@ -67,7 +67,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:111
 
 > **horseCategory**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:106
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:106](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L106)
 
 馬カテゴリコード（HORSE_CATEGORY_MAP）
 
@@ -77,7 +77,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:106
 
 > **joken**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:108
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:108](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L108)
 
 条件ビットマスク（JOKEN_MAP）
 
@@ -87,7 +87,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:108
 
 > **jyuryoKubun**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:109
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:109](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L109)
 
 重量区分コード（JYURYO_KUBUN_MAP: 馬齢=1, 定量=2, 別定=3, ハンデ=4）
 
@@ -97,7 +97,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:109
 
 > **kaisaiDay**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:105
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:105](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L105)
 
 開催日目（1〜12）
 
@@ -107,7 +107,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:105
 
 > **kaisaiKai**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:103
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:103](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L103)
 
 開催回（1〜3）
 
@@ -117,7 +117,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:103
 
 > **mawari**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:99
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:99](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L99)
 
 回りコード（MAWARI_MAP: 右=1, 左=2, 直線=3, 右外=4, 左外=5）
 
@@ -127,7 +127,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:99
 
 > **raceClass**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:107
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:107](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L107)
 
 クラスコード（GRADE_MAP: 未勝利=19, 1勝=18, 2勝=17, 3勝=16, OP=5, 新馬=9）
 
@@ -137,7 +137,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:107
 
 > **raceName**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:94
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:94](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L94)
 
 レース名
 
@@ -147,7 +147,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:94
 
 > **raceNum**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:93
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:93](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L93)
 
 レースナンバー（1〜12）
 
@@ -157,7 +157,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:93
 
 > **raceTime**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:96
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:96](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L96)
 
 出走時刻（HH:MM）
 
@@ -167,7 +167,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:96
 
 > **shibaKubun**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:100
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:100](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L100)
 
 芝コース種別コード（SHIBA_COURSE_MAP: 0=なし, A=1, B=2, C=3, D=4）
 
@@ -177,7 +177,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:100
 
 > **syutuba**: [`SyutubaIF`](SyutubaIF.md)[]
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:112
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:112](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L112)
 
 出走馬情報
 
@@ -187,7 +187,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:112
 
 > **tousu**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:110
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:110](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L110)
 
 出走頭数
 
@@ -197,7 +197,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:110
 
 > **venue**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:104
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:104](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L104)
 
 競馬場コード（VENUE_MAP: 国内1〜90, 海外99, 香港100台, UAE200台, 仏300台, 英400台 ...）
 
@@ -207,6 +207,6 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:104
 
 > **weather**: `number`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:101
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:101](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L101)
 
 天候コード（WEATHER_MAP）

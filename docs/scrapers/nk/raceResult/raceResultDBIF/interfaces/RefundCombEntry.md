@@ -6,7 +6,7 @@
 
 # Interface: RefundCombEntry
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:155
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:155](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L155)
 
 払い戻し1件（馬連・三連複など複数馬番の組み合わせ系）。
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:155
 
 > **combination**: `number`[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:157
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:157](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L157)
 
 馬番の組み合わせ
 
@@ -28,7 +28,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:157
 
 > **ninki**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:161
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:161](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L161)
 
 人気
 
@@ -38,6 +38,6 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:161
 
 > **payout**: `number`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:159
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:159](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L159)
 
 払戻金（円）

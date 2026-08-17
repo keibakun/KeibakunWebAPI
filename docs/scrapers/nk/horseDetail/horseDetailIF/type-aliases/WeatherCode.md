@@ -8,7 +8,7 @@
 
 > **WeatherCode** = `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:37
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:37](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L37)
 
 天気コード。
 `1`=晴 / `2`=曇 / `3`=雨 / `4`=小雨 / `5`=雪 / `0`=不明

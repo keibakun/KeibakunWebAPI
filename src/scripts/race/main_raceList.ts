@@ -6,7 +6,7 @@ import { RaceList } from "../../scrapers/nk/raceList/raceList";
 import { RaceData } from "../../scrapers/nk/raceList/raceListIF";
 import { Logger } from "../../utils/Logger";
 import { FileUtil } from "../../utils/FileUtil";
-import { RaceListDbService } from "../../service/RaceListDbService";
+import { RaceListDbService } from "../../service/db/RaceListDbService";
 
 const logger = new Logger();
 const dbService = new RaceListDbService();

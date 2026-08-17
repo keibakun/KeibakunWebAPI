@@ -6,7 +6,7 @@
 
 # Class: Main\_Shutuba
 
-Defined in: scripts/race/main\_shutuba.ts:25
+Defined in: [scripts/race/main\_shutuba.ts:25](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_shutuba.ts#L25)
 
 Main_Shutuba
 
@@ -21,7 +21,7 @@ Main_Shutuba
 
 > **new Main\_Shutuba**(`year`, `month?`, `day?`, `debug?`, `concurrency?`, `singleRaceId?`): `Main_Shutuba`
 
-Defined in: scripts/race/main\_shutuba.ts:41
+Defined in: [scripts/race/main\_shutuba.ts:41](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_shutuba.ts#L41)
 
 コンストラクタ
 
@@ -73,7 +73,7 @@ Defined in: scripts/race/main\_shutuba.ts:41
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/race/main\_shutuba.ts:54
+Defined in: [scripts/race/main\_shutuba.ts:54](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_shutuba.ts#L54)
 
 エントリポイント: スケジュールから開催日を抽出して処理を開始します。
 `singleRaceId` が指定された場合は年月日・debug フラグを無視し、その1件のみ処理します。

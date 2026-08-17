@@ -6,7 +6,7 @@
 
 # Interface: JraNewsItem
 
-Defined in: scrapers/jra/News/JraNewsIF.ts:4
+Defined in: [scrapers/jra/News/JraNewsIF.ts:4](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNewsIF.ts#L4)
 
 JRAニュースのデータインターフェイス
 
@@ -16,7 +16,7 @@ JRAニュースのデータインターフェイス
 
 > **category**: `string`
 
-Defined in: scrapers/jra/News/JraNewsIF.ts:8
+Defined in: [scrapers/jra/News/JraNewsIF.ts:8](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNewsIF.ts#L8)
 
 カテゴリ（例: "レース関連"）
 
@@ -26,7 +26,7 @@ Defined in: scrapers/jra/News/JraNewsIF.ts:8
 
 > **date**: `string`
 
-Defined in: scrapers/jra/News/JraNewsIF.ts:6
+Defined in: [scrapers/jra/News/JraNewsIF.ts:6](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNewsIF.ts#L6)
 
 日付表示（例: "3月22日（日曜）"）
 
@@ -36,7 +36,7 @@ Defined in: scrapers/jra/News/JraNewsIF.ts:6
 
 > **link**: `string`
 
-Defined in: scrapers/jra/News/JraNewsIF.ts:12
+Defined in: [scrapers/jra/News/JraNewsIF.ts:12](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNewsIF.ts#L12)
 
 絶対URL（https://www.jra.go.jp が先頭）
 
@@ -46,6 +46,6 @@ Defined in: scrapers/jra/News/JraNewsIF.ts:12
 
 > **title**: `string`
 
-Defined in: scrapers/jra/News/JraNewsIF.ts:10
+Defined in: [scrapers/jra/News/JraNewsIF.ts:10](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNewsIF.ts#L10)
 
 ニュースのタイトル

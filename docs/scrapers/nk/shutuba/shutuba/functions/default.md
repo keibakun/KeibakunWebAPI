@@ -8,7 +8,7 @@
 
 > **default**(`page`, `raceId`): `Promise`\<[`RaceIF`](../../ShutubaIF/interfaces/RaceIF.md)\>
 
-Defined in: scrapers/nk/shutuba/shutuba.ts:190
+Defined in: [scrapers/nk/shutuba/shutuba.ts:190](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/shutuba.ts#L190)
 
 出馬表を取得する関数
 

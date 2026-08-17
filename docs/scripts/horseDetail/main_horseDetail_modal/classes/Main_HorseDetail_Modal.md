@@ -6,7 +6,7 @@
 
 # Class: Main\_HorseDetail\_Modal
 
-Defined in: scripts/horseDetail/main\_horseDetail\_modal.ts:38
+Defined in: [scripts/horseDetail/main\_horseDetail\_modal.ts:38](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_modal.ts#L38)
 
 workPool の先頭ファイルを参照し、HorseDetail JSON の comment を SP モーダルから補完する。
 
@@ -30,7 +30,7 @@ workPool ファイルは削除しない（Step④が参照するため）。
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/horseDetail/main\_horseDetail\_modal.ts:39
+Defined in: [scripts/horseDetail/main\_horseDetail\_modal.ts:39](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_modal.ts#L39)
 
 #### Returns
 

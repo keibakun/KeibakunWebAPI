@@ -6,7 +6,7 @@
 
 # Class: Main\_HorseDetail
 
-Defined in: scripts/horseDetail/main\_horseDetail.ts:47
+Defined in: [scripts/horseDetail/main\_horseDetail.ts:47](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail.ts#L47)
 
 Main_HorseDetail
 
@@ -22,7 +22,7 @@ main_horseDetail_db → main_horseDetail_modal → main_horseDetail_pedigree
 
 > **new Main\_HorseDetail**(`year`, `monthArg?`, `dayArg?`, `production?`, `localScheduled?`): `Main_HorseDetail`
 
-Defined in: scripts/horseDetail/main\_horseDetail.ts:62
+Defined in: [scripts/horseDetail/main\_horseDetail.ts:62](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail.ts#L62)
 
 コンストラクタ
 
@@ -68,7 +68,7 @@ Defined in: scripts/horseDetail/main\_horseDetail.ts:62
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/horseDetail/main\_horseDetail.ts:73
+Defined in: [scripts/horseDetail/main\_horseDetail.ts:73](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail.ts#L73)
 
 エントリポイント
 
@@ -82,7 +82,7 @@ Defined in: scripts/horseDetail/main\_horseDetail.ts:73
 
 > **runSingle**(`horseId`, `raceId`): `Promise`\<`void`\>
 
-Defined in: scripts/horseDetail/main\_horseDetail.ts:103
+Defined in: [scripts/horseDetail/main\_horseDetail.ts:103](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail.ts#L103)
 
 単体モード: horseId と raceId を直接指定して1件だけ取得します。
 umaban は Shutuba ファイルがあれば自動取得し、なければ空文字でフォールバックします。

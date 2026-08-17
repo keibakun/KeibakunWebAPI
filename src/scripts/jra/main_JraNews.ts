@@ -1,7 +1,7 @@
 import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { Logger } from "../../utils/Logger";
 import { JraNews } from "../../scrapers/jra/News/JraNews";
-import { JraNewsDbService } from "../../service/JraNewsDbService";
+import { JraNewsDbService } from "../../service/db/JraNewsDbService";
 
 /**
  * JRAニューススクレイパーの簡易実行エントリ

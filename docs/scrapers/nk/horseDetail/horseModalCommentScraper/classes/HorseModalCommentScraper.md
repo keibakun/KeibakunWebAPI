@@ -6,7 +6,7 @@
 
 # Class: HorseModalCommentScraper
 
-Defined in: scrapers/nk/horseDetail/horseModalCommentScraper.ts:17
+Defined in: [scrapers/nk/horseDetail/horseModalCommentScraper.ts:17](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseModalCommentScraper.ts#L17)
 
 SP モーダルページ（race.sp.netkeiba.com）から厩舎コメントを取得して
 成績テーブルの `comment` フィールドに補完するスクレイパー。
@@ -20,7 +20,7 @@ Step③ 専用。DB取得・血統取得は行わない。
 
 > **new HorseModalCommentScraper**(`page`): `HorseModalCommentScraper`
 
-Defined in: scrapers/nk/horseDetail/horseModalCommentScraper.ts:21
+Defined in: [scrapers/nk/horseDetail/horseModalCommentScraper.ts:21](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseModalCommentScraper.ts#L21)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: scrapers/nk/horseDetail/horseModalCommentScraper.ts:21
 
 > **supplement**(`raceId`, `horseId`, `umaban`, `raceResults`): `Promise`\<`void`\>
 
-Defined in: scrapers/nk/horseDetail/horseModalCommentScraper.ts:38
+Defined in: [scrapers/nk/horseDetail/horseModalCommentScraper.ts:38](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseModalCommentScraper.ts#L38)
 
 SP モーダルからコメントを取得し、raceResults の comment フィールドを破壊的に更新する。
 

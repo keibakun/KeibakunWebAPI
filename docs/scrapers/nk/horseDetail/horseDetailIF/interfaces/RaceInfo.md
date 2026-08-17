@@ -6,7 +6,7 @@
 
 # Interface: RaceInfo
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:113
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:113](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L113)
 
 レース自体の情報（開催・コース・条件など）
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:113
 
 > **baba**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:150
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:150](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L150)
 
 馬場状態コード。
 `1`=良 / `2`=稍重 / `3`=重 / `4`=不良 / `0`=不明
@@ -29,7 +29,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:150
 
 > **course**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:138
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:138](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L138)
 
 コース種別コード。`1`=芝 / `2`=ダート / `3`=障害
 
@@ -39,7 +39,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:138
 
 > **date**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:115
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:115](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L115)
 
 開催日（YYYY/MM/DD）
 
@@ -49,7 +49,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:115
 
 > **day**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:121
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:121](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L121)
 
 開催日目（例: 3日目なら 3）
 
@@ -59,7 +59,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:121
 
 > **distance**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:140
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:140](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L140)
 
 距離（m）
 
@@ -69,7 +69,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:140
 
 > **grade**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:134
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:134](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L134)
 
 グレード区分（数値）。
 `1`=G1 / `2`=G2 / `3`=G3 / `4`=重賞 / `5`=OP /
@@ -84,7 +84,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:134
 
 > **kaiji**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:117
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:117](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L117)
 
 回次（例: 2回開催なら 2）
 
@@ -94,7 +94,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:117
 
 > **R**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:136
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:136](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L136)
 
 R（レース番号）
 
@@ -104,7 +104,7 @@ R（レース番号）
 
 > **raceId**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:123
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:123](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L123)
 
 レースID（`/race/<raceId>/` から抽出）
 
@@ -114,7 +114,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:123
 
 > **raceName**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:125
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:125](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L125)
 
 レース名（グレード括弧なし）
 
@@ -124,7 +124,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:125
 
 > **tousuu**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:152
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:152](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L152)
 
 頭数
 
@@ -134,7 +134,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:152
 
 > **venue**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:119
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:119](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L119)
 
 競馬場コード。JRA以外（地方/海外）は `null`
 
@@ -144,7 +144,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:119
 
 > **weather**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:145
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:145](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L145)
 
 天気コード。
 `1`=晴 / `2`=曇 / `3`=雨 / `4`=小雨 / `5`=雪 / `0`=不明

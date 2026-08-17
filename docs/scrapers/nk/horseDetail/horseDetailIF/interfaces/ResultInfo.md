@@ -6,7 +6,7 @@
 
 # Interface: ResultInfo
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:182
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:182](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L182)
 
 出走結果情報
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:182
 
 > **comment**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:204
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:204](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L204)
 
 厩舎コメント
 
@@ -28,7 +28,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:204
 
 > **last3f**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:200
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:200](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L200)
 
 上り（上がり3F秒）
 
@@ -38,7 +38,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:200
 
 > **prize**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:188
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:188](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L188)
 
 賞金（万円）
 
@@ -48,7 +48,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:188
 
 > **rank**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:184
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:184](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L184)
 
 着順
 
@@ -58,7 +58,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:184
 
 > **time**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:186
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:186](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L186)
 
 タイム
 
@@ -68,7 +68,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:186
 
 > **tuuka1c**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:192
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:192](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L192)
 
 1コーナー通過順位
 
@@ -78,7 +78,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:192
 
 > **tuuka2c**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:194
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:194](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L194)
 
 2コーナー通過順位
 
@@ -88,7 +88,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:194
 
 > **tuuka3c**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:196
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:196](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L196)
 
 3コーナー通過順位
 
@@ -98,7 +98,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:196
 
 > **tuuka4c**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:198
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:198](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L198)
 
 4コーナー通過順位
 
@@ -108,7 +108,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:198
 
 > **tyakusa**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:190
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:190](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L190)
 
 着差
 
@@ -118,7 +118,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:190
 
 > **weight**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:202
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:202](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L202)
 
 馬体重（kg）
 
@@ -128,6 +128,6 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:202
 
 > **winnerOrSecondary**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:206
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:206](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L206)
 
 勝ち馬（1着時は2着馬）

@@ -6,7 +6,7 @@ import { RaceIF } from "../../scrapers/nk/shutuba/ShutubaIF";
 import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { Logger } from "../../utils/Logger";
 import { FileUtil } from "../../utils/FileUtil";
-import { ShutubaDbService } from "../../service/ShutubaDbService";
+import { ShutubaDbService } from "../../service/db/ShutubaDbService";
 
 const logger = new Logger();
 const dbService = new ShutubaDbService();

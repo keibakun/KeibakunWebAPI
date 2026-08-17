@@ -8,7 +8,7 @@
 
 > **getHorseDetailOutPath**(`base`, `id`): `object`
 
-Defined in: scripts/horseDetail/main\_horseDetail\_db.ts:31
+Defined in: [scripts/horseDetail/main\_horseDetail\_db.ts:31](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_db.ts#L31)
 
 ## Parameters
 

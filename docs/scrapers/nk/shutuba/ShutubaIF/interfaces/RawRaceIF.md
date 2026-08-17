@@ -6,7 +6,7 @@
 
 # Interface: RawRaceIF
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:56
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:56](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L56)
 
 **`Internal`**
 
@@ -20,7 +20,7 @@ RawRaceIF
 
 > **baba**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:63
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:63](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L63)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:63
 
 > **course**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:61
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:61](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L61)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:61
 
 > **grade**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:59
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:59](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L59)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:59
 
 > **raceData**: `string`[]
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:64
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:64](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L64)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:64
 
 > **raceName**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:58
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:58](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L58)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:58
 
 > **raceNum**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:57
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:57](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L57)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:57
 
 > **raceTime**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:60
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:60](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L60)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:60
 
 > **syutuba**: [`RawSyutubaIF`](RawSyutubaIF.md)[]
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:65
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:65](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L65)
 
 ***
 
@@ -84,4 +84,4 @@ Defined in: scrapers/nk/shutuba/ShutubaIF.ts:65
 
 > **weather**: `string`
 
-Defined in: scrapers/nk/shutuba/ShutubaIF.ts:62
+Defined in: [scrapers/nk/shutuba/ShutubaIF.ts:62](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/shutuba/ShutubaIF.ts#L62)

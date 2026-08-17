@@ -6,7 +6,7 @@
 
 # Interface: RaceTitle
 
-Defined in: scrapers/nk/raceList/raceListIF.ts:29
+Defined in: [scrapers/nk/raceList/raceListIF.ts:29](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceListIF.ts#L29)
 
 RaceTitle
 レースタイトルの情報を表すインターフェース
@@ -17,7 +17,7 @@ RaceTitle
 
 > **kaiji**: `number`
 
-Defined in: scrapers/nk/raceList/raceListIF.ts:30
+Defined in: [scrapers/nk/raceList/raceListIF.ts:30](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceListIF.ts#L30)
 
 回次
 
@@ -27,7 +27,7 @@ Defined in: scrapers/nk/raceList/raceListIF.ts:30
 
 > **times**: `number`
 
-Defined in: scrapers/nk/raceList/raceListIF.ts:32
+Defined in: [scrapers/nk/raceList/raceListIF.ts:32](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceListIF.ts#L32)
 
 日目
 
@@ -37,6 +37,6 @@ Defined in: scrapers/nk/raceList/raceListIF.ts:32
 
 > **venue**: `number`
 
-Defined in: scrapers/nk/raceList/raceListIF.ts:31
+Defined in: [scrapers/nk/raceList/raceListIF.ts:31](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceListIF.ts#L31)
 
 開催場コード (VENUE_MAP準拠)

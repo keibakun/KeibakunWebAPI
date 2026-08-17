@@ -6,7 +6,7 @@
 
 # Class: HorsePedigreeScraper
 
-Defined in: scrapers/nk/horseDetail/horsePedigree.ts:96
+Defined in: [scrapers/nk/horseDetail/horsePedigree.ts:96](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horsePedigree.ts#L96)
 
 馬の5代血統表スクレイパー。
 
@@ -33,7 +33,7 @@ try {
 
 > **new HorsePedigreeScraper**(`page`): `HorsePedigreeScraper`
 
-Defined in: scrapers/nk/horseDetail/horsePedigree.ts:104
+Defined in: [scrapers/nk/horseDetail/horsePedigree.ts:104](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horsePedigree.ts#L104)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: scrapers/nk/horseDetail/horsePedigree.ts:104
 
 > **scrapePedigree**(`horseId`, `profile`): `Promise`\<[`Pedigree`](../../horseDetailIF/type-aliases/Pedigree.md)\>
 
-Defined in: scrapers/nk/horseDetail/horsePedigree.ts:119
+Defined in: [scrapers/nk/horseDetail/horsePedigree.ts:119](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horsePedigree.ts#L119)
 
 db.netkeiba の血統ページ（`/horse/ped/{horseId}/`）から5代血統表を取得する。
 

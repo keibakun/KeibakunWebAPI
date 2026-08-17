@@ -6,7 +6,7 @@
 
 # Class: RaceResult
 
-Defined in: scrapers/nk/raceResult/raceResult.ts:15
+Defined in: [scrapers/nk/raceResult/raceResult.ts:15](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResult.ts#L15)
 
 RaceResultクラス
 
@@ -20,7 +20,7 @@ PuppeteerのPageインスタンスを使用してレース結果を取得する�
 
 > **new RaceResult**(`page`): `RaceResult`
 
-Defined in: scrapers/nk/raceResult/raceResult.ts:23
+Defined in: [scrapers/nk/raceResult/raceResult.ts:23](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResult.ts#L23)
 
 コンストラクタ
 
@@ -42,7 +42,7 @@ PuppeteerのPageインスタンス
 
 > **getRaceResult**(`raceId`): `Promise`\<[`RaceResultWithRefund`](../../raceResultDBIF/interfaces/RaceResultWithRefund.md)\>
 
-Defined in: scrapers/nk/raceResult/raceResult.ts:33
+Defined in: [scrapers/nk/raceResult/raceResult.ts:33](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResult.ts#L33)
 
 レース結果を取得するメソッド
 

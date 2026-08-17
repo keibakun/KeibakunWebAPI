@@ -6,7 +6,7 @@
 
 # Class: Main\_RaceSchedule
 
-Defined in: scripts/race/main\_raceSchedule.ts:18
+Defined in: [scripts/race/main\_raceSchedule.ts:18](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_raceSchedule.ts#L18)
 
 Main_RaceSchedule
 
@@ -19,7 +19,7 @@ KeibakunServer 経由で DB に保存するクラスです。
 
 > **new Main\_RaceSchedule**(`year`): `Main_RaceSchedule`
 
-Defined in: scripts/race/main\_raceSchedule.ts:21
+Defined in: [scripts/race/main\_raceSchedule.ts:21](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_raceSchedule.ts#L21)
 
 #### Parameters
 
@@ -37,7 +37,7 @@ Defined in: scripts/race/main\_raceSchedule.ts:21
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/race/main\_raceSchedule.ts:27
+Defined in: [scripts/race/main\_raceSchedule.ts:27](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_raceSchedule.ts#L27)
 
 指定年のすべての月についてレース日程を取得して保存します。
 

@@ -8,7 +8,7 @@
 
 > **Pedigree** = `Record`\<`string`, [`PedigreeNode`](../interfaces/PedigreeNode.md)\>
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:70
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:70](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L70)
 
 5代血統表（ヒープ方式インデックス）。
 

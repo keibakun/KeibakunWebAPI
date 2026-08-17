@@ -8,7 +8,7 @@
 
 > **VenueCode** = `number` \| `null`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:25
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:25](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L25)
 
 競馬場コード（JRA10場）。
 `1`=札幌 / `2`=函館 / `3`=福島 / `4`=新潟 / `5`=東京 /

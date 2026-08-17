@@ -6,7 +6,7 @@
 
 # Interface: RaceResultWithRefund
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:248
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:248](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L248)
 
 レース結果コンテナ（DB格納用）。
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:248
 
 > **cornerOrder**: [`CornerOrderIF`](CornerOrderIF.md)
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:251
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:251](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L251)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:251
 
 > **lapTime**: [`LapTimeIF`](LapTimeIF.md)
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:252
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:252](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L252)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:252
 
 > **refund**: [`RefundIF`](RefundIF.md)
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:250
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:250](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L250)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:250
 
 > **result**: [`RaceResultRow`](RaceResultRow.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:249
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:249](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L249)

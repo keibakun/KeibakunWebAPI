@@ -6,7 +6,7 @@
 
 # Interface: RefundIF
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:169
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:169](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L169)
 
 払い戻し情報。
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:169
 
 > **fukusho**: [`RefundEntry`](RefundEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:173
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:173](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L173)
 
 複勝
 
@@ -28,7 +28,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:173
 
 > **sanrenpuku**: [`RefundCombEntry`](RefundCombEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:183
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:183](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L183)
 
 三連複
 
@@ -38,7 +38,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:183
 
 > **sanrentan**: [`RefundCombEntry`](RefundCombEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:185
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:185](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L185)
 
 三連単
 
@@ -48,7 +48,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:185
 
 > **tansho**: [`RefundEntry`](RefundEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:171
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:171](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L171)
 
 単勝
 
@@ -58,7 +58,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:171
 
 > **umaren**: [`RefundCombEntry`](RefundCombEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:177
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:177](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L177)
 
 馬連
 
@@ -68,7 +68,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:177
 
 > **umatan**: [`RefundCombEntry`](RefundCombEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:181
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:181](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L181)
 
 馬単
 
@@ -78,7 +78,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:181
 
 > **wakuren**: [`RefundCombEntry`](RefundCombEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:175
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:175](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L175)
 
 枠連
 
@@ -88,6 +88,6 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:175
 
 > **wide**: [`RefundCombEntry`](RefundCombEntry.md)[]
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:179
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:179](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L179)
 
 ワイド

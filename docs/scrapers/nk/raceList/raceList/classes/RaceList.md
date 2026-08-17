@@ -6,7 +6,7 @@
 
 # Class: RaceList
 
-Defined in: scrapers/nk/raceList/raceList.ts:11
+Defined in: [scrapers/nk/raceList/raceList.ts:11](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceList.ts#L11)
 
 RaceListクラス
 PuppeteerのPageインスタンスを使用してレースリストを取得するクラス
@@ -17,7 +17,7 @@ PuppeteerのPageインスタンスを使用してレースリストを取得す�
 
 > **new RaceList**(`page`): `RaceList`
 
-Defined in: scrapers/nk/raceList/raceList.ts:15
+Defined in: [scrapers/nk/raceList/raceList.ts:15](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceList.ts#L15)
 
 #### Parameters
 
@@ -35,7 +35,7 @@ Defined in: scrapers/nk/raceList/raceList.ts:15
 
 > **getRaceList**(`kaisaiDate`): `Promise`\<[`RaceData`](../../raceListIF/interfaces/RaceData.md)[]\>
 
-Defined in: scrapers/nk/raceList/raceList.ts:25
+Defined in: [scrapers/nk/raceList/raceList.ts:25](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceList/raceList.ts#L25)
 
 レースリストを取得するメソッド
 

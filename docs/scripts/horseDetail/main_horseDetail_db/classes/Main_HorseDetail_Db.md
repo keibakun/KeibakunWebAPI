@@ -6,7 +6,7 @@
 
 # Class: Main\_HorseDetail\_Db
 
-Defined in: scripts/horseDetail/main\_horseDetail\_db.ts:96
+Defined in: [scripts/horseDetail/main\_horseDetail\_db.ts:96](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_db.ts#L96)
 
 workPool の先頭ファイルを消化して db.netkeiba からプロフィール＋成績を取得・保存する。
 
@@ -30,7 +30,7 @@ workPool の先頭ファイルを消化して db.netkeiba からプロフィー�
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/horseDetail/main\_horseDetail\_db.ts:97
+Defined in: [scripts/horseDetail/main\_horseDetail\_db.ts:97](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_db.ts#L97)
 
 #### Returns
 

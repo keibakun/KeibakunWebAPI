@@ -6,7 +6,7 @@
 
 # Interface: EntryInfo
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:160
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:160](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L160)
 
 出走登録情報（馬・騎手に紐づく情報）
 
@@ -18,7 +18,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:160
 
 > **jockey**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:168
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:168](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L168)
 
 騎手名
 
@@ -28,7 +28,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:168
 
 > **jockeyId**: `string`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:170
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:170](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L170)
 
 騎手ID
 
@@ -38,7 +38,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:170
 
 > **kinryou**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:166
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:166](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L166)
 
 斤量
 
@@ -48,7 +48,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:166
 
 > **odds**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:172
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:172](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L172)
 
 オッズ
 
@@ -58,7 +58,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:172
 
 > **popularity**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:174
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:174](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L174)
 
 人気
 
@@ -68,7 +68,7 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:174
 
 > **umaban**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:164
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:164](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L164)
 
 馬番
 
@@ -78,6 +78,6 @@ Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:164
 
 > **wakuban**: `number`
 
-Defined in: scrapers/nk/horseDetail/horseDetailIF.ts:162
+Defined in: [scrapers/nk/horseDetail/horseDetailIF.ts:162](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDetailIF.ts#L162)
 
 枠番

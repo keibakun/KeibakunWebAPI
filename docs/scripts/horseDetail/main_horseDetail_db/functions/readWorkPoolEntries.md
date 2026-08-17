@@ -8,7 +8,7 @@
 
 > **readWorkPoolEntries**(`filePath`): `Promise`\<`HorseEntry`[]\>
 
-Defined in: scripts/horseDetail/main\_horseDetail\_db.ts:43
+Defined in: [scripts/horseDetail/main\_horseDetail\_db.ts:43](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_db.ts#L43)
 
 ## Parameters
 

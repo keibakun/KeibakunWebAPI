@@ -6,7 +6,7 @@
 
 # Class: HorseDbScraper
 
-Defined in: scrapers/nk/horseDetail/horseDbScraper.ts:257
+Defined in: [scrapers/nk/horseDetail/horseDbScraper.ts:257](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDbScraper.ts#L257)
 
 db.netkeiba.com の馬詳細ページからプロフィールと全成績を取得するスクレイパー。
 
@@ -19,7 +19,7 @@ Step② 専用。コメント補完・血統取得は行わない。
 
 > **new HorseDbScraper**(`page`): `HorseDbScraper`
 
-Defined in: scrapers/nk/horseDetail/horseDbScraper.ts:261
+Defined in: [scrapers/nk/horseDetail/horseDbScraper.ts:261](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDbScraper.ts#L261)
 
 #### Parameters
 
@@ -37,7 +37,7 @@ Defined in: scrapers/nk/horseDetail/horseDbScraper.ts:261
 
 > **scrape**(`horseId`): `Promise`\<\{ `profile`: [`HorseProfile`](../../horseDetailIF/interfaces/HorseProfile.md); `raceResults`: [`HorseRaceResultRow`](../../horseDetailIF/interfaces/HorseRaceResultRow.md)[]; \}\>
 
-Defined in: scrapers/nk/horseDetail/horseDbScraper.ts:271
+Defined in: [scrapers/nk/horseDetail/horseDbScraper.ts:271](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/horseDetail/horseDbScraper.ts#L271)
 
 db.netkeiba の馬詳細ページからプロフィールと全成績テーブルを取得する。
 1件ごとに新規ページを作成して finally でクローズするため、

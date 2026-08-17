@@ -6,7 +6,7 @@
 
 # Class: Main\_GenerateWorkPool
 
-Defined in: scripts/maintenance/main\_generateWorkPool.ts:127
+Defined in: [scripts/maintenance/main\_generateWorkPool.ts:127](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/maintenance/main_generateWorkPool.ts#L127)
 
 Shutuba フォルダを最新年度から走査して workPool ファイルを生成するクラス。
 
@@ -38,7 +38,7 @@ await gen.run();
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/maintenance/main\_generateWorkPool.ts:132
+Defined in: [scripts/maintenance/main\_generateWorkPool.ts:132](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/maintenance/main_generateWorkPool.ts#L132)
 
 workPool 生成処理を実行する。
 

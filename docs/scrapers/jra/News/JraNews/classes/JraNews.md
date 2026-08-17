@@ -6,7 +6,7 @@
 
 # Class: JraNews
 
-Defined in: scrapers/jra/News/JraNews.ts:15
+Defined in: [scrapers/jra/News/JraNews.ts:15](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNews.ts#L15)
 
 JRAニュースをスクレイピングするクラス
 
@@ -23,7 +23,7 @@ JRAニュースをスクレイピングするクラス
 
 > **new JraNews**(`page`): `JraNews`
 
-Defined in: scrapers/jra/News/JraNews.ts:20
+Defined in: [scrapers/jra/News/JraNews.ts:20](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNews.ts#L20)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: scrapers/jra/News/JraNews.ts:20
 
 > **getNews**(`yyyymm?`): `Promise`\<[`JraNewsIF`](../../JraNewsIF/type-aliases/JraNewsIF.md)\>
 
-Defined in: scrapers/jra/News/JraNews.ts:39
+Defined in: [scrapers/jra/News/JraNews.ts:39](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/jra/News/JraNews.ts#L39)
 
 年月パラメータを受け取りスクレイピング先を切替える
 

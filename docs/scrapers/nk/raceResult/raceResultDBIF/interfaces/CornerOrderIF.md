@@ -6,7 +6,7 @@
 
 # Interface: CornerOrderIF
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:202
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:202](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L202)
 
 コーナー通過順（レース全体のブロック文字列）。
 
@@ -23,7 +23,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:202
 
 > **corner1**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:203
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:203](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L203)
 
 ***
 
@@ -31,7 +31,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:203
 
 > **corner2**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:204
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:204](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L204)
 
 ***
 
@@ -39,7 +39,7 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:204
 
 > **corner3**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:205
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:205](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L205)
 
 ***
 
@@ -47,4 +47,4 @@ Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:205
 
 > **corner4**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultDBIF.ts:206
+Defined in: [scrapers/nk/raceResult/raceResultDBIF.ts:206](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultDBIF.ts#L206)

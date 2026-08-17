@@ -6,7 +6,7 @@
 
 # Class: Main\_HorseDetail\_Pedigree
 
-Defined in: scripts/horseDetail/main\_horseDetail\_pedigree.ts:40
+Defined in: [scripts/horseDetail/main\_horseDetail\_pedigree.ts:40](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_pedigree.ts#L40)
 
 workPool の先頭ファイルを参照し、HorseDetail JSON に5代血統表を補完して上書き保存する。
 その後 workPool ファイルを削除する（Step⑤を兼ねる）。
@@ -32,7 +32,7 @@ workPool の先頭ファイルを参照し、HorseDetail JSON に5代血統表�
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/horseDetail/main\_horseDetail\_pedigree.ts:41
+Defined in: [scripts/horseDetail/main\_horseDetail\_pedigree.ts:41](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_pedigree.ts#L41)
 
 #### Returns
 

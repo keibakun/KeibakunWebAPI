@@ -6,7 +6,7 @@
 
 # Interface: Schedule
 
-Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:20
+Defined in: [scrapers/nk/raceSchedule/raceShceduleIF.ts:20](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceSchedule/raceShceduleIF.ts#L20)
 
 Schedule
 開催日程のインターフェース
@@ -17,7 +17,7 @@ Schedule
 
 > **date**: `string`
 
-Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:21
+Defined in: [scrapers/nk/raceSchedule/raceShceduleIF.ts:21](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceSchedule/raceShceduleIF.ts#L21)
 
 日付
 
@@ -27,7 +27,7 @@ Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:21
 
 > **day**: `string`
 
-Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:22
+Defined in: [scrapers/nk/raceSchedule/raceShceduleIF.ts:22](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceSchedule/raceShceduleIF.ts#L22)
 
 曜日
 
@@ -37,7 +37,7 @@ Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:22
 
 > **kaisaiDate**: `string`
 
-Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:23
+Defined in: [scrapers/nk/raceSchedule/raceShceduleIF.ts:23](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceSchedule/raceShceduleIF.ts#L23)
 
 リンク
 
@@ -47,6 +47,6 @@ Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:23
 
 > **races**: [`Race`](Race.md)[]
 
-Defined in: scrapers/nk/raceSchedule/raceShceduleIF.ts:24
+Defined in: [scrapers/nk/raceSchedule/raceShceduleIF.ts:24](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceSchedule/raceShceduleIF.ts#L24)
 
 レース情報の配列

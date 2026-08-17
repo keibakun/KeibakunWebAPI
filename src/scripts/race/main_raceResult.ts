@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import { Page } from "puppeteer";
 import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { RaceResult } from "../../scrapers/nk/raceResult/raceResult";
-import { RaceResultDbService } from "../../service/RaceResultDbService";
+import { RaceResultDbService } from "../../service/db/RaceResultDbService";
 import { FileUtil } from "../../utils/FileUtil";
 import { Logger } from "../../utils/Logger";
 

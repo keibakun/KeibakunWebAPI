@@ -7,7 +7,7 @@ import { FileUtil } from "../../utils/FileUtil";
 import { JsonFileWriterUtil } from "../../utils/JsonFileWriterUtil";
 import { HorseDetail } from "../../scrapers/nk/horseDetail/horseDetailIF";
 import { HorseDetailRunLogger } from "../../utils/HorseDetailRunLogger";
-import { HorseDetailDbService } from "../../service/HorseDetailDbService";
+import { HorseDetailDbService } from "../../service/db/HorseDetailDbService";
 
 const logger = new Logger();
 const jsonWriter = new JsonFileWriterUtil(logger);

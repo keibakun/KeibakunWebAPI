@@ -8,4 +8,4 @@
 
 > `const` **HORSE\_OUT\_DIR**: `string`
 
-Defined in: scripts/horseDetail/main\_horseDetail\_db.ts:28
+Defined in: [scripts/horseDetail/main\_horseDetail\_db.ts:28](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/horseDetail/main_horseDetail_db.ts#L28)

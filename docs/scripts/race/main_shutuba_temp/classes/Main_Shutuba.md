@@ -6,7 +6,7 @@
 
 # Class: Main\_Shutuba
 
-Defined in: scripts/race/main\_shutuba\_temp.ts:25
+Defined in: [scripts/race/main\_shutuba\_temp.ts:25](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_shutuba_temp.ts#L25)
 
 Main_Shutuba
 
@@ -21,7 +21,7 @@ Main_Shutuba
 
 > **new Main\_Shutuba**(`year`, `month?`, `day?`, `debug?`, `concurrency?`): `Main_Shutuba`
 
-Defined in: scripts/race/main\_shutuba\_temp.ts:39
+Defined in: [scripts/race/main\_shutuba\_temp.ts:39](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_shutuba_temp.ts#L39)
 
 コンストラクタ
 
@@ -67,7 +67,7 @@ Defined in: scripts/race/main\_shutuba\_temp.ts:39
 
 > **run**(): `Promise`\<`void`\>
 
-Defined in: scripts/race/main\_shutuba\_temp.ts:50
+Defined in: [scripts/race/main\_shutuba\_temp.ts:50](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scripts/race/main_shutuba_temp.ts#L50)
 
 エントリポイント: スケジュールから開催日を抽出して処理を開始します。
 

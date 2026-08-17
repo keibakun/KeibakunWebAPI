@@ -3,7 +3,7 @@ import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { Logger } from "../../utils/Logger";
 import { RaceSchedule } from "../../scrapers/nk/raceSchedule/raceSchedule";
 import { Schedule } from "../../scrapers/nk/raceSchedule/raceShceduleIF";
-import { RaceScheduleDbService } from "../../service/RaceScheduleDbService";
+import { RaceScheduleDbService } from "../../service/db/RaceScheduleDbService";
 
 const logger = new Logger();
 const dbService = new RaceScheduleDbService();

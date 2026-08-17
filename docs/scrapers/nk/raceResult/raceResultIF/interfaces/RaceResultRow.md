@@ -6,7 +6,7 @@
 
 # Interface: RaceResultRow
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:4
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:4](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L4)
 
 レース結果テーブルの1行を表すインターフェース
 
@@ -16,7 +16,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:4
 
 > **agari**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:17
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:17](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L17)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:17
 
 > **bataijuu**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:21
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:21](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L21)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:21
 
 > **chakusa**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:14
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:14](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L14)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:14
 
 > **horseId**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:8
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:8](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L8)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:8
 
 > **horseName**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:7
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:7](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L7)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:7
 
 > **jockey**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:11
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:11](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L11)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:11
 
 > **jockeyId**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:12
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:12](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L12)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:12
 
 > **kinryou**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:10
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:10](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L10)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:10
 
 > **ninki**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:15
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:15](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L15)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:15
 
 > **odds**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:16
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:16](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L16)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:16
 
 > **rank**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:5
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:5](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L5)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:5
 
 > **sexAge**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:9
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:9](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L9)
 
 ***
 
@@ -112,7 +112,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:9
 
 > **time**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:13
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:13](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L13)
 
 ***
 
@@ -120,7 +120,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:13
 
 > **trainer**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:19
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:19](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L19)
 
 ***
 
@@ -128,7 +128,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:19
 
 > **trainerId**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:20
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:20](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L20)
 
 ***
 
@@ -136,7 +136,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:20
 
 > **tsuuka**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:18
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:18](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L18)
 
 ***
 
@@ -144,4 +144,4 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:18
 
 > **umaban**: `string`
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:6
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:6](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L6)

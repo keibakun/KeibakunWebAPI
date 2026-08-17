@@ -6,7 +6,7 @@
 
 # Interface: RefundIF
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:27
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:27](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L27)
 
 払い戻し情報の集合を表すインターフェース
 
@@ -16,7 +16,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:27
 
 > **fukusho**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:29
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:29](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L29)
 
 #### ninki
 
@@ -36,7 +36,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:29
 
 > **sanrenpuku**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:34
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:34](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L34)
 
 #### combination
 
@@ -56,7 +56,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:34
 
 > **sanrentan**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:35
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:35](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L35)
 
 #### combination
 
@@ -76,7 +76,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:35
 
 > **tansho**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:28
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:28](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L28)
 
 #### ninki
 
@@ -96,7 +96,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:28
 
 > **umaren**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:31
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:31](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L31)
 
 #### combination
 
@@ -116,7 +116,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:31
 
 > **umatan**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:33
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:33](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L33)
 
 #### combination
 
@@ -136,7 +136,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:33
 
 > **wakuren**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:30
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:30](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L30)
 
 #### combination
 
@@ -156,7 +156,7 @@ Defined in: scrapers/nk/raceResult/raceResultIF.ts:30
 
 > **wide**: `object`[]
 
-Defined in: scrapers/nk/raceResult/raceResultIF.ts:32
+Defined in: [scrapers/nk/raceResult/raceResultIF.ts:32](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/scrapers/nk/raceResult/raceResultIF.ts#L32)
 
 #### combination
 
