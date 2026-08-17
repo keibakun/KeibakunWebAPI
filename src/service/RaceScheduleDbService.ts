@@ -1,5 +1,5 @@
 import { DbService } from "./DbService";
-import { Schedule } from "../NKScraper/raceSchedule/raceShceduleIF";
+import { Schedule } from "../scrapers/nk/raceSchedule/raceShceduleIF";
 
 /** POST ボディの 1 エントリ（kaisaiDate × venue のフラット形式） */
 interface ScheduleEntry {

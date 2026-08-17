@@ -1,5 +1,5 @@
 import { DbService } from "./DbService";
-import { JraNewsIF } from "../JRAScraper/News/JraNewsIF";
+import { JraNewsIF } from "../scrapers/jra/News/JraNewsIF";
 
 /**
  * JraNewsDbService

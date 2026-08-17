@@ -1,5 +1,5 @@
 import { DbService } from "./DbService";
-import { HorseDetail } from "../NKScraper/horseDetail/horseDetailIF";
+import { HorseDetail } from "../scrapers/nk/horseDetail/horseDetailIF";
 
 /**
  * HorseDetailDbService

@@ -1,5 +1,5 @@
 import { DbService } from "./DbService";
-import { RaceResultWithRefund } from "../NKScraper/raceResult/raceResultDBIF";
+import { RaceResultWithRefund } from "../scrapers/nk/raceResult/raceResultDBIF";
 
 /**
  * RaceResultDbService

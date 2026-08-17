@@ -1,5 +1,5 @@
 import { DbService } from "./DbService";
-import { RaceIF } from "../NKScraper/shutuba/syutubaIF";
+import { RaceIF } from "../scrapers/nk/shutuba/ShutubaIF";
 
 /**
  * ShutubaDbService

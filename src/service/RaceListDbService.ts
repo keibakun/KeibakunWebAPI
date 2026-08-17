@@ -1,5 +1,5 @@
 import { DbService } from "./DbService";
-import { RaceData } from "../NKScraper/raceList/raceListIF";
+import { RaceData } from "../scrapers/nk/raceList/raceListIF";
 
 /**
  * RaceListDbService
