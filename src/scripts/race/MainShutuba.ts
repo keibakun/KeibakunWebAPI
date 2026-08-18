@@ -21,7 +21,7 @@ const DEFAULT_CONCURRENCY = 5;
  * 各 `raceId` に対して `getShutuba` を呼び出し、KeibakunServerへ保存します。
  * デバッグモードフラグはデフォルトで false です。
  */
-export class Main_Shutuba extends MainScraper {
+export class MainShutuba extends MainScraper {
     private year: number;
     private month?: number;
     private day?: number;
@@ -169,7 +169,7 @@ const args = process.argv.slice(2);
 if (args[0] && args[0].length > 4) {
     const singleRaceId = args[0];
     const concurrency = args[1] ? parseInt(args[1], 10) : undefined;
-    const main = new Main_Shutuba(0, undefined, undefined, undefined, concurrency, singleRaceId);
+    const main = new MainShutuba(0, undefined, undefined, undefined, concurrency, singleRaceId);
     main.run();
 } else {
     const year = args[0] ? parseInt(args[0], 10) : undefined;
@@ -182,7 +182,7 @@ if (args[0] && args[0].length > 4) {
         process.exit(1);
     }
 
-    const main = new Main_Shutuba(year, monthArg, dayArg, debugArg);
+    const main = new MainShutuba(year, monthArg, dayArg, debugArg);
     main.run().catch((error) => {
         logger.error(`Shutuba 実行中に致命的なエラーが発生しました: ${String(error)}`);
         process.exit(1);

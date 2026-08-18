@@ -6,7 +6,7 @@
 
 # Abstract Class: DbService
 
-Defined in: service/base/DbService.ts:11
+Defined in: [service/base/DbService.ts:11](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L11)
 
 ## Extended by
 
@@ -23,7 +23,7 @@ Defined in: service/base/DbService.ts:11
 
 > **new DbService**(): `DbService`
 
-Defined in: service/base/DbService.ts:14
+Defined in: [service/base/DbService.ts:14](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L14)
 
 #### Returns
 
@@ -35,15 +35,39 @@ Defined in: service/base/DbService.ts:14
 
 > `protected` `readonly` **serverUrl**: `string`
 
-Defined in: service/base/DbService.ts:12
+Defined in: [service/base/DbService.ts:12](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L12)
 
 ## Methods
+
+### get()
+
+> `protected` **get**\<`T`\>(`endpoint`): `Promise`\<`T`\>
+
+Defined in: [service/base/DbService.ts:42](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L42)
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+#### Parameters
+
+##### endpoint
+
+`string`
+
+#### Returns
+
+`Promise`\<`T`\>
+
+***
 
 ### post()
 
 > `protected` **post**\<`T`\>(`endpoint`, `body`, `expectedStatus`): `Promise`\<`void`\>
 
-Defined in: service/base/DbService.ts:26
+Defined in: [service/base/DbService.ts:26](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L26)
 
 KeibakunServer の指定エンドポイントへ JSON を POST します。
 

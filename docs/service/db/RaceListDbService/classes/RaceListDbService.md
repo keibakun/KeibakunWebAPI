@@ -6,7 +6,7 @@
 
 # Class: RaceListDbService
 
-Defined in: service/db/RaceListDbService.ts:10
+Defined in: [service/db/RaceListDbService.ts:14](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/db/RaceListDbService.ts#L14)
 
 RaceListDbService
 
@@ -23,7 +23,7 @@ DB に格納するサービスクラス。
 
 > **new RaceListDbService**(): `RaceListDbService`
 
-Defined in: service/base/DbService.ts:14
+Defined in: [service/base/DbService.ts:14](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L14)
 
 #### Returns
 
@@ -39,7 +39,7 @@ Defined in: service/base/DbService.ts:14
 
 > `protected` `readonly` **serverUrl**: `string`
 
-Defined in: service/base/DbService.ts:12
+Defined in: [service/base/DbService.ts:12](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L12)
 
 #### Inherited from
 
@@ -47,11 +47,59 @@ Defined in: service/base/DbService.ts:12
 
 ## Methods
 
+### findRaceIds()
+
+> **findRaceIds**(`date`): `Promise`\<`string`[]\>
+
+Defined in: [service/db/RaceListDbService.ts:18](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/db/RaceListDbService.ts#L18)
+
+指定開催日の raceId 一覧を KeibakunServer から取得します。
+
+#### Parameters
+
+##### date
+
+`string`
+
+#### Returns
+
+`Promise`\<`string`[]\>
+
+***
+
+### get()
+
+> `protected` **get**\<`T`\>(`endpoint`): `Promise`\<`T`\>
+
+Defined in: [service/base/DbService.ts:42](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L42)
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+#### Parameters
+
+##### endpoint
+
+`string`
+
+#### Returns
+
+`Promise`\<`T`\>
+
+#### Inherited from
+
+[`DbService`](../../../base/DbService/classes/DbService.md).[`get`](../../../base/DbService/classes/DbService.md#get)
+
+***
+
 ### post()
 
 > `protected` **post**\<`T`\>(`endpoint`, `body`, `expectedStatus`): `Promise`\<`void`\>
 
-Defined in: service/base/DbService.ts:26
+Defined in: [service/base/DbService.ts:26](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/base/DbService.ts#L26)
 
 KeibakunServer の指定エンドポイントへ JSON を POST します。
 
@@ -99,7 +147,7 @@ HTTP エラーまたはネットワーク障害時
 
 > **store**(`date`, `data`): `Promise`\<`void`\>
 
-Defined in: service/db/RaceListDbService.ts:17
+Defined in: [service/db/RaceListDbService.ts:33](https://github.com/keibakun/KeibakunWebAPI/blob/main/src/service/db/RaceListDbService.ts#L33)
 
 RaceList を KeibakunServer へ POST して DB に格納します。
 

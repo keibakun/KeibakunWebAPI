@@ -15,7 +15,7 @@ const scheduleDbService = new RaceScheduleDbService();
  *
  * 開催日はRaceScheduleDbServiceから取得するため、ローカルの開催日程ファイルには依存しません。
  */
-export class Main_RaceList extends MainScraper {
+export class MainRaceList extends MainScraper {
     private year: number;
     private monthArg?: number;
 
@@ -101,13 +101,13 @@ export class Main_RaceList extends MainScraper {
 }
 
 /**
- * コマンドライン引数からMain_RaceListを実行
+ * コマンドライン引数からMainRaceListを実行
  */
 const args = process.argv.slice(2);
 const year = parseInt(args[0], 10) || 2025;
 const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
 
-const main = new Main_RaceList(year, monthArg);
+const main = new MainRaceList(year, monthArg);
 main.run().catch((error) => {
     logger.error(`RaceList 実行中に致命的なエラーが発生しました: ${String(error)}`);
     process.exit(1);

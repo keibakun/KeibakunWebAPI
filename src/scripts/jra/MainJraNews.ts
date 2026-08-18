@@ -6,9 +6,9 @@ import { MainScraper } from "../base/MainScraper";
  * JRAニューススクレイパーの簡易実行エントリ
  *
  * 実行例:
- * PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npx tsx src/scripts/jra/main_JraNews.ts
+ * PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npx tsx src/scripts/jra/MainJraNews.ts
  */
-export class Main_JraNews extends MainScraper {
+export class MainJraNews extends MainScraper {
     /**
      * 指定年月のJRAニュースを取得し、KeibakunServerへ保存します。
      * @param yyyymm 対象年月（YYYYMM）。省略時は現在年月
@@ -18,6 +18,7 @@ export class Main_JraNews extends MainScraper {
         const dbService = new JraNewsDbService();
         let useYyyymm = yyyymm;
         if (useYyyymm && !/^\d{6}$/.test(useYyyymm)) {
+            // yyyymm パラメータの形式が不正な場合は警告を出して無視する
             this.logger.warn(`yyyymm パラメータの形式が不正です: ${useYyyymm} (期待: yyyymm)`);
             useYyyymm = undefined;
         }
@@ -53,7 +54,7 @@ export class Main_JraNews extends MainScraper {
 }
 
 if (require.main === module) {
-    const main = new Main_JraNews();
+    const main = new MainJraNews();
     main.run(process.argv[2]).catch((e) => {
         console.error(e);
         process.exit(1);

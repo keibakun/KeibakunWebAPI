@@ -9,12 +9,12 @@ const logger = new Logger();
 const dbService = new RaceScheduleDbService();
 
 /**
- * Main_RaceSchedule
+ * MainRaceSchedule
  *
  * 指定年の月ごとに `RaceSchedule` をスクレイピングして
  * KeibakunServer経由でDBに保存するエントリポイントです。
  */
-export class Main_RaceSchedule extends MainScraper {
+export class MainRaceSchedule extends MainScraper {
     private year: number;
 
     constructor(year: number) {
@@ -54,5 +54,5 @@ export class Main_RaceSchedule extends MainScraper {
 const args = process.argv.slice(2);
 const year = parseInt(args[0], 10) || 2026;
 
-const main = new Main_RaceSchedule(year);
+const main = new MainRaceSchedule(year);
 main.run();

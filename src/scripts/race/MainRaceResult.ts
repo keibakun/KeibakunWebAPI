@@ -18,7 +18,7 @@ const DEFAULT_CONCURRENCY = 5;
  * DBへ保存します。複数タブを使った並列スクレイピングに対応しています。
  * 対象raceIdはKeibakunServerのレース一覧APIから取得します。
  */
-export class Main_RaceResult extends MainScraper {
+export class MainRaceResult extends MainScraper {
     private year: number;
     private monthArg?: number;
     private concurrency: number;
@@ -118,12 +118,12 @@ const args = process.argv.slice(2);
 if (args[0] && args[0].length > 4) {
     const singleRaceId = args[0];
     const concurrency = args[1] ? parseInt(args[1], 10) : undefined;
-    const main = new Main_RaceResult(0, undefined, concurrency, singleRaceId);
+    const main = new MainRaceResult(0, undefined, concurrency, singleRaceId);
     main.run();
 } else {
     const year = parseInt(args[0], 10) || 2025;
     const monthArg = args[1] ? parseInt(args[1], 10) : undefined;
     const concurrency = args[2] ? parseInt(args[2], 10) : undefined;
-    const main = new Main_RaceResult(year, monthArg, concurrency);
+    const main = new MainRaceResult(year, monthArg, concurrency);
     main.run();
 }
