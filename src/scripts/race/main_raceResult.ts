@@ -1,14 +1,13 @@
-import path from "path";
-import fs from "fs/promises";
 import { Page } from "puppeteer";
 import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { RaceResult } from "../../scrapers/nk/raceResult/raceResult";
 import { RaceResultDbService } from "../../service/db/RaceResultDbService";
-import { FileUtil } from "../../utils/FileUtil";
+import { RaceListDbService } from "../../service/db/RaceListDbService";
 import { Logger } from "../../utils/Logger";
 
 const logger = new Logger();
 const dbService = new RaceResultDbService();
+const raceListDbService = new RaceListDbService();
 
 /** 並列処理のデフォルト同時実行数 */
 const DEFAULT_CONCURRENCY = 5;
@@ -16,8 +15,8 @@ const DEFAULT_CONCURRENCY = 5;
 /**
  * Main_RaceResult
  *
- * 年月から `RaceList` を走査し、各 `raceId` に対して `RaceResult` を取得して
- * `RaceResult/<year><month><rest>/index.html` に JSON を保存するクラスです。
+ * 年月をKeibakunServerへ問い合わせ、各 `raceId` に対して `RaceResult` を取得して
+ * DBへ保存するクラスです。
  * 複数タブを使った並列スクレイピングに対応しています。
  */
 export class Main_RaceResult {
@@ -135,85 +134,17 @@ export class Main_RaceResult {
     }
 
     /**
-     * 指定月の RaceList ディレクトリを走査し、raceId の配列を返します。
+     * 指定年月のレース一覧をKeibakunServerへ問い合わせ、raceIdの配列を返します。
      * @param month 対象月（1-12）
      */
     private async collectRaceIds(month: number): Promise<string[]> {
-        const formattedMonth = month.toString().padStart(2, "0");
-        const raceListRoot = path.join(__dirname, `../../RaceList/`);
-
-        let entries: string[] = [];
         try {
-            entries = await fs.readdir(raceListRoot);
+            const yyyymm = `${this.year}${month.toString().padStart(2, "0")}`;
+            return await raceListDbService.findRaceIds(yyyymm);
         } catch (err) {
-            logger.warn(`RaceListディレクトリが見つかりません: ${raceListRoot}`);
+            logger.warn(`RaceList API の呼び出しに失敗しました: date=${this.year}${month.toString().padStart(2, "0")}`);
             return [];
         }
-
-        const kaisaiDates: string[] = [];
-        for (const name of entries) {
-            const idxPath = path.join(raceListRoot, name, "index.html");
-            if (name.startsWith(`${this.year}${formattedMonth}`) && await FileUtil.exists(idxPath)) {
-                kaisaiDates.push(name);
-            }
-        }
-
-        if (kaisaiDates.length === 0) {
-            logger.warn(`RaceList/${this.year}${formattedMonth}**/index.html が見つかりません`);
-            return [];
-        }
-
-        const raceIds: string[] = [];
-        for (const kaisaiDate of kaisaiDates) {
-            const ids = await this.extractRaceIds(raceListRoot, kaisaiDate);
-            raceIds.push(...ids);
-        }
-        return raceIds;
-    }
-
-    /**
-     * 開催日（kaisaiDate）の RaceList/index.html から raceId を抽出します。
-     * @param raceListRoot RaceList ルートパス
-     * @param kaisaiDate 開催日文字列（YYYYMMDD）
-     */
-    private async extractRaceIds(raceListRoot: string, kaisaiDate: string): Promise<string[]> {
-        const raceListPath = path.join(raceListRoot, kaisaiDate, "index.html");
-        if (! await FileUtil.exists(raceListPath)) {
-            logger.warn(`RaceListファイルが存在しません: ${raceListPath}`);
-            return [];
-        }
-
-        let raceListJson = "";
-        try {
-            raceListJson = await fs.readFile(raceListPath, "utf-8");
-        } catch (e) {
-            logger.error(`RaceListの読み込みに失敗しました: ${raceListPath}`);
-            return [];
-        }
-
-        let raceList: any[] = [];
-        try {
-            raceList = JSON.parse(raceListJson);
-        } catch (e) {
-            logger.error("RaceListのJSONパースに失敗しました");
-            return [];
-        }
-
-        const raceIds: string[] = [];
-        for (const venue of raceList) {
-            if (venue.items && Array.isArray(venue.items)) {
-                for (const item of venue.items) {
-                    if (item.raceId) {
-                        raceIds.push(item.raceId);
-                    }
-                }
-            }
-        }
-
-        if (raceIds.length === 0) {
-            logger.error(`raceIdが見つかりませんでした: ${kaisaiDate}`);
-        }
-        return raceIds;
     }
 }
 
