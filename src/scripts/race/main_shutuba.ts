@@ -1,15 +1,16 @@
-import path from "path";
-import fs from "fs/promises";
 import { Page } from "puppeteer";
 import getShutuba from "../../scrapers/nk/shutuba/shutuba";
 import { RaceIF } from "../../scrapers/nk/shutuba/ShutubaIF";
 import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { Logger } from "../../utils/Logger";
-import { FileUtil } from "../../utils/FileUtil";
 import { ShutubaDbService } from "../../service/db/ShutubaDbService";
+import { RaceListDbService } from "../../service/db/RaceListDbService";
+import { RaceScheduleDbService } from "../../service/db/RaceScheduleDbService";
 
 const logger = new Logger();
 const dbService = new ShutubaDbService();
+const raceListDbService = new RaceListDbService();
+const scheduleDbService = new RaceScheduleDbService();
 
 /** 並列処理のデフォルト同時実行数 */
 const DEFAULT_CONCURRENCY = 5;
@@ -17,8 +18,7 @@ const DEFAULT_CONCURRENCY = 5;
 /**
  * Main_Shutuba
  *
- * `RaceSchedule/<YYYYMM>/index.html` から開催日を抽出し、
- * `RaceList/<kaisaiDate>/index.html` を参照して `raceId` を取り出し、
+ * KeibakunServerから開催日と `raceId` を取得し、
  * 各 `raceId` に対して `getShutuba` を呼び出して出馬表を保存するクラスです。
  * デバッグモードフラグはデフォルトで false です。
  */
@@ -61,75 +61,37 @@ export class Main_Shutuba {
 
         let kaisaiDates: string[] = [];
 
-        if (!this.debug) {
-            if (!this.month) {
-                // 年のみ指定: 該当年の RaceList を全走査する
-                logger.info(`指定された年: ${this.year}（debug=false, 年全体）`);
+        if (this.debug && (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12)) {
+            logger.error("月の指定が無効です。1～12の範囲で指定してください。");
+            return;
+        }
 
-                kaisaiDates = await this.getKaisaiDatesFromRaceListByYear(this.year);
-                if (kaisaiDates.length === 0) {
-                    logger.warn(`${this.year}年の RaceList に開催日が見つかりませんでした。`);
-                    return;
-                }
-            } else if (isNaN(this.month) || this.month < 1 || this.month > 12) {
-                logger.error("月の指定が無効です。月は1～12の範囲で指定してください。");
-                return;
-            } else if (this.day && !isNaN(this.day) && this.day >= 1 && this.day <= 31) {
-                // 年月日指定: 翌日以降の RaceList を走査する
-                logger.info(`指定された年: ${this.year}, 月: ${this.month}, 日: ${this.day}（debug=false）`);
-
-                const baseDate = new Date(this.year, this.month - 1, this.day);
-                const targetDate = new Date(baseDate);
-                targetDate.setDate(targetDate.getDate() + 1); // 明日以降
-
-                kaisaiDates = await this.getKaisaiDatesFromRaceListAfter(targetDate);
-                if (kaisaiDates.length === 0) {
-                    logger.warn(`指定日時の翌日以降の RaceList に開催日が見つかりませんでした。`);
-                    return;
-                }
-            } else {
-                // 年月のみ指定: 該当月の RaceList を全走査する
-                logger.info(`指定された年: ${this.year}, 月: ${this.month}（debug=false, 月全体）`);
-
-                kaisaiDates = await this.getKaisaiDatesFromRaceListByMonth(this.year, this.month);
-                if (kaisaiDates.length === 0) {
-                    logger.warn(`${this.year}年${this.month}月の RaceList に開催日が見つかりませんでした。`);
-                    return;
-                }
+        if (!this.month) {
+            logger.info(`指定された年: ${this.year}（年全体）`);
+            for (let month = 1; month <= 12; month++) {
+                kaisaiDates.push(...await this.getKaisaiDatesFromServer(this.year, month));
+            }
+        } else if (isNaN(this.month) || this.month < 1 || this.month > 12) {
+            logger.error("月の指定が無効です。月は1～12の範囲で指定してください。");
+            return;
+        } else if (this.day && !isNaN(this.day) && this.day >= 1 && this.day <= 31) {
+            const targetDate = new Date(this.year, this.month - 1, this.day + 1);
+            const targetString = this.formatDate(targetDate);
+            for (let month = this.month; month <= 12; month++) {
+                const dates = await this.getKaisaiDatesFromServer(this.year, month);
+                kaisaiDates.push(...dates.filter((date) => date >= targetString));
             }
         } else {
-            // 既存の動作（debug=true）: RaceSchedule から開催日を抽出
-            // month が整数か検証
-            if (!this.month || isNaN(this.month) || this.month < 1 || this.month > 12) {
-                logger.error("月の指定が無効です。1～12の範囲で指定してください。");
-                return;
-            }
+            logger.info(`指定された年: ${this.year}, 月: ${this.month}${this.debug ? "（debug=true）" : ""}`);
+            kaisaiDates = await this.getKaisaiDatesFromServer(this.year, this.month);
+        }
 
-            logger.info(`指定された年: ${this.year}, 月: ${this.month}, デバッグモード: ${this.debug}`);
-
-            const formattedMonth = this.month.toString().padStart(2, "0");
-            const schedulePath = path.join(__dirname, `../../RaceSchedule/${this.year}${formattedMonth}/index.html`);
-
-            // schedule ファイルの存在チェック
-            if (! await FileUtil.exists(schedulePath)) {
-                logger.warn(`index.html が存在しません: ${schedulePath}`);
-                return;
-            }
-
-            // index.html を読み込み、kaisaiDate を抽出
-            let scheduleContent = "";
-            try {
-                scheduleContent = await fs.readFile(schedulePath, "utf-8");
-            } catch (e) {
-                logger.error(`スケジュールの読み込みに失敗しました: ${schedulePath}`);
-                return;
-            }
-
-            kaisaiDates = this.extractKaisaiDates(scheduleContent, schedulePath);
-            if (kaisaiDates.length === 0) {
-                logger.warn(`指定された年 (${this.year}) の月 (${this.month}) の開催日が見つかりませんでした。`);
-                return;
-            }
+        kaisaiDates = kaisaiDates
+            .filter((date, index, dates) => dates.indexOf(date) === index)
+            .sort();
+        if (kaisaiDates.length === 0) {
+            logger.warn("指定条件に一致する開催日が見つかりませんでした。");
+            return;
         }
 
         // 各開催日について raceId を収集
@@ -207,131 +169,26 @@ export class Main_Shutuba {
     }
 
     /**
-     * 開催日の RaceList/index.html から raceId を収集します（スクレイピングなし）。
+    * 開催日のレース一覧をKeibakunServerへ問い合わせ、raceIdを収集します。
      * @param kaisaiDate 開催日文字列（YYYYMMDD）
      */
     private async collectRaceIds(kaisaiDate: string): Promise<string[]> {
-        const raceListPath = path.join(__dirname, `../../RaceList/${kaisaiDate}/index.html`);
-        if (! await FileUtil.exists(raceListPath)) {
-            logger.warn(`RaceList の index.html が存在しません: ${raceListPath}`);
-            return [];
-        }
-
-        let raceListContent = "";
         try {
-            raceListContent = await fs.readFile(raceListPath, "utf-8");
+            return await raceListDbService.findRaceIds(kaisaiDate);
         } catch (e) {
-            logger.error(`RaceList の読み込みに失敗しました: ${raceListPath}`);
+            logger.error(`RaceList API の呼び出しに失敗しました: date=${kaisaiDate}`);
             return [];
         }
-
-        const raceIdMatches = raceListContent.match(/"raceId":\s*"(\d{12})"/g);
-        if (!raceIdMatches) {
-            logger.warn(`raceId が見つかりません: ${raceListPath}`);
-            return [];
-        }
-
-        return raceIdMatches
-            .map((match) => match.match(/"raceId":\s*"(\d{12})"/)?.[1] || "")
-            .filter((id) => id !== "");
     }
 
-    /**
-     * index.html の内容から kaisaiDate を抽出します。
-     * @param htmlContent index.html の文字列
-     * @param indexPath ログ用のパス
-     */
-    private extractKaisaiDates(htmlContent: string, indexPath: string): string[] {
-        const kaisaiDateMatches = htmlContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
-        if (!kaisaiDateMatches) {
-            logger.warn(`kaisaiDate が見つかりません: ${indexPath}`);
-            return [];
-        }
-        return kaisaiDateMatches
-            .map((match) => match.match(/"kaisaiDate":\s*"(\d{8})"/)?.[1] || "")
-            .filter((d) => d !== "");
+    private async getKaisaiDatesFromServer(year: number, month: number): Promise<string[]> {
+        const yyyymm = `${year}${month.toString().padStart(2, "0")}`;
+        return scheduleDbService.findKaisaiDates(yyyymm);
     }
 
-    /**
-     * RaceList ディレクトリを走査し、targetDate（YYYYMMDD）以上のディレクトリ名を返す
-     * @param targetDate 判定開始日（この日を含む）
-     */
-    private async getKaisaiDatesFromRaceListAfter(targetDate: Date): Promise<string[]> {
-        const raceListDir = path.join(__dirname, `../../RaceList`);
-        if (! await FileUtil.exists(raceListDir)) {
-            logger.warn(`RaceList ディレクトリが存在しません: ${raceListDir}`);
-            return [];
-        }
-
-        let entries: string[] = [];
-        try {
-            entries = await fs.readdir(raceListDir);
-        } catch (e) {
-            logger.error(`RaceList ディレクトリの読み込みに失敗しました: ${raceListDir}`);
-            return [];
-        }
-
-        const pad = (n: number) => String(n).padStart(2, "0");
-        const targetStr = `${targetDate.getFullYear()}${pad(targetDate.getMonth() + 1)}${pad(targetDate.getDate())}`;
-
-        const kaisaiDates = entries
-            .filter((name) => /^\d{8}$/.test(name) && name >= targetStr)
-            .sort();
-
-        return kaisaiDates;
-    }
-
-    /**
-     * RaceList ディレクトリを走査し、指定年に一致するディレクトリ名を返す
-     * @param year 対象年
-     */
-    private async getKaisaiDatesFromRaceListByYear(year: number): Promise<string[]> {
-        const raceListDir = path.join(__dirname, `../../RaceList`);
-        if (! await FileUtil.exists(raceListDir)) {
-            logger.warn(`RaceList ディレクトリが存在しません: ${raceListDir}`);
-            return [];
-        }
-
-        let entries: string[] = [];
-        try {
-            entries = await fs.readdir(raceListDir);
-        } catch (e) {
-            logger.error(`RaceList ディレクトリの読み込みに失敗しました: ${raceListDir}`);
-            return [];
-        }
-
-        const prefix = `${year}`;
-
-        return entries
-            .filter((name) => /^\d{8}$/.test(name) && name.startsWith(prefix))
-            .sort();
-    }
-
-    /**
-     * RaceList ディレクトリを走査し、指定年月に一致するディレクトリ名を返す
-     * @param year 対象年
-     * @param month 対象月（1-12）
-     */
-    private async getKaisaiDatesFromRaceListByMonth(year: number, month: number): Promise<string[]> {
-        const raceListDir = path.join(__dirname, `../../RaceList`);
-        if (! await FileUtil.exists(raceListDir)) {
-            logger.warn(`RaceList ディレクトリが存在しません: ${raceListDir}`);
-            return [];
-        }
-
-        let entries: string[] = [];
-        try {
-            entries = await fs.readdir(raceListDir);
-        } catch (e) {
-            logger.error(`RaceList ディレクトリの読み込みに失敗しました: ${raceListDir}`);
-            return [];
-        }
-
-        const prefix = `${year}${month.toString().padStart(2, "0")}`;
-
-        return entries
-            .filter((name) => /^\d{8}$/.test(name) && name.startsWith(prefix))
-            .sort();
+    private formatDate(date: Date): string {
+        const pad = (value: number) => value.toString().padStart(2, "0");
+        return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
     }
 }
 

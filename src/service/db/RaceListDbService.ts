@@ -1,6 +1,10 @@
 import { DbService } from "../base/DbService";
 import { RaceData } from "../../scrapers/nk/raceList/raceListIF";
 
+interface RaceListItem {
+    raceId: string;
+}
+
 /**
  * RaceListDbService
  *
@@ -8,6 +12,18 @@ import { RaceData } from "../../scrapers/nk/raceList/raceListIF";
  * DB に格納するサービスクラス。
  */
 export class RaceListDbService extends DbService {
+    /**
+     * 指定開催日の raceId 一覧を KeibakunServer から取得します。
+     */
+    async findRaceIds(date: string): Promise<string[]> {
+        const rows = await this.get<RaceListItem[]>(
+            `/races?date=${encodeURIComponent(date)}`
+        );
+        return rows
+            .map((row) => row.raceId)
+            .filter((raceId) => /^\d{12}$/.test(raceId));
+    }
+
     /**
      * RaceList を KeibakunServer へ POST して DB に格納します。
      *
