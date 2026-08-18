@@ -1,19 +1,21 @@
 import "dotenv/config";
-import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { RaceList } from "../../scrapers/nk/raceList/raceList";
 import { RaceData } from "../../scrapers/nk/raceList/raceListIF";
 import { Logger } from "../../utils/Logger";
 import { RaceListDbService } from "../../service/db/RaceListDbService";
 import { RaceScheduleDbService } from "../../service/db/RaceScheduleDbService";
+import { MainScraper } from "../base/MainScraper";
 
 const logger = new Logger();
 const dbService = new RaceListDbService();
 const scheduleDbService = new RaceScheduleDbService();
 
 /**
- * レースリスト取得・保存のメインクラス
+ * 開催日ごとのレース一覧を取得し、KeibakunServerへ保存するエントリポイントです。
+ *
+ * 開催日はRaceScheduleDbServiceから取得するため、ローカルの開催日程ファイルには依存しません。
  */
-export class Main_RaceList {
+export class Main_RaceList extends MainScraper {
     private year: number;
     private monthArg?: number;
 
@@ -23,32 +25,30 @@ export class Main_RaceList {
      * @param monthArg 対象月（省略時は全月）
      */
     constructor(year: number, monthArg?: number) {
+        super();
         this.year = year;
         this.monthArg = monthArg;
     }
 
     /**
-     * レースリスト取得処理のエントリポイント
+        * 指定年の対象月についてレース一覧の取得・保存を実行します。
+        * @throws PuppeteerまたはDB格納APIで発生したエラー
      */
     async run(): Promise<void> {
         logger.info(`指定された年: ${this.year}${this.monthArg ? `, 月: ${this.monthArg}` : ""}`);
 
         const months = this.getTargetMonths();
 
-        const pm = new PuppeteerManager();
         try {
-            await pm.init();
-            const page = pm.getPage();
-            const raceListScraper = new RaceList(page);
-
-            for (const month of months) {
-                await this.processMonth(raceListScraper, month);
-            }
+            await this.withPage(async (page) => {
+                const raceListScraper = new RaceList(page);
+                for (const month of months) {
+                    await this.processMonth(raceListScraper, month);
+                }
+            });
         } catch (e) {
             logger.error(`致命的なエラー: ${e}`);
             throw e;
-        } finally {
-            await pm.close();
         }
     }
 
@@ -64,7 +64,7 @@ export class Main_RaceList {
     }
 
     /**
-    * 指定年月をサーバーへ問い合わせ、開催日のレースリストを取得・保存
+    * 指定年月をServer APIへ問い合わせ、開催日ごとのレースリストを取得・保存します。
      * @param raceListScraper RaceListインスタンス
      * @param month 対象月
      */
@@ -82,7 +82,7 @@ export class Main_RaceList {
     }
 
     /**
-     * レースリストを取得しDB格納APIへ送信する
+     * 開催日のレースリストをスクレイピングし、DB格納APIへ送信します。
      * @param raceListScraper RaceListインスタンス
      * @param kaisaiDate 開催日
      */

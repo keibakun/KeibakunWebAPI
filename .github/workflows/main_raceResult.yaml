@@ -51,7 +51,7 @@ jobs:
         run: |
           npm install
           if [ -n "${{ github.event.inputs.raceId }}" ]; then
-            npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.raceId }}
+            npx tsx ./src/scripts/race/MainRaceResult.ts ${{ github.event.inputs.raceId }}
           else
-            npx tsx ./src/NKScraper/main_raceResult.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
+            npx tsx ./src/scripts/race/MainRaceResult.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }}
           fi

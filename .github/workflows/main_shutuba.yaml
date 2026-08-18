@@ -49,7 +49,7 @@ jobs:
         run: |
           npm install
           if [ -n "${{ github.event.inputs.raceId }}" ]; then
-            npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.raceId }}
+            npx tsx ./src/scripts/race/MainShutuba.ts ${{ github.event.inputs.raceId }}
           else
-            npx tsx ./src/NKScraper/main_shutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} ${{ github.event.inputs.debug }}
+            npx tsx ./src/scripts/race/MainShutuba.ts ${{ github.event.inputs.year }} ${{ github.event.inputs.month }} ${{ github.event.inputs.debug }}
           fi

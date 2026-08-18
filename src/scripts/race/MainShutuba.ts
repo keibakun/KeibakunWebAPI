@@ -1,11 +1,10 @@
-import { Page } from "puppeteer";
 import getShutuba from "../../scrapers/nk/shutuba/shutuba";
 import { RaceIF } from "../../scrapers/nk/shutuba/ShutubaIF";
-import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { Logger } from "../../utils/Logger";
 import { ShutubaDbService } from "../../service/db/ShutubaDbService";
 import { RaceListDbService } from "../../service/db/RaceListDbService";
 import { RaceScheduleDbService } from "../../service/db/RaceScheduleDbService";
+import { MainScraper } from "../base/MainScraper";
 
 const logger = new Logger();
 const dbService = new ShutubaDbService();
@@ -16,13 +15,13 @@ const scheduleDbService = new RaceScheduleDbService();
 const DEFAULT_CONCURRENCY = 5;
 
 /**
- * Main_Shutuba
+ * 開催日の出馬表を取得・保存するエントリポイントです。
  *
  * KeibakunServerから開催日と `raceId` を取得し、
- * 各 `raceId` に対して `getShutuba` を呼び出して出馬表を保存するクラスです。
+ * 各 `raceId` に対して `getShutuba` を呼び出し、KeibakunServerへ保存します。
  * デバッグモードフラグはデフォルトで false です。
  */
-export class Main_Shutuba {
+export class Main_Shutuba extends MainScraper {
     private year: number;
     private month?: number;
     private day?: number;
@@ -39,6 +38,7 @@ export class Main_Shutuba {
      * @param singleRaceId 1件だけ取得する raceId（指定時は年月日を無視）
      */
     constructor(year: number, month?: number, day?: number, debug?: boolean, concurrency?: number, singleRaceId?: string) {
+        super();
         this.year = year;
         this.month = month;
         this.day = day;
@@ -48,8 +48,9 @@ export class Main_Shutuba {
     }
 
     /**
-     * エントリポイント: スケジュールから開催日を抽出して処理を開始します。
+     * Server APIから開催日とraceIdを取得して出馬表の処理を開始します。
      * `singleRaceId` が指定された場合は年月日・debug フラグを無視し、その1件のみ処理します。
+     * @throws ワーカープールまたはブラウザ処理で発生したエラー
      */
     async run(): Promise<void> {
         // singleRaceId モード
@@ -94,7 +95,7 @@ export class Main_Shutuba {
             return;
         }
 
-        // 各開催日について raceId を収集
+        // 開催日ごとにServer APIへ問い合わせ、出馬表取得対象を作成します。
         const allRaceIds: string[] = [];
         for (const kaisaiDate of kaisaiDates) {
             const ids = await this.collectRaceIds(kaisaiDate);
@@ -105,7 +106,7 @@ export class Main_Shutuba {
     }
 
     /**
-     * raceId 一覧を受け取り、Puppeteer を起動してワーカープールで処理します。
+     * raceId一覧を受け取り、共通ワーカープールで出馬表を取得・保存します。
      */
     private async runWithRaceIds(raceIds: string[]): Promise<void> {
         if (raceIds.length === 0) {
@@ -115,45 +116,9 @@ export class Main_Shutuba {
 
         logger.info(`合計 ${raceIds.length} 件の raceId を処理します（並列数: ${this.concurrency}）`);
 
-        // Puppeteer を起動してワーカープールで並列処理
-        const pm = new PuppeteerManager();
-        const pages: Page[] = [];
         try {
-            await pm.init();
-
-            // 並列数ぶんのページ（タブ）を生成
-            for (let i = 0; i < this.concurrency; i++) {
-                const page = await pm.newPage();
-                pages.push(page);
-            }
-
-            await this.runWorkerPool(pages, raceIds);
-        } catch (e) {
-            logger.error(`致命的なエラー: ${String(e)}`);
-            throw e;
-        } finally {
-            for (const page of pages) {
-                try { await page.close(); } catch {}
-            }
-            await pm.close();
-        }
-    }
-
-    /**
-     * ワーカープール: 各ページが共有キューから raceId を取り出して処理する
-     * @param pages Puppeteer Page の配列
-     * @param raceIds 処理対象の raceId 配列
-     */
-    private async runWorkerPool(pages: Page[], raceIds: string[]): Promise<void> {
-        let cursor = 0;
-        const total = raceIds.length;
-
-        const worker = async (page: Page, workerId: number) => {
-            while (true) {
-                const idx = cursor++;
-                if (idx >= total) break;
-                const raceId = raceIds[idx];
-                logger.info(`[Worker${workerId}] (${idx + 1}/${total}) レースID: ${raceId} の出馬表を取得します`);
+            await this.withWorkerPages(raceIds, this.concurrency, async (page, raceId, index, workerId) => {
+                logger.info(`[Worker${workerId}] (${index + 1}/${raceIds.length}) レースID: ${raceId} の出馬表を取得します`);
                 try {
                     const raceData: RaceIF = await getShutuba(page, raceId);
                     await dbService.store(raceId, raceData);
@@ -162,10 +127,11 @@ export class Main_Shutuba {
                     logger.error(`[Worker${workerId}] レースID: ${raceId} の出馬表取得または保存中にエラーが発生しました: ${String(error)}`);
                     throw error;
                 }
-            }
-        };
-
-        await Promise.all(pages.map((page, i) => worker(page, i)));
+            });
+        } catch (e) {
+            logger.error(`致命的なエラー: ${String(e)}`);
+            throw e;
+        }
     }
 
     /**
@@ -186,6 +152,10 @@ export class Main_Shutuba {
         return scheduleDbService.findKaisaiDates(yyyymm);
     }
 
+    /**
+     * 指定日付の翌日をYYYYMMDD形式へ変換します。
+     * @param date 変換対象の日付
+     */
     private formatDate(date: Date): string {
         const pad = (value: number) => value.toString().padStart(2, "0");
         return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;

@@ -42,4 +42,4 @@ jobs:
           SLEEP=$((RANDOM % 120))
           echo "Random sleep for ${SLEEP} seconds to randomize start time within the hour"
           sleep ${SLEEP}
-          npx tsx ./src/NKScraper/main_shutuba.ts ${YYYY} ${MM} ${DD}
+          npx tsx ./src/scripts/race/MainShutuba.ts ${YYYY} ${MM} ${DD}

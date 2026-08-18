@@ -1,9 +1,8 @@
-import { Page } from "puppeteer";
-import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { RaceResult } from "../../scrapers/nk/raceResult/raceResult";
 import { RaceResultDbService } from "../../service/db/RaceResultDbService";
 import { RaceListDbService } from "../../service/db/RaceListDbService";
 import { Logger } from "../../utils/Logger";
+import { MainScraper } from "../base/MainScraper";
 
 const logger = new Logger();
 const dbService = new RaceResultDbService();
@@ -13,13 +12,13 @@ const raceListDbService = new RaceListDbService();
 const DEFAULT_CONCURRENCY = 5;
 
 /**
- * Main_RaceResult
+ * 指定年月のレース結果を取得・保存するエントリポイントです。
  *
  * 年月をKeibakunServerへ問い合わせ、各 `raceId` に対して `RaceResult` を取得して
- * DBへ保存するクラスです。
- * 複数タブを使った並列スクレイピングに対応しています。
+ * DBへ保存します。複数タブを使った並列スクレイピングに対応しています。
+ * 対象raceIdはKeibakunServerのレース一覧APIから取得します。
  */
-export class Main_RaceResult {
+export class Main_RaceResult extends MainScraper {
     private year: number;
     private monthArg?: number;
     private concurrency: number;
@@ -33,6 +32,7 @@ export class Main_RaceResult {
      * @param singleRaceId 1件だけ取得する raceId（指定時は year/monthArg を無視）
      */
     constructor(year: number, monthArg?: number, concurrency?: number, singleRaceId?: string) {
+        super();
         this.year = year;
         this.monthArg = monthArg;
         this.concurrency = concurrency ?? DEFAULT_CONCURRENCY;
@@ -40,8 +40,9 @@ export class Main_RaceResult {
     }
 
     /**
-     * エントリポイント: Puppeteer を初期化して対象月すべての処理を実行します。
+    * 対象月のraceIdを収集し、Puppeteerで結果取得を実行します。
      * `singleRaceId` が指定された場合は year/monthArg を無視し、その1件のみ処理します。
+    * @throws ワーカープールまたはブラウザ処理で発生したエラー
      */
     async run(): Promise<void> {
         let allRaceIds: string[];
@@ -54,7 +55,7 @@ export class Main_RaceResult {
 
             const months = this.getTargetMonths();
 
-            // 全対象月の raceId を先に収集する
+            // ブラウザを起動する前に対象raceIdを確定し、取得処理を一括で実行します。
             allRaceIds = [];
             for (const month of months) {
                 const ids = await this.collectRaceIds(month);
@@ -68,59 +69,21 @@ export class Main_RaceResult {
         }
         logger.info(`合計 ${allRaceIds.length} 件の raceId を処理します（並列数: ${this.concurrency}）`);
 
-        // Puppeteer を起動してワーカープールで並列処理
-        const pm = new PuppeteerManager();
-        const pages: Page[] = [];
         try {
-            await pm.init();
-
-            // 並列数ぶんのページ（タブ）を生成
-            for (let i = 0; i < this.concurrency; i++) {
-                const page = await pm.newPage();
-                pages.push(page);
-            }
-
-            // ワーカープール方式で並列実行
-            await this.runWorkerPool(pages, allRaceIds);
-        } catch (e) {
-            logger.error(`致命的なエラー: ${String(e)}`);
-        } finally {
-            // 追加したページをクローズ
-            for (const page of pages) {
-                try { await page.close(); } catch {}
-            }
-            await pm.close();
-        }
-    }
-
-    /**
-     * ワーカープール: 各ページが共有キューから raceId を取り出して処理する
-     * @param pages Puppeteer Page の配列
-     * @param raceIds 処理対象の raceId 配列
-     */
-    private async runWorkerPool(pages: Page[], raceIds: string[]): Promise<void> {
-        let cursor = 0;
-        const total = raceIds.length;
-
-        const worker = async (page: Page, workerId: number) => {
-            const scraper = new RaceResult(page);
-            while (true) {
-                const idx = cursor++;
-                if (idx >= total) break;
-                const raceId = raceIds[idx];
+            await this.withWorkerPages(allRaceIds, this.concurrency, async (page, raceId, index, workerId) => {
                 try {
-                    logger.info(`[Worker${workerId}] (${idx + 1}/${total}) raceId: ${raceId} のレース結果を取得します`);
+                    logger.info(`[Worker${workerId}] (${index + 1}/${allRaceIds.length}) raceId: ${raceId} のレース結果を取得します`);
+                    const scraper = new RaceResult(page);
                     const result = await scraper.getRaceResult(raceId);
                     await dbService.store(raceId, result);
                     logger.info(`[Worker${workerId}] raceId: ${raceId} を DB に保存しました`);
                 } catch (err: any) {
                     logger.error(`[Worker${workerId}] raceId: ${raceId} の取得・保存でエラー: ${String(err)}`);
                 }
-            }
-        };
-
-        // 全ワーカーを同時に起動し、すべてが完了するまで待機
-        await Promise.all(pages.map((page, i) => worker(page, i)));
+            });
+        } catch (e) {
+            logger.error(`致命的なエラー: ${String(e)}`);
+        }
     }
 
     /**

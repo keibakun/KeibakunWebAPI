@@ -32,4 +32,4 @@ jobs:
           KEIBAKUN_SERVER_URL: ${{ secrets.KEIBAKUN_SERVER_URL }}
         run: |
           npm install
-          npx tsx ./src/NKScraper/main_raceSchedule.ts ${{ github.event.inputs.year }}
+          npx tsx ./src/scripts/race/MainRaceSchedule.ts ${{ github.event.inputs.year }}
