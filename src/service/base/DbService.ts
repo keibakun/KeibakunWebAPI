@@ -38,4 +38,16 @@ export abstract class DbService {
             );
         }
     }
+
+    protected async get<T>(endpoint: string): Promise<T> {
+        const url = `${this.serverUrl}${endpoint}`;
+        const res = await fetch(url, { method: "GET" });
+
+        if (!res.ok) {
+            const text = await res.text().catch(() => "");
+            throw new Error(`[${this.constructor.name}] GET ${url} failed: HTTP ${res.status} ${text}`);
+        }
+
+        return (await res.json()) as T;
+    }
 }

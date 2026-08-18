@@ -19,6 +19,16 @@ interface ScheduleEntry {
  */
 export class RaceScheduleDbService extends DbService {
     /**
+     * 指定年月の開催日を KeibakunServer から取得します。
+     */
+    async findKaisaiDates(yyyymm: string): Promise<string[]> {
+        const response = await this.get<{ yyyymm: string; kaisaiDates: string[] }>(
+            `/race-schedule?yyyymm=${encodeURIComponent(yyyymm)}`
+        );
+        return response.kaisaiDates;
+    }
+
+    /**
      * 月次開催日程を KeibakunServer へ POST して DB に格納します。
      *
      * @param yyyymm    - 対象年月（例: "202601"）

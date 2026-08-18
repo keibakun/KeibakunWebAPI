@@ -1,15 +1,14 @@
-import path from "path";
-import fs from "fs/promises";
 import "dotenv/config";
 import { PuppeteerManager } from "../../utils/PuppeteerManager";
 import { RaceList } from "../../scrapers/nk/raceList/raceList";
 import { RaceData } from "../../scrapers/nk/raceList/raceListIF";
 import { Logger } from "../../utils/Logger";
-import { FileUtil } from "../../utils/FileUtil";
 import { RaceListDbService } from "../../service/db/RaceListDbService";
+import { RaceScheduleDbService } from "../../service/db/RaceScheduleDbService";
 
 const logger = new Logger();
 const dbService = new RaceListDbService();
+const scheduleDbService = new RaceScheduleDbService();
 
 /**
  * レースリスト取得・保存のメインクラス
@@ -65,45 +64,21 @@ export class Main_RaceList {
     }
 
     /**
-     * 指定月のindex.htmlからkaisaiDateを抽出し、レースリストを取得・保存
+    * 指定年月をサーバーへ問い合わせ、開催日のレースリストを取得・保存
      * @param raceListScraper RaceListインスタンス
      * @param month 対象月
      */
     private async processMonth(raceListScraper: RaceList, month: number): Promise<void> {
         const formattedMonth = month.toString().padStart(2, "0");
-        const indexPath = path.join(__dirname, `../../RaceSchedule/${this.year}${formattedMonth}/index.html`);
-        logger.info(`index.html のパス: ${indexPath}`);
-
-        if (!(await FileUtil.exists(indexPath))) {
-            logger.warn(`index.html が存在しません: ${indexPath}`);
-            return;
-        }
-
-        const htmlContent = await fs.readFile(indexPath, "utf-8");
-        const kaisaiDates = this.extractKaisaiDates(htmlContent, indexPath);
+        const yyyymm = `${this.year}${formattedMonth}`;
+        logger.info(`指定年月の開催日を取得します: ${yyyymm}`);
+        const kaisaiDates = await scheduleDbService.findKaisaiDates(yyyymm);
 
         logger.info(`抽出された kaisaiDate: ${kaisaiDates.join(", ")}`);
 
         for (const kaisaiDate of kaisaiDates) {
             await this.fetchAndSaveRaceList(raceListScraper, kaisaiDate);
         }
-    }
-
-    /**
-     * index.htmlからkaisaiDateを抽出
-     * @param htmlContent index.htmlの内容
-     * @param indexPath ファイルパス（エラー時ログ用）
-     * @returns {string[]} 抽出されたkaisaiDate配列
-     */
-    private extractKaisaiDates(htmlContent: string, indexPath: string): string[] {
-        const kaisaiDateMatches = htmlContent.match(/"kaisaiDate":\s*"(\d{8})"/g);
-        if (!kaisaiDateMatches) {
-            logger.error(`kaisaiDate が見つかりませんでした: ${indexPath}`);
-            return [];
-        }
-        return kaisaiDateMatches
-            .map((match) => match.match(/"kaisaiDate":\s*"(\d{8})"/)?.[1] || "")
-            .filter((date) => date !== "");
     }
 
     /**
